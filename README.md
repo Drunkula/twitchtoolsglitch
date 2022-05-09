@@ -7,9 +7,10 @@ A collection of tools to use with Twitch channels that monitor the chat and perf
 - New chat message alert. Alerts you when a new chat message is received. A cooldown is automatically set between alerts and a delay before the alert lets you trigger the cooldown before the alert fully fires. Great if you're caught up in your game and forget to pay attention to the chat.
 
 
-
-Standard limits mean you can limit commands to mods, vips or named users.
+You can limit commands to mods, vips or named users.
 They are additional so having mods checked means ALL mods.
 Named users will be permitted even if they have no special roles.
 
 All settings will be added to the url so you can bookmark pages without having to enter all the details again.
+
+**More tools** will be coming and if you've any suggestions for tools the please let me know.
