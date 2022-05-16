@@ -277,13 +277,6 @@ var funcs = { r, g, b, w, c, m, y, k } = [ ['r', 1], ['g', 2], ['b', 4], ['w', 7
 	, {}
 );
 
-	// returns array of url?foo=bar parameters will be needed for minified versions
-
-function get_url_params() {
-	let getVars = [];
-	decodeURI(window.location.href).replace(/[?&]+([^=&]+)=([^&]*)/gi,function(a,name,value){getVars[name]=value;});
-	return getVars;
-}
 
 function sleep(ms) {		// sleep(200).then(...)
 	return new Promise(res => {

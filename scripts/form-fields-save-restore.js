@@ -1,18 +1,20 @@
+'use strict'
 const FORM_RESTORE_VERBOSE = false;
 /**
  *	Returns form fields are uri encode pairs separated by &
 	*	Fields should have a name, and ideally should be inputs
 	* @param {string} selectors e.g. "#myform input"
+	* @param {string} idIfNoName bool use the items id if there's no name property
 	* @returns
 	*/
 
-function inputs_to_uri_string(selectors, idIfNoName = true, asObject = false) {
+function inputs_to_uri_string(selectors = '.form-save', idIfNoName = true, asObject = false) {
 	let inputs = document.querySelectorAll(selectors);
 	let uri = [];
 
 	inputs.forEach( field => {
 		let value;
-
+			// use id if no name property
 		const name = field.name ? field.name : (idIfNoName && field.id ? field.id : null);
 
 		if (!name) {
@@ -39,10 +41,7 @@ function inputs_to_uri_string(selectors, idIfNoName = true, asObject = false) {
 		}
 			// stupid field names might happen
 		uri.push(`${encodeURIComponent(name)}=${encodeURIComponent(value)}`);
-		//uri[encodeURIComponent(name)] = encodeURIComponent(value) ;	// this might bite me
 	});
-
-	//if (asObject) return uri;	let a = [];	for(f in uri) a.push(`${f}=${uri[f]}`);
 
 	return uri.join('&');
 }
@@ -50,18 +49,21 @@ function inputs_to_uri_string(selectors, idIfNoName = true, asObject = false) {
 
 	/**
 	 *
-	 * @param {string} selector selector of fields to replace e.g. #myform input -
-	 * @param {bool} idIfNoName use the items id if it doesn't have a name
-	 * @param {mixed} uristringOrUseWindow a string to decode or of true window.location.href is used
+	 * @param {string} selector selector for form items
+	 * @param {string} paramString string to decode
+	 * @param {bool} idIfNoName use element's id if no name
+	 * @param {bool} localStorageFallback use localStorage if paramString fail
 	 */
 
-function restore_form_values(selector, idIfNoName = true, uristringOrUseWindow = true) {
+function restore_form_values(selector = '.form-save', paramString = window.location.search, idIfNoName = true, localStorageFallback = true) {
+//function restore_form_values({selector = '.form-save', paramString = window.location.search, idIfNoName = true, localStorageFallback = true}) {
 	let inputs = document.querySelectorAll(selector);
 
-	let params = uristringOrUseWindow === true ? window.location.search : uristringOrUseWindow;
-	let getVars = [];
+	if (!paramString && localStorageFallback) {
+		paramString = page_params_get();
+	}
 
-	decodeURI(params).replace(/[?&]+([^=&]+)=([^&]*)/gi, function(a,name,value){getVars[name] = value;});
+	let getVars = param_string_to_array(paramString);
 
 	inputs.forEach( field => {
 		const name = field.name ? field.name : (idIfNoName && field.id ? field.id : null);
@@ -99,6 +101,7 @@ function restore_form_values(selector, idIfNoName = true, uristringOrUseWindow =
 				}
 				break;
 			default:
+				//console.log(`getVars[${name}] = ${getVars[name]} : decoded = `, decodeURIComponent(getVars[name]));
 				field.value = decodeURIComponent(getVars[name]);
 				if (field.classList.contains('form-filter-spaces-to-commas')) {
 					field.value = form_filter_commas_to_spaces(field.value);
@@ -108,6 +111,12 @@ function restore_form_values(selector, idIfNoName = true, uristringOrUseWindow =
 	});
 }
 
+function param_string_to_array( params = window.location.search ) {
+	let getVars = [];
+	//decodeURI(params).replace(/[?&]+([^=&]+)=([^&]*)/gi, function(a,name,value){getVars[name] = value;});
+	decodeURI(params).replace(/[?&]?([^=&]+)=([^&]*)/gi, function(a,name,value){getVars[name] = value;});
+	return getVars;
+}
 
 	// simple filters, actually doesn't look for spaces
 

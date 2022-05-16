@@ -29,3 +29,22 @@ function form_filter_commas_to_spaces(str) {
 	str = str.match(/\w+/g);
 	return str ? str.join(' ') : '';
 }
+
+    // adds data to the localstorage for this page
+    // setItem getItem removeItem clear
+
+function local_store_set(name, data) {
+    console.log(localStorage);
+
+    let namePath = name + window.location.pathname;
+    localStorage.setItem(namePath, JSON.stringify(data));
+}
+
+    // url location of current page
+
+function local_store_get (name) {
+    console.log(localStorage);
+
+    let namePath = name + window.location.pathname;
+    return JSON.parse( localStorage.getItem(namePath) );
+}

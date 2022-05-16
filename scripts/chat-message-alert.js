@@ -1,16 +1,18 @@
 /**
  *  Alerts you to new chat messages on a cooldown
- *  SOLVED: FOUND A BUG - if you add time during coutdown then it only adds default time
+ *  SOLVED: BUG - if you add time during coutdown then it only adds default time
  * FOUND A BUG - if you add time but a message comes in before the next interval the alert window can show again
- * so check_new_chat_message_alert gets called again
+ *  so check_new_chat_message_alert gets called again
  */
 "use strict"
-//var channels = [ 'drunkula' ]//, 'alexisstrum', 'TheVillageRuse']//, 'dandidoesit' ]//, 'rusty836', 'kim_justice' ]
+
+{// scope start
+
 const TT_CHAT_MSG_COOLDOWN_MINS_MAX = 300;
 const TT_CHAT_MSG_SECS_BEFORE_ALERT_MAX = 120;
     // regex's to match the input
 
-var NCMVars = {
+let NCMVars = {
     onCooldown: true,
     cooldownDefaultSecs : 180,
     cooldownSecsRemaining : 180,  // that'll be changing
@@ -18,8 +20,6 @@ var NCMVars = {
     secsBeforeAlert : 15,       // in case you spot a chatter and want to add to the cooldown
 
     alertPending: false,
-
-    ignoredUsers: TMI_IGNORE_DEFAULT,
 
     flashSetTimeout: null,
     flashDuration: 3500,    // milliseconds
@@ -42,30 +42,17 @@ window.addEventListener('load', (event) => {
     button_add_confirmed_func('.clearChatConf', clearChatters);
 
     tt_forms_init_common(); // channels populates form fields from url string
-    tt_forms_init_common_permissions(); // allonamed and checkboxes
 
         // main listener
     NCM_add_tmi_listener();
-        // button that creates the link to the page
-    add_bookmark_button_handler();
-        // joins/leave channels on submit
-    mainform_add_submit_handler();
 
-    init_flasher_tech();
+    NCM_init_cooldown_time_inc_buttons()
 
-    init_cooldown_time_inc_buttons()
+    // call AFTER form fields restore which is done in init_common
+    NCM_set_default_cooldown_onchange();
+    NCM_set_secs_before_alert_onchange();
 
-        // call AFTER form fields restore which is done in init_common
-
-    if (!TMIConfig.$_GET['ignoredusers']) {
-        gid('ignoredusers').value =  TMI_IGNORE_DEFAULT.join(' ');
-    }
-
-    set_ignored_users_onchange()
-    set_default_cooldown_onchange();
-    set_secs_before_alert_onchange();
-
-        // clicking the alert
+    // clicking the alert
     gid('alertnotification').onclick = () => {
         NCM_clear_final_coundown();
         NCM_set_default_cooldown();
@@ -77,6 +64,8 @@ window.addEventListener('load', (event) => {
     NCMVars.alertSound = document.getElementById('ding');
 
     setInterval(NCM_cooldown_interval_timer, 1000);
+
+    init_flasher_tech();
 
     // autojoin
     if (TMIConfig.autojoin) { console.log(r("Auto Joining channels..."));
@@ -100,7 +89,7 @@ function NCM_add_tmi_listener()
             // Handle different message types..
         switch(userstate["message-type"]) {
             case "action": case "chat": case "whisper":
-                check_new_chat_message_alert(userstate, channel, message);
+                NCM_check_new_chat_message_alert(userstate, channel, message);
                 break;
             default: // pfff ?
                 break;
@@ -114,7 +103,7 @@ function NCM_add_tmi_listener()
  */
 
 
-function check_new_chat_message_alert(user, channel, msg) {
+function NCM_check_new_chat_message_alert(user, channel, msg) {
     if (NCMVars.onCooldown || NCMVars.alertPending) {        //console.log('Still on a cooldown'); // DEBUG
         return;
     }
@@ -123,7 +112,7 @@ function check_new_chat_message_alert(user, channel, msg) {
         return;
     }
 
-    if ( NCMVars.ignoredUsers.includes(user.username) ) {
+    if ( TMIConfig.ignoredUsers.includes(user.username) ) {
         console.log('IGNORING:', user.username);
         return;
     }
@@ -206,7 +195,7 @@ function NCM_set_default_cooldown() {
      *  The update 'global' secsBeforeAlert after some validation
      */
 
-function set_secs_before_alert_onchange() {
+function NCM_set_secs_before_alert_onchange() {
     let sbaInput = gid('secsbeforealert');
 
     sbaInput.onchange = () => {
@@ -228,7 +217,7 @@ function set_secs_before_alert_onchange() {
      *  The default cooldown minutes onchange handler sets the value in the 'globals'
      */
 
-function set_default_cooldown_onchange() {
+function NCM_set_default_cooldown_onchange() {
     let defCool = gid('defaultcooldown');
 
     defCool.onchange = () => {
@@ -247,27 +236,11 @@ function set_default_cooldown_onchange() {
     defCool.onchange();
 }
 
-function set_ignored_users_onchange() {
-    let igUsrs = gid('ignoredusers');
 
-    igUsrs.onchange = () => {
-            // strip out the words
-        let iu = igUsrs.value; // int
-        iu = iu.match(/\w+/g);
-
-        iu = iu ? iu.map(a => a.toLowerCase()) : [];
-
-        NCMVars.ignoredUsers = iu;
-
-        console.log('SETTING Ignored users config TO ', iu);
-    }
-
-    igUsrs.onchange();
-}
 
     // during the final countdown these values get bustesd
 
-function init_cooldown_time_inc_buttons() {
+function NCM_init_cooldown_time_inc_buttons() {
 	var btns = qsa('.cooldown-set');
 
 	btns.forEach( (btn) => {
@@ -358,3 +331,5 @@ function stop_flash() {
 
     clearTimeout(NCMVars.flashSetTimeout);
 }
+
+}//scope ends

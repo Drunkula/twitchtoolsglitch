@@ -1,3 +1,4 @@
+'use strict'
 console.debug('common tmi start.');
 /* https://github.com/tmijs/docs/blob/gh-pages/_posts/v1.4.2/2019-03-03-Events.md
 https://github.com/tmijs/docs/blob/gh-pages/_posts/v1.4.2/2019-03-03-Commands.md
@@ -5,15 +6,16 @@ https://github.com/tmijs/docs/blob/gh-pages/_posts/v1.4.2/2019-03-03-Functions.m
 */
 	// ******************** TMI Boilerplate ****************** //
 
-let TMI_DEFAULT_CHANNELS = [];		// could put this in a different file for easy user use
-let TMI_DEFAULT_ALLOW_NAMED = [];
+let TMI_DEFAULT_CHANNELS = [];//"def", "channels", 'DEFAULTS'];		// could put this in a different file for easy user use
+let TMI_DEFAULT_ALLOW_NAMED = [];//"default", "allow", "named", 'DEFAULTS'];
 let TMI_IGNORE_DEFAULT = ["nightbot", "streamelements", "moobot"]; // LOWERCASE
 
 var TMIConfig = {
-	chansCleaned: [],
 	autojoin: null,
 	joinDebounceSecs: 3,
-	$_GET: [],
+	restoredParams: [],
+
+	ignoredUsers: '',
 
 	perms : {	// permissions to run commands
         allowEveryone : false,
@@ -22,7 +24,7 @@ var TMIConfig = {
         allowNamed : TMI_DEFAULT_ALLOW_NAMED
     }
 }
-
+	// TMI options
 const clientOpts = 	{
     connection: {
         secure: true,
@@ -46,65 +48,134 @@ const tmiConnected = cclient.connect();	// don't join here if you prefill channe
 	 */
 
 function tt_forms_init_common() {
-        //document.getElementById('ncl').onclick = () => { o('', true); }
-    document.getElementById('loglabel').onclick = () => { log('', true); }
-		// PROBLEM really they aren't new chatters for all situations
-		//gid('resetnew').onclick = () => { chatters.clear(); o('', true); }
-
-	let $_GET = get_url_params();
-	TMIConfig.$_GET = $_GET;
-        // form values will overwrite defaults
+	TMIConfig.restoredParams = get_restore_params();
+		// form values will overwrite defaults
 	restore_form_values('.form-save');
+	mainform_add_submit_handler();
+	add_bookmark_button_handler()
 
+	tt_forms_init_common_permissions();
+
+	let ll = gid('loglabel');
+	if (ll) {
+		ll.onclick = () => { log('', true); }
+	}
 		// if no channels were in the request then use the defaults
 	let channo = gid('channels');
 	if (channo) {
-		if (TMIConfig.$_GET['channels'] === undefined) {
+		if (TMIConfig.restoredParams['channels'] === undefined) {
 			channo.value = TMI_DEFAULT_CHANNELS.join(' ');
 		}
 	}
 
+	tt_init_ignored_users();
+
 		// autojoin check
-	if ($_GET['autojoin'] === "true") {
+	if (TMIConfig.restoredParams['autojoin'] === "true") {
 		TMIConfig.autojoin = true;
 	}
+}
+
+	// call AFTER restore params
+
+function tt_init_ignored_users() {
+    let igUsrs = gid('ignoredusers');
+
+	if (!igUsrs) return;
+
+    if (TMIConfig.restoredParams['ignoredusers'] === undefined) {
+        igUsrs.value =  TMI_IGNORE_DEFAULT.join(' ');
+    }
+		// ignored user checks are made against TMI with username which is lower case - hence onchange
+    igUsrs.onchange = () => {
+        let iu = igUsrs.value; // int
+        iu = iu.match(/\w+/g);  // strip out the words
+
+        iu = iu ? iu.map(a => a.toLowerCase()) : [];
+
+		TMIConfig.ignoredUsers = iu;
+
+        console.log('SETTING Ignored users config TO ', iu);
+    }
+
+    //igUsrs.onchange();
 }
 
 	// if permissions are used you'll have allownamed, everyone, mods, vips
 
 function tt_forms_init_common_permissions() {
-		    // add default values and onchange handler
-		let aNamed = gid('allownamed');
-
-		if (aNamed) {
-			aNamed.onchange = allow_named_onchange;
-				// form restore is called before this
-			if (TMIConfig.$_GET['allownamed'] === undefined)
-				aNamed.value = TMI_DEFAULT_ALLOW_NAMED.join(' ');
-
-			allow_named_onchange();
-		}
-
-	        // set events for permission checkboxes everyone, mods, vips
-		let boxes = qsa(".permissions input[type=checkbox]");
-
-		for(let cb of boxes) {        //log('checkbox = '+cb.id+' is '+(cb.checked? 'SET':'UNSET'))
-			cb.onchange = () => {   // this auto naming thing is pretty stupid
-				let varName = 'allow' + cb.id[0].toUpperCase() + cb.id.substring(1);
-				TMIConfig.perms[varName] = cb.checked;
-			}
-			cb.onchange();  // inits the values
-		}
-
+	tt_init_permission_checkboxes();
+	tt_init_allow_named_input();
 }
 
+	// sets onchange event for the allowname field
+function tt_init_allow_named_input() {
+	    // add default values and onchange handler
+	let aNamed = gid('allownamed');
+
+	if (aNamed) {
+		aNamed.onchange = tt_allow_named_onchange;
+			// form restore is called before this
+		if (TMIConfig.restoredParams['allownamed'] === undefined)
+			aNamed.value = TMI_DEFAULT_ALLOW_NAMED.join(' ');
+
+		tt_allow_named_onchange();
+	}
+}
+
+    // allow named input field changes and updates permissions
+
+function tt_allow_named_onchange(e) {
+	var named = gid('allownamed').value.match(/\w+/g);
+	TMIConfig.perms.allowNamed = named ? named.map( a => a.toLowerCase() ) : [];
+}
+
+	// set events for permission checkboxes everyone, mods, vips (class)
+function tt_init_permission_checkboxes() {
+	let boxes = qsa(".permissions input[type=checkbox]");
+
+	for(let cb of boxes) {        //log('checkbox = '+cb.id+' is '+(cb.checked? 'SET':'UNSET'))
+		cb.onchange = () => {   // this auto naming thing is pretty stupid
+			let varName = 'allow' + cb.id[0].toUpperCase() + cb.id.substring(1);
+			TMIConfig.perms[varName] = cb.checked;
+		}
+		cb.onchange();  // inits the values
+	}
+}
+
+
+    // user allowed to do the command?
+
+function tt_user_permitted(user) {
+	let allowed = false;
+
+	switch (true) {
+		case TMIConfig.perms.allowEveryone:
+		case TMIConfig.perms.allowMods && user.mod:
+		case TMIConfig.perms.allowVips && user.badges && user.badges.vip === "1":
+		case TMIConfig.perms.allowNamed.includes(user.username):
+		case user.badges && user.badges.broadcaster === "1":
+			allowed = true;
+			break;
+
+		default:
+			allowed = false;
+			break;
+	}
+
+	return allowed;
+}
 
 	// common form submit handler for joining channels
 
 function mainform_add_submit_handler() {
 	const joinBtn = gid('join');
 
-	gid('mainform').onsubmit = (e) => {
+	let mf = gid('mainform');
+
+	if (!mf) return;
+
+	mf.onsubmit = (e) => {
 		if (joinBtn.disabled)   // debouncing
 			return;
 
@@ -240,13 +311,6 @@ function o(str, clearIt, after="<br/>", divId = 'mainoutput') {
 	document.getElementById('log').insertAdjacentHTML('afterbegin', str + after);
 }
 
-    // allow named input field changes and updates permissions
-
-function allow_named_onchange() {
-	var named = gid('allownamed').value.match(/\w+/g);
-	TMIConfig.perms.allowNamed = named ? named.map( a => a.toLowerCase() ) : [];
-}
-
     // Populate the url link box
 
 function add_bookmark_button_handler() {
@@ -257,10 +321,13 @@ function add_bookmark_button_handler() {
 	let allownamed = gid('allownamed');
 
 	const popUrlFunc =() => {
-		let url = inputs_to_uri_string(".form-save", true);
+		let urlParams = inputs_to_uri_string('.form-save', true);
 
-		url = 'autojoin=true&' + url;
-		url = window.location.origin + window.location.pathname + '?' + url;
+		urlParams = 'autojoin=true&' + urlParams;
+
+		page_params_set(urlParams);
+
+		let url = window.location.origin + window.location.pathname + '?' + urlParams;
 
 		linkurl.value = url;
 		history.replaceState({}, null, url);
@@ -269,6 +336,57 @@ function add_bookmark_button_handler() {
 	btn.forEach( (b) => {
 		b.onclick = popUrlFunc;
 	});
+}
+
+
+function page_params_set(data) {
+	local_store_set('urlParams', data);
+}
+
+function page_params_get() {
+	return local_store_get('urlParams');
+}
+
+function local_store_set(name, data) {
+    let namePath = name + window.location.pathname;
+    localStorage.setItem(namePath, JSON.stringify(data));
+}
+
+    // url location of current page
+
+function local_store_get (name) {
+    let namePath = name + window.location.pathname;
+    return JSON.parse( localStorage.getItem(namePath) );
+}
+
+
+	// returns object of vars in ?url params or localStorage
+
+function get_restore_params() {
+	let getU = get_query_string_params();
+
+	if (Object.keys(getU).length) {
+		console.info('get_restore_params using '+ g('get'));
+		return getU;
+	}
+		// local storage?
+	let lParams = param_string_to_array( page_params_get() )
+
+	if (Object.keys(lParams).length) {
+		console.info('get_restore_params using ' + g('localStorage'));
+		return lParams;
+	}
+
+	return false;
+}
+
+	// returns array of url?foo=bar parameters will be needed for minified versions
+
+function get_query_string_params() {
+	let getVars = {};
+	decodeURI(window.location.href).replace(/[?&]+([^=&]+)=([^&]*)/gi,
+		function(a,name,value){getVars[name]=value;});
+	return getVars;
 }
 
 console.debug('common tmi end.');

@@ -19,7 +19,7 @@
 
 	 // window onload
 
- window.addEventListener('load', () => {
+window.addEventListener('load', () => {
 	log('LOADED');
 
 	tt_forms_init_common();
@@ -33,14 +33,6 @@
 	button_add_confirmed_func('.clearChatConf', clearChatters);
 	button_add_confirmed_func('.resetChatConf', resetChatters);
 
-			// param can be chans or channels
-        // button that creates the link to the page
-	add_bookmark_button_handler();
-
-	restore_form_values('.form-save');
-		//init_new_chatter_form_submit_handler();
-	mainform_add_submit_handler();
-
 		// url params to array
 	if (TMIConfig.autojoin === true) {
 		document.getElementById('join').click();			//join_chans();
@@ -50,23 +42,23 @@
 
 	 // message handler - does the new chatter logging
 
- cclient.on('message', (channel, userstate, message, self) => {
-		 // Don't listen to my own messages..
-	 if (self) return;
+cclient.on('message', (channel, userstate, message, self) => {
+		// Don't listen to my own messages..
+	if (self) return;
 
-	 let user = `${channel} ${userstate.username}`;
-		 // Handle different message types..
-	 switch(userstate["message-type"]) {
-		 case "action":
-		 case "chat":
-			 if (NCNChatterSet.has(user)) {   // they already in the array?
-				 return;
-			 }
-			 NCNChatterSet.add(user);
-			 o(`<y>${channel}</y> ${userstate['display-name']}`);
-			 // console.log(userstate);
-			 break;
-	 }
- });
+	let user = `${channel} ${userstate.username}`;
+		// Handle different message types..
+	switch(userstate["message-type"]) {
+		case "action":
+		case "chat":
+			if (NCNChatterSet.has(user)) {   // they already in the array?
+				return;
+			}
+			NCNChatterSet.add(user);
+			o(`<y>${channel}</y> ${userstate['display-name']}`);
+			// console.log(userstate);
+			break;
+	}
+});
 
 
