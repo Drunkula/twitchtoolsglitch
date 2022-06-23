@@ -12,10 +12,12 @@ console.log("localStorage", localStorage);
 
 	// window onload
 
-window.addEventListener('load', () => {
+(() => {
+
+docReady( () => {
 	log('LOADED');
 
-	tt_forms_init_common();
+	TT.forms_init_common();
 
 	let clearChatters = () => { o('', true); };
 	let resetChatters = () => { NCNChatterSet.clear(); o('', true); }
@@ -23,8 +25,8 @@ window.addEventListener('load', () => {
 	gid('clearnew').onclick = clearChatters;
 	gid('resetnew').onclick = resetChatters;
 
-	button_add_confirmed_func('.clearChatConf', clearChatters);
-	button_add_confirmed_func('.resetChatConf', resetChatters);
+	TT.button_add_confirmed_func('.clearChatConf', clearChatters);
+	TT.button_add_confirmed_func('.resetChatConf', resetChatters);
 
 		// url params to array
 	if (TMIConfig.autojoin === true) {
@@ -107,3 +109,5 @@ let callbacks = [
     anongiftpaidupgrade = function (channel, username, userstate)
 		{console.log('** Anon paid gift upgrade **'); for(arg of arguments) {console.log(arg); }}, // use upgraded from an anonymous gift sub
 ];
+
+})();

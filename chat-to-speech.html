@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Chat Message Alert : Twitch Tools</title>
+    <title>Speak My Chat : Twitch Tools</title>
     <meta name="description">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
     <script defer="" src="https://use.fontawesome.com/releases/v6.1.1/js/all.js"></script>
@@ -55,24 +55,19 @@
       <script src="/scripts/tmi-code-common.js" defer></script>
       <script src="/scripts/event-listeners.js" defer></script>
       <script src="/scripts/form-fields-save-restore.js" defer></script>
-      <script src="/scripts/chat-message-alert.js" defer></script>
+      <script src="/scripts/chat-to-speech.js" type="module"></script>
       <div id="flasher">
-        <p>NEW<br>CHAT<br>MESSAGE!</p>
+        <p>CLICK<br>THE<br>PAGE!</p>
       </div>
-      <div class="notification is-info not-mobile-view" id="ncnoti">Chat Alert Message - Maybe you've not been checking.
+      <div class="notification is-info not-mobile-view" id="ncnoti">Speech from CHAT
         <button class="delete" data-target="#ncnoti"></button>
       </div>
       <div class="columns is-flex-direction-row-reverse">
         <div class="column">
-          <audio id="ding" controls src="https://soundbible.com/mp3/service-bell_daniel_simion.mp3">Ding!</audio>
-          <div class="notification is-danger has-text-centered mt-4 is-hidden" id="alertnotification">
-            <p class="is-size-3">ALERT IN&nbsp;<span id="alertcountdown"></span></p>
-            <p>click to clear</p>
-          </div>
           <div class="box controls">
             <form class="not-mobile-view mb-2" id="mainform">
               <label class="label is-hidden-mobile">Channels</label>
-              <div class="field has-addons">
+              <div class="field has-addons not-mobile-view">
                 <div class="control is-expanded">
                   <input class="input is-fullwidth form-save form-filter-spaces-to-commas" id="channels" type="text" size="50" placeholder="Channel names space or comma separated">
                 </div>
@@ -83,24 +78,12 @@
             </form>
             <div class="field is-grouped-centered is-grouped">
               <div class="control">
-                <div class="tag is-medium is-info" id="cooldownoutput">Cooldown:&nbsp;<span id="cooldowncountdown">???</span></div>
+                <label class="checkbox button is-link is-size-7-mobile is-small">
+                  <input type="checkbox" checked data-tocheckbox="TTSVars.chatEnabled" id="enablealert"> enabled
+                </label>
               </div>
               <div class="control">
                 <button class="button is-small is-primary mobile-view-btn">Mini View</button>
-              </div>
-              <div class="control">
-                <button class="button is-small is-info clearChatConf"><span>Clear List</span><span class="icon is-small"><i class="fas fa-comment-slash"></i></span></button>
-              </div>
-            </div>
-            <div class="field is-grouped-centered is-grouped">
-              <div class="control">
-                <button class="button is-small is-info cooldown-set" data-add="60">+1m</button>
-              </div>
-              <div class="control">
-                <button class="button is-small is-info cooldown-set" data-add="300">+5m</button>
-              </div>
-              <div class="control">
-                <button class="button is-small is-info cooldown-set" data-add="900">+15m</button>
               </div>
               <div class="control">
                 <button class="button is-small is-warning cooldown-set" data-add="clear">Clear</button>
@@ -110,10 +93,82 @@
               </div>
             </div>
             <div class="field is-grouped-centered is-grouped"></div>
+            <div id="saycmds">
+              <p>fake speech command here</p>
+              <div class="columns is-vcentered">
+                <div class="column">
+                  <div class="control">
+                    <input class="input is-small form-save" type="text" id="saycmd-1" name="saycmd-1-name" placeholder="saycmd-1 voice command">
+                  </div>
+                  <div class="control">
+                    <div class="select is-small">
+                      <select class="form-save" id="voiceid-1">
+                        <option value="choose voice">choose voice 1</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="column py-0">
+                  <div class="field is-horizontal is-vcentered py-0">
+                    <div class="field-body">
+                      <input class="form-save" type="range" id="rateval-1" min="0.5" max="2" step="0.1" value="1.0" data-for="rateout-1">&nbsp;rate&nbsp;<span class="mr-1" id="rateout-1" style="width: 2em;">1</span>
+                      <input class="form-save" type="range" id="pitchval-1" min="0.5" max="2" step="0.1" value="1.0" data-for="pitchout-1">&nbsp;pitch&nbsp;<span id="pitchout-1" style="width: 2em;">1</span>
+                      <button class="tag button is-small is-info ml-1" data-index="1">test</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="columns is-vcentered">
+                <div class="column">
+                  <div class="control">
+                    <input class="input is-small form-save" type="text" id="saycmd-2" name="saycmd-2-name" placeholder="saycmd-2 voice command">
+                  </div>
+                  <div class="control">
+                    <div class="select is-small">
+                      <select class="form-save" id="voiceid-2">
+                        <option value="choose voice">choose voice 2</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="column py-0">
+                  <div class="field is-horizontal is-vcentered py-0">
+                    <div class="field-body">
+                      <input class="form-save" type="range" id="rateval-2" min="0.5" max="2" step="0.1" value="1.0" data-for="rateout-2">&nbsp;rate&nbsp;<span class="mr-1" id="rateout-2" style="width: 2em;">1</span>
+                      <input class="form-save" type="range" id="pitchval-2" min="0.5" max="2" step="0.1" value="1.0" data-for="pitchout-2">&nbsp;pitch&nbsp;<span id="pitchout-2" style="width: 2em;">1</span>
+                      <button class="tag button is-small is-info ml-1" data-index="2">test</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="columns is-vcentered">
+                <div class="column">
+                  <div class="control">
+                    <input class="input is-small form-save" type="text" id="saycmd-3" name="saycmd-3-name" placeholder="saycmd-3 voice command">
+                  </div>
+                  <div class="control">
+                    <div class="select is-small">
+                      <select class="form-save" id="voiceid-3">
+                        <option value="choose voice">choose voice 3</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="column py-0">
+                  <div class="field is-horizontal is-vcentered py-0">
+                    <div class="field-body">
+                      <input class="form-save" type="range" id="rateval-3" min="0.5" max="2" step="0.1" value="1.0" data-for="rateout-3">&nbsp;rate&nbsp;<span class="mr-1" id="rateout-3" style="width: 2em;">1</span>
+                      <input class="form-save" type="range" id="pitchval-3" min="0.5" max="2" step="0.1" value="1.0" data-for="pitchout-3">&nbsp;pitch&nbsp;<span id="pitchout-3" style="width: 2em;">1</span>
+                      <button class="tag button is-small is-info ml-1" data-index="3">test</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div class="column">
-          <div class="box" id="mainoutput">Chat Message Alerts</div>
+          <div class="box" id="mainoutput">Speechy Chatty</div>
           <div class="not-mobile-view" id="logbox">
             <div class="box">
               <button class="delete is-pulled-right" data-target="#logbox"></button>
@@ -121,25 +176,25 @@
               <div id="log"></div>
             </div>
           </div>
-          <button id="flashtestbtn">FLASH</button>
+          <button id="speechtestbtn">Speak</button>
         </div>
       </div>
       <div class="container not-mobile-view">
         <div class="message is-link" id="mbnc">
-          <div class="message-header">Chat Message Alert Tips
+          <div class="message-header">Speechy Tool Tips
             <button class="delete" data-target="#mbnc"></button>
           </div>
           <div class="message-body">
-            <div class="block">It's all too easy to get tied up in a game and forget to read the chat.  Using this tool you can get visual or audio alerts when new chat messages happen.  You don't want this to happen with every message so set a cooldown value and just bump up the current value with the +time buttons any time.</div>
+            <div class="block">Something.</div>
             <p><strong>Config</strong>
               <button class="button is-small is-primary modal-trigger p-1" data-target="configModal"><i class="fas fa-gear"></i></button> :
             </p>
-            <p class="block"><strong>Alerts:</strong> sound, flash screen or disable.</p>
-            <p class="block"><strong>Ignored Users:</strong> Don't trigger for these, useful for StreamElements, Nightbot, Moobot or just people that give you the pip.</p>
-            <p class="block"><strong>Cooldown:</strong> When the page loads and when alerts occur a cooldown will start before it can be triggered again.  You can add to the cooldown at any time using the add time buttons.</p>
-            <p class="block"><strong>Secs before alert:</strong> Before a new chat message triggers the full alert you'll get a warning.  This is useful if you spot a chat message first after the cooldown has ended.  Click the warning or add time to the cooldown to stop the full alert.</p>
-            <div class="block"><strong>NOTE:</strong> Sounds might not play until you 'interact with the document, which means clicking inside it.  It's a limitation of some browsers to stop pop up web pages from being really annoying.</div>
-            <div class="block"><strong>Tips:</strong> "Done" on the config page, joining channels and the "Get Url" button saves your settings to the browser url letting you bookmark the page without having to type in everything again.  If you're a mod for multiple channels you can easily save bookmarks with different settings.</div>
+            <p><strong>Permissions:</strong> limit to mods, vips, everyone and/or named users you trust</p>
+            <p class="block"><strong>alerts:</strong> sound, flash screen or disable.</p>
+            <p><strong>Cooldowns:</strong></p>
+            <div class="block">global cooldown, user cooldown.</div>
+            <div class="block"><strong>NOTE:</strong> Speech isn't allowed on many browsers unless you click inside the page.  You'll be warned if that happens.</div>
+            <div class="block"><strong>Tips:</strong> "Done" on the config page, joining channels and "Get Url" saves values to the current url letting you bookmark the page without having to type in everything again.  If you're a mod for multiple channels you can easily save bookmarks with different settings.</div>
             <div class="field has-addons">
               <div class="control is-expanded">
                 <input class="input is-small" id="linkurl" placeholder="Url to bookmark">
@@ -148,7 +203,7 @@
                 <button class="button is-danger is-small is-responsive urlpopulate">Get Url</button>
               </div>
             </div>
-            <p>The <span class="tag is-primary">Mini View</span> button will give a reduced view, <strong>just make sure you've joined a channel first.</strong></p>
+            <p>The <span class="tag is-primary">Mini View</span> button toggles a reduced view useful for phones.  Make sure you've joined a channel first.</p>
           </div>
         </div>
       </div>
@@ -156,55 +211,69 @@
         <div class="modal-background"></div>
         <div class="modal-card">
           <header class="modal-card-head">
-            <p class="modal-card-title">New Chat Message Alert Config</p>
+            <p class="modal-card-title">Chat to Speech Config</p>
             <button class="delete"></button>
           </header>
           <section class="modal-card-body">
             <div class="field is-grouped-centered is-grouped mb-3">
               <div class="control">
                 <label class="checkbox button is-link is-size-7-mobile">
-                  <input class="form-save" type="checkbox" checked data-tocheckbox="NCMVars.playSound" id="playsound"> play sound
+                  <input class="form-save" type="checkbox" data-tocheckbox="TTSVars.chatReadAll" id="readallchat"> All chat
                 </label>
               </div>
               <div class="control">
                 <label class="checkbox button is-link is-size-7-mobile">
-                  <input class="form-save" type="checkbox" checked data-tocheckbox="NCMVars.flashEnabled" id="flashscreen"> flash screen
+                  <input class="form-save" type="checkbox" data-tocheckbox="TTSVars.chatReadEmotes" id="chatreademotes"> emotes
                 </label>
               </div>
               <div class="control">
                 <label class="checkbox button is-link is-size-7-mobile">
-                  <input type="checkbox" checked data-tocheckbox="NCMVars.alertEnabled" id="enablealert"> enabled
+                  <input class="form-save" type="checkbox" data-tocheckbox="TTSVars.chatReadNameDigits" id="chatreadnamedigits"> name digits
                 </label>
               </div>
             </div>
-            <label class="label">Ignore (hide your bot)</label>
+            <label class="label has-text-centered">Allow speech from:</label>
+            <div class="field is-grouped-centered is-grouped permissions">
+              <div class="control">
+                <label class="checkbox button is-info">
+                  <input class="form-save" type="checkbox" id="everyone"> everyone
+                </label>
+              </div>
+              <div class="control">
+                <label class="checkbox button is-info">
+                  <input class="form-save" type="checkbox" checked id="mods"> mods
+                </label>
+              </div>
+              <div class="control">
+                <label class="checkbox button is-info">
+                  <input class="form-save" type="checkbox" checked id="vips"> vips
+                </label>
+              </div>
+            </div>
+            <label class="label">Users always allowed (even if not mods)</label>
+            <div class="field">
+              <div class="control">
+                <input class="input form-save form-filter-spaces-to-commas" type="text" name="allownamed" id="allownamed" placeholder="allow named users" data-toarraylc="perms.allowNamed">
+              </div>
+            </div>
+            <label class="label">Ignored users</label>
             <div class="field">
               <div class="control">
                 <input class="input form-save form-filter-spaces-to-commas" type="text" name="ignoredusers" id="ignoredusers" placeholder="ignored users" data-toarraylc="perms.ignoredUsers">
               </div>
             </div>
-            <nav class="level">
-              <div class="level-left has-text-centered">
-                <div class="level-item">
-                  <label class="field-label">cooldown minutes</label>
-                  <div class="field is-horizontal">
-                    <div class="control">
-                      <input class="input number-input-3 form-save" type="number" id="defaultcooldown" min="0" max="300" value="3" data-toint="NCMVars.defaultCooldown">
-                    </div>
-                  </div>
-                </div>
+            <label class="label">Global cooldown seconds</label>
+            <div class="field">
+              <div class="control">
+                <input class="input number-input-5 form-save" type="number" name="globalcooldown" id="globalcooldown" min="0" max="12000" value="10" data-toint="TTSVars.chatcooldownglobal">
               </div>
-              <div class="level-right has-text-centered">
-                <div class="level-item">
-                  <label class="field-label">secs before alert</label>
-                  <div class="field is-horizontal">
-                    <div class="control">
-                      <input class="input number-input-3 form-save" type="number" id="secsbeforealert" min="0" max="120" value="15" data-toint="NCMVars.secsBeforeAlert">
-                    </div>
-                  </div>
-                </div>
+            </div>
+            <label class="label">User cooldown seconds</label>
+            <div class="field">
+              <div class="control">
+                <input class="input number-input-4 form-save" type="number" name="usercooldown" id="usercooldown" min="0" max="12000" value="60" data-toint="TTSVars.chatcooldownuser">
               </div>
-            </nav>
+            </div>
           </section>
           <footer class="modal-card-foot">
             <button class="button modal-dismiss is-success urlpopulate">Done</button>

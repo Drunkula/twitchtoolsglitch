@@ -15,14 +15,15 @@
  * I could give different channels different colours, have a colour list
  */
 
- let NCNChatterSet = new Set();	// first chats stored as channel+name
+ TMIConfig.NCNChatterSet = new Set();	// first chats stored as channel+name
+ let NCNChatterSet = TMIConfig.NCNChatterSet;
 
 	 // window onload
 
 window.addEventListener('load', () => {
 	log('LOADED');
 
-	tt_forms_init_common();
+	TT.forms_init_common();
 
 	let clearChatters = () => { o('', true); };
 	let resetChatters = () => { NCNChatterSet.clear(); o('', true); }
@@ -30,12 +31,12 @@ window.addEventListener('load', () => {
 	gid('clearnew').onclick = clearChatters;
 	gid('resetnew').onclick = resetChatters;
 
-	button_add_confirmed_func('.clearChatConf', clearChatters);
-	button_add_confirmed_func('.resetChatConf', resetChatters);
+	TT.button_add_confirmed_func('.clearChatConf', clearChatters);
+	TT.button_add_confirmed_func('.resetChatConf', resetChatters);
 
 		// url params to array
 	if (TMIConfig.autojoin === true) {
-		document.getElementById('join').click();			//join_chans();
+		document.getElementById('join').click();			//TT.join_chans();
 	}
 });
 

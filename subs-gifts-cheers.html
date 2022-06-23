@@ -10,7 +10,6 @@
     <!-- highlight auto in <pre><code> tags-->
     <!-- link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/androidstudio.min.css")-->
     <!-- script(defer='' src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js")-->
-    <script src="/scripts/twitch-tools-init.js"></script>
     <link rel="stylesheet" href="/css/styles.css">
   </head>
   <body>
@@ -21,7 +20,7 @@
           <div class="navbar-menu" id="nav-links-component">
             <div class="navbar-start"><a class="navbar-item" href="/">Home.</a>
               <div class="navbar-item has-dropdown is-hoverable"><a class="navbar-link">Tools List</a>
-                <div class="navbar-dropdown is-boxed"><a class="navbar-item" href="new-chatter.html">New Chatters alert (say hello to new chatters easily)</a><a class="navbar-item" href="muted-alert.html">You're Muted alert</a><a class="navbar-item" href="chat-alert.html">New chat alert - don't miss chat messages (good for small channels)</a><a class="navbar-item" href="subs-gifts-cheers.html">Subs, gifts, cheers</a><a class="navbar-item" href="localstorage.html">localstorage killer</a><a class="navbar-item" href="#"><b>There'll be more...</b></a><a class="navbar-item" href="#">VIPs / Named chatters or WRONG 'UNS join</a><a class="navbar-item" href="#">OBS scene and mic control mod chat commands (!unmute, !brb, !game)</a><a class="navbar-item" href="#">OBS web control panel for your mods</a><a class="navbar-item" href="#">And your suggestions.</a>
+                <div class="navbar-dropdown is-boxed"><a class="navbar-item" href="chat-to-speech.html">Speech from chat</a><a class="navbar-item" href="new-chatter.html">New Chatters alert (say hello to new chatters easily)</a><a class="navbar-item" href="muted-alert.html">You're Muted alert</a><a class="navbar-item" href="chat-alert.html">New chat alert - don't miss chat messages (good for small channels)</a><a class="navbar-item" href="subs-gifts-cheers.html">Subs, gifts, cheers</a><a class="navbar-item" href="localstorage.html">localstorage killer</a><a class="navbar-item" href="#"><b>There'll be more...</b></a><a class="navbar-item" href="#">VIPs / Named chatters or WRONG 'UNS join</a><a class="navbar-item" href="#">OBS scene and mic control mod chat commands (!unmute, !brb, !game)</a><a class="navbar-item" href="#">OBS web control panel for your mods</a><a class="navbar-item" href="#">And your suggestions.</a>
                   <hr class="navbar-divider is-hidden-desktop">
                 </div>
               </div>
@@ -50,10 +49,13 @@
           
         </script>
     <div class="block mx-5 my-3 main-container">
-      <script src="/scripts/tmi.min.js"></script>
-      <script src="/scripts/tmi-code-common.js"></script>
-      <script src="/scripts/form-fields-save-restore.js"></script>
-      <script src="/scripts/subs-gifts-cheers.js"></script>
+      <script src="/scripts/backbone-common.js" defer></script>
+      <script src="/scripts/twitch-tools-init.js" defer></script>
+      <script src="/scripts/tmi.min.js" defer></script>
+      <script src="/scripts/tmi-code-common.js" defer></script>
+      <script src="/scripts/event-listeners.js" defer></script>
+      <script src="/scripts/form-fields-save-restore.js" defer></script>
+      <script src="/scripts/subs-gifts-cheers.js" defer></script>
       <div class="notification is-info not-mobile-view" id="ncnoti">Subs Gifts Cheers
         <button class="delete" data-target="#ncnoti"></button>
       </div>

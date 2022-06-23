@@ -5,7 +5,7 @@
  window.addEventListener('load', () => {
 	log('LOADED');
 
-	tt_forms_init_common();
+	TT.forms_init_common();
 
 	let clearChatters = () => { o('', true); };
 	let resetChatters = () => { NCNChatterSet.clear(); o('', true); }

@@ -9,7 +9,7 @@ const TT_MUTED_MINS_MAX = 300;
     // regex's to match the input
 const muteRegexs = [/!muted/i, /\b[you|mic].*\bmute/i, /can[']?t.*hear.*you/i]
 
-var chatMsgNewVars = {
+TMIConfig.chatMsgNewVars = {
     onCooldown: false,
     cooldownDefaultSecs : 181,
     cooldownSecsRemaining : 180,  // that'll be changing
@@ -24,13 +24,15 @@ var chatMsgNewVars = {
     cooldownSecsDiv: null
 }
 
+const chatMsgNewVars = TMIConfig.chatMsgNewVars;
+
 
     // on window load
 
 window.addEventListener('load', (event) => {
     gid('clearmainout').addEventListener('click', () => o('', true) );
 
-    tt_forms_init_common(); // channels populates form fields from url string
+    TT.forms_init_common(); // channels populates form fields from url string
     //tt_forms_init_common_permissions(); // ABSORBED allonamed and checkboxes
 
     chatMsgNewVars.alertSound = document.getElementById('ding');
@@ -50,7 +52,7 @@ window.addEventListener('load', (event) => {
     setInterval(muted_cooldown_interval_timer, 1000);// DEBUG want 1000 in real use
         // autojoin
     if (TMIConfig.autojoin) { console.log(r("Auto Joining channels..."));
-        join_chans();
+        TT.join_chans();
     }
 });// on load ends
 
@@ -69,7 +71,7 @@ function add_new_chat_message_tmi_listener()
         if (lastMsgId === userstate['id'])
             return;
 
-        lastMsgId = userstate['id'];
+        lastMsgId = userstate['id'];    // unique to every message
 
             // Handle different message types..
         switch(userstate["message-type"]) {
@@ -95,7 +97,7 @@ function NCM_check_new_chat_message_alert(user, channel, msg) {
         return;
     }
 
-    var allowDing = tt_user_permitted(user);
+    var allowDing = TT.user_permitted(user);
 
         // ding away
     if (allowDing) {
@@ -230,7 +232,7 @@ function init_flasher_tech() {        // if a flasher is there set up a func
     document.getElementById('flashtestbtn').onclick = flashFunc;
 }
 
-function start_flash() {
+function Xstart_flash() {
     clearTimeout(chatMsgNewVars.flashSetTimeout);
     flashBox.classList.add('flasher');
     chatMsgNewVars.flashSetTimeout = setTimeout(stop_flash, chatMsgNewVars.flashDuration);
