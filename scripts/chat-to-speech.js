@@ -48,6 +48,71 @@ TMIConfig.TTSVars = {
     speechQ: []
 }
 
+class Speecher {
+	speechQueue = [];
+	isSpeaking = false;
+
+	stop() {
+		this.isSpeaking = false;
+		this.stopNow = true;
+		EasySpeech.pause();
+	}
+
+	pause() {
+		this.stopNow = true;
+		EasySpeech.pause();
+	}
+
+	resume() {
+		this.stopNow = false;
+		EasySpeech.resume();
+		this.sayQueueProcess();
+	}
+
+		// pack = {text, pitch, rate, voice}
+
+	say(pack)
+	{
+		this.stopNow = false;
+			// allow (msg, voice) usage
+
+		this.speechQueue.push(pack);
+
+		console.log("QUEUEU SIZE", this.speechQueue.length);
+
+		if (!this.isSpeaking)
+			this.sayQueueProcess();
+	}
+
+	sayQueueProcess() {
+		if (this.isSpeaking) return;
+
+		if (this.stopNow) {
+			EasySpeech.pause();
+			this.isSpeaking = false;
+			return;
+		}
+
+		this.isSpeaking = true;
+			// oh my god - I thought shift was broken for sooo long
+		let pack = this.speechQueue.shift();
+
+		if ( pack ) {
+			console.log("USING PACK", pack);
+			console.log("Now Q SIZE", this.speechQueue.length);
+			EasySpeech.speak(pack)
+            .then( () => {
+				this.isSpeaking = false;
+				this.sayQueueProcess()
+			} )
+            .catch(e => e);
+		}
+		else {
+			this.isSpeaking = false;
+		}
+	}
+}
+
 
 // Defaults https://github.com/jankapunkt/easy-speech/blob/master/API.md#module_EasySpeech--module.exports..EasySpeech.defaults
 // defaults({voice, pitch, rate, volume})
@@ -55,6 +120,7 @@ TMIConfig.TTSVars = {
 {   // scope starts
     var TTSVars = TMIConfig.TTSVars;
     const TTS_TEST_TEXT = "Testing the voice one two three";
+    const speech = new Speecher;
 
     let TTS_EVENTS = [
         {selector: '#saycmds [id^="saycmd-"], #saycmds input[type="range"], #saycmds select',
@@ -139,7 +205,7 @@ TMIConfig.TTSVars = {
                 // Handle different message types..
             switch(userstate["message-type"]) {
                 case "action": case "chat": case "whisper":
-                    // check if the user or globa timeout is in effect.
+                    // check if the user or global timeout is in effect.
 
                     console.log("read emotes:", TTSVars.chatReadEmotes);
                     // filter out emotes
@@ -162,18 +228,19 @@ TMIConfig.TTSVars = {
                     if (isSpeak !== false) {
                         if (isSpeak.rest === '') return;
 
-                        let name = userstate['display-name'];
+                        let name = userstate['display-name'].replace(/_/g, ' ');
 
                             // if no digits in username
                         if ( !TTSVars.chatReadNameDigits ) {
-                             name = name.replaceAll(/\d/g, ' ')
+                             name = name.replace(/\d/g, ' ')
                         }
                             // this actually writes to the global params
                         isSpeak.params.text = isSpeak.rest + ' said ' + name;// or username;
 
-                        EasySpeech.speak(isSpeak.params)
+                        speech.say(isSpeak.params);
+                        /* EasySpeech.speak()
                         .then(e => console.log("finished", isSpeak.params))
-                        .catch(e => e);   // let the on handler deal with it
+                        .catch(e => e);   // let the on handler deal with it */
                     }
 
                     break;
@@ -198,10 +265,8 @@ TMIConfig.TTSVars = {
     function filter_out_emotes(msg, state) {
         if (state["emotes-raw"] === null) return msg;
 
-        let posns = [...state["emotes-raw"].matchAll(EMOTE_PATTERN)];
-        let pos;
-            // pop them
-
+        let pos, posns = [...state["emotes-raw"].matchAll(EMOTE_PATTERN)];
+            // in reverse
         while (pos = posns.pop()) {            //msg = msg.slice(0, p1) + msg.slice(p2 + 1);   // WORKS
             msg = msg.slice(0, +pos[1]) + msg.slice(+pos[2] + 1);   // WORKS
         }
@@ -219,6 +284,7 @@ TMIConfig.TTSVars = {
 
         // commands must always start with !
         // returns rest of string without command
+        // filter emotes BEFORE calling this
     function is_say_command (str) {
         if (str[0] === '!') {	// get the first word with ! lowercased
             console.log("is_say_command: ", str);
@@ -326,7 +392,7 @@ TMIConfig.TTSVars = {
         EasySpeech.speak(params);
     }
 
-        // creates objects from the speech command settings 1, not zero based
+        // grab parameters from the speech setting 1, not zero based
 
     function get_speech_vars(index) {
         let rate = +gid('rateval-'+index).value;
