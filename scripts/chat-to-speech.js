@@ -20,6 +20,8 @@
  *  read numbers option
  *  POSSIBLE - follower only
  *  FILTER OUT ICONS
+ *
+ *  If it starts with ! but isn't a command maybe don't read it out
  */
 "use strict"
 
@@ -69,23 +71,37 @@ class Speecher {
 		this.sayQueueProcess();
 	}
 
+    cancel() {
+        EasySpeech.cancel();
+    }
+
+    reset() {
+        EasySpeech.reset();
+    }
+
+    clear() {
+        this.speechQueue = [];
+    }
+
 		// pack = {text, pitch, rate, voice}
 
 	say(pack)
 	{
 		this.stopNow = false;
 			// allow (msg, voice) usage
-
 		this.speechQueue.push(pack);
 
-		console.log("QUEUEU SIZE", this.speechQueue.length);
+		console.log("Speech Queue", this.speechQueue.length);
 
 		if (!this.isSpeaking)
 			this.sayQueueProcess();
 	}
 
 	sayQueueProcess() {
-		if (this.isSpeaking) return;
+		if (this.isSpeaking) {
+            //console.log("NO SPEEK - A ALREADY SPEAK");
+            return;
+        }
 
 		if (this.stopNow) {
 			EasySpeech.pause();
@@ -98,14 +114,15 @@ class Speecher {
 		let pack = this.speechQueue.shift();
 
 		if ( pack ) {
-			console.log("USING PACK", pack);
-			console.log("Now Q SIZE", this.speechQueue.length);
+			//console.log("USING PACK", pack, "Now Q SIZE", this.speechQueue.length);
 			EasySpeech.speak(pack)
-            .then( () => {
-				this.isSpeaking = false;
-				this.sayQueueProcess()
-			} )
-            .catch(e => e);
+                .then( () => {
+                    this.isSpeaking = false;
+                    this.sayQueueProcess()
+                } )
+                .catch(e => {   // no page interaction - clear isSpeaking
+                    this.isSpeaking = false;
+                });
 		}
 		else {
 			this.isSpeaking = false;
@@ -129,6 +146,7 @@ class Speecher {
         {selector: '#saycmds button[data-index]', event: 'click', function: test_voice_onclick, params: {}},
         {selector: 'input[type="range"]', event: 'input', function: slider_oninput, params: {}},
 
+        {selector: '#enablespeech', event: 'change', function: speech_enabled_onchange, params: {}},
     ];
 
     async function init_easyspeech() {
@@ -136,9 +154,9 @@ class Speecher {
 
         await EasySpeech.init();
             // boundary end error mark pause resume start
-        EasySpeech.on({'voiceschanged': () => console.log('WELL THIS WORKS')})// no, sadly, but it should
+        //EasySpeech.on({'voiceschanged': () => console.log('VOICES CHANGE WELL THIS WORKS')})// no, sadly, but it should but I could just attach to the system speech
         EasySpeech.on({'error': speek_error});// this is legit
-        EasySpeech.on({'start': e => console.log('start', e.target.text)})
+        //EasySpeech.on({'start': e => console.log('start', e.target.text)})
         //EasySpeech.on({'boundary': () => console.log('boundary WELL THIS WORKS')})
 
         TTSVars.voices = EasySpeech.voices();
@@ -149,8 +167,6 @@ class Speecher {
         // on window load
 
     window.addEventListener('load', async (event) => {
-
-        //init_say_commands_onchange();
 
         init_easyspeech().then(() => {
             // set up the voice selects
@@ -197,8 +213,7 @@ class Speecher {
             lastMsgId = userstate['id'];    // unique to every message
 
                 // are they permitted ?
-            if (! TT.user_permitted( userstate )) {
-                                console.log("USER NOT PERMITTED", userstate['username']);
+            if (! TT.user_permitted( userstate )) { console.log("USER NOT PERMITTED", userstate['username']);
                 return false;
             }
 
@@ -207,41 +222,50 @@ class Speecher {
                 case "action": case "chat": case "whisper":
                     // check if the user or global timeout is in effect.
 
-                    console.log("read emotes:", TTSVars.chatReadEmotes);
                     // filter out emotes
-                    if ( ! TTSVars.chatReadEmotes ) {
+                    if ( ! TTSVars.chatReadEmotes && userstate['emotes-raw'] !== null) {
                         message = filter_out_emotes(message, userstate);
                     }
 
-                    let isSpeak = is_say_command(message);  // returns obj or false
+                    let isSayCmd = is_say_command(message);  // returns obj or false
+//                    console.log("is_say_command: ", isSayCmd);
+
+                    if (!isSayCmd) {
+                        if (! TTSVars.chatReadOtherCommands && '!' === message[0]) {
+                            return;
+                        }
+
+                        if (TTSVars.chatReadAll) {
+                            let params = get_speech_vars(1);
+
+                            isSayCmd = { // command rest params (voice)
+                                command: 'all-chat',
+                                rest: message,  // use first voice by default
+                                params
+                            }
+                        } else {
+                            return;
+                        }
+                    }
+
                         // let's commands still be used
-                    if (!isSpeak && TTSVars.chatReadAll) {
-                        let params = get_speech_vars(1);
 
-                        isSpeak = { // command rest params (voice)
-                            command: 'all-chat',
-                            rest: message,  // use first voice by default
-                            params
-                        }
+                    if (isSayCmd.rest === '') return;
+
+                    let name = userstate['display-name'].replace(/_/g, ' ');
+
+                        // if no digits in username
+                    if ( !TTSVars.chatReadNameDigits ) {
+                            name = name.replace(/\d/g, ' ')
                     }
+                        // this actually writes to the global params
+                    isSayCmd.params.text = isSayCmd.rest + ' said ' + name;// or username;
 
-                    if (isSpeak !== false) {
-                        if (isSpeak.rest === '') return;
+                    speech.say(isSayCmd.params);
+                    /* EasySpeech.speak()
+                    .then(e => console.log("finished", isSpeak.params))
+                    .catch(e => e);   // let the on handler deal with it */
 
-                        let name = userstate['display-name'].replace(/_/g, ' ');
-
-                            // if no digits in username
-                        if ( !TTSVars.chatReadNameDigits ) {
-                             name = name.replace(/\d/g, ' ')
-                        }
-                            // this actually writes to the global params
-                        isSpeak.params.text = isSpeak.rest + ' said ' + name;// or username;
-
-                        speech.say(isSpeak.params);
-                        /* EasySpeech.speak()
-                        .then(e => console.log("finished", isSpeak.params))
-                        .catch(e => e);   // let the on handler deal with it */
-                    }
 
                     break;
                 default: // pfff ?
@@ -266,12 +290,14 @@ class Speecher {
         if (state["emotes-raw"] === null) return msg;
 
         let pos, posns = [...state["emotes-raw"].matchAll(EMOTE_PATTERN)];
+
+            //let orig = msg; console.log("emotes", state["emotes-raw"], state.emotes, "I found", posns.length);
             // in reverse
         while (pos = posns.pop()) {            //msg = msg.slice(0, p1) + msg.slice(p2 + 1);   // WORKS
             msg = msg.slice(0, +pos[1]) + msg.slice(+pos[2] + 1);   // WORKS
         }
-                console.log("RETURNING", msg);
-        return msg;
+            //console.log("emotes RETURNING\n", msg.trim(), "\nfrom\n", orig, "length:", msg.trim().length);
+        return msg.trim();
     }
 
         // if browser requires interaction before allowing speech then flash the screen
@@ -287,8 +313,6 @@ class Speecher {
         // filter emotes BEFORE calling this
     function is_say_command (str) {
         if (str[0] === '!') {	// get the first word with ! lowercased
-            console.log("is_say_command: ", str);
-
             var words = str.split(' ').filter(e => e);
                 // rest of first word to lower case
             var inCmd = words[0].toLowerCase();
@@ -437,5 +461,21 @@ class Speecher {
         EasySpeech.speak({text: "Testing the speech engine - beep boop beep"});
     }
 
+        // clears the speech queue
+
+    function speech_enabled_onchange (e) {
+        let t = e.target;
+        if (! t.checked) {
+            this.isSpeaking = false;
+            speech.cancel();
+            //speech.reset();
+            speech.clear();
+        }
+        else {
+            //speech.resume();
+            speech.isSpeaking = false;
+            //speech.sayQueueProcess();
+        }
+    }
 
 } // SCOPE ENDS
