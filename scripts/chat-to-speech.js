@@ -22,32 +22,34 @@
  *  FILTER OUT ICONS
  *
  *  If it starts with ! but isn't a command maybe don't read it out
+ *
+ *  https://github.com/jankapunkt/easy-speech/blob/master/API.md#module_EasySpeech
+ *  Defaults https://github.com/jankapunkt/easy-speech/blob/master/API.md#module_EasySpeech--module.exports..EasySpeech.defaults
  */
 "use strict"
 
 import EasySpeech from "./easyspeech.module.js";
 
-const TT_MUTED_MINS_MAX = 300;
+//const TT_MUTED_MINS_MAX = 300;
     // regex's to match the input
 
 TMIConfig.TTSVars = {
     cooldownUsers: new Set(),
 
-    onCooldown: false,
+    cooldownGlobalActive: false,
     cooldownDefaultSecs : 181,
     cooldownSecsRemaining : 180,  // that'll be changing
     cooldownCallback : null,    // for setInterval
+    cooldownDiv: null,
+    cooldownSecsDiv: null,
 
     flashSetTimeout: null,
     flashDuration: 3500,    // milliseconds
     flashFunc: x => x,  // does nothing for now
 //    alertSound: null,   // embedded sound item for alertSound.play()
 
-    cooldownDiv: null,
-    cooldownSecsDiv: null,
     voices: [],
-    sayCmds: {},
-    speechQ: []
+    sayCmds: {}
 }
 
 class Speecher {
@@ -88,7 +90,6 @@ class Speecher {
 	say(pack)
 	{
 		this.stopNow = false;
-			// allow (msg, voice) usage
 		this.speechQueue.push(pack);
 
 		console.log("Speech Queue", this.speechQueue.length);
@@ -98,13 +99,12 @@ class Speecher {
 	}
 
 	sayQueueProcess() {
-		if (this.isSpeaking) {
-            //console.log("NO SPEEK - A ALREADY SPEAK");
+		if (this.isSpeaking) {            //console.log("NO SPEEK - A ALREADY SPEAK");
             return;
         }
 
 		if (this.stopNow) {
-			EasySpeech.pause();
+			EasySpeech.cancel();
 			this.isSpeaking = false;
 			return;
 		}
@@ -131,10 +131,8 @@ class Speecher {
 }
 
 
-// Defaults https://github.com/jankapunkt/easy-speech/blob/master/API.md#module_EasySpeech--module.exports..EasySpeech.defaults
-// defaults({voice, pitch, rate, volume})
 
-{   // scope starts
+try {   // scope starts
     var TTSVars = TMIConfig.TTSVars;
     const TTS_TEST_TEXT = "Testing the voice one two three";
     const speech = new Speecher;
@@ -150,11 +148,20 @@ class Speecher {
     ];
 
     async function init_easyspeech() {
-        EasySpeech.onvoiceschanged = () => console.log(`-------- VOICES CHANGED`)
+        let caps = EasySpeech.detect();
+        console.log("DETECT", caps);
+        log("Speech Synthesis " + caps['speechSynthesis'].toString())
 
-        await EasySpeech.init();
-            // boundary end error mark pause resume start
-        //EasySpeech.on({'voiceschanged': () => console.log('VOICES CHANGE WELL THIS WORKS')})// no, sadly, but it should but I could just attach to the system speech
+        log("Initialising Speech engine");
+
+        let res = await EasySpeech.init();
+
+        log("Engine Initialised");
+
+        console.log("easy speech", EasySpeech);
+
+        // boundary end error mark pause resume start - see docs
+        EasySpeech.on({'voiceschanged': () => o('VOICES CHANGE WELL THIS WORKS')})// no, sadly, but it should but I could just attach to the system speech
         EasySpeech.on({'error': speek_error});// this is legit
         //EasySpeech.on({'start': e => console.log('start', e.target.text)})
         //EasySpeech.on({'boundary': () => console.log('boundary WELL THIS WORKS')})
@@ -162,11 +169,14 @@ class Speecher {
         TTSVars.voices = EasySpeech.voices();
 
         EasySpeech.defaults({rate: 1, error: (e) => console.log("EASYSPEECH ERROR DEFAULT", e)});
+
+        return res;
     };
 
         // on window load
 
     window.addEventListener('load', async (event) => {
+        let isError = false;
 
         init_easyspeech().then(() => {
             // set up the voice selects
@@ -181,7 +191,17 @@ class Speecher {
                 console.log(r("Auto Joining channels..."));
                 TT.join_chans();
             }
-        });
+        })
+        .catch( e => {
+            log('<b>INIT ERROR:</b> ' + e.toString())
+            o(e.toString(), true)
+            o('<h4 class="subtitle is-4">Please try a different browser</h4>')
+            o('<h3 class="title is-3">Sadly No Speech available</h3>')
+        })
+
+        if (isError) {
+            return;
+        }
 
         //gid('clearmainout').addEventListener('click', () => o('', true) );
 
@@ -478,4 +498,8 @@ class Speecher {
         }
     }
 
-} // SCOPE ENDS
+}   // SCOPE ENDS
+catch (e) {
+    console.log("Errorrr", e);
+    o("Error: " + e.toString());
+}
