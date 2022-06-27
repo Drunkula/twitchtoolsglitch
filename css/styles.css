@@ -64,7 +64,7 @@ rb {
 
 .tab-content {
 	display: flex !important;
-	background-color: azure;
+	/* background-color: azure; */
 	flex-wrap: wrap;	/* ok - this fixed it! */
 }
 
@@ -103,10 +103,13 @@ header h3 {
 }
 
 .section header {
-	text-align: right;
 	max-width: fit-content;
 	line-height: 0.8;
 	margin-bottom: 20px !important;
+}
+
+.section header h3 {
+	text-align: right;
 }
 
 .section:nth-of-type(3n) {
@@ -192,6 +195,14 @@ html {
 
 .number-input-3 {
 	width: 5rem;
+}
+
+.number-input-4 {
+	width: 5.5rem;
+}
+
+.number-input-5 {
+	width: 5.5rem;
 }
 	/* pre full alert warning */
 #alertnotification {

@@ -1,6 +1,6 @@
-const TMI_DEFAULT_CHANNELS = 	["def", "channels", 'DEFAULTS'];		// could put this in a different file for easy user use
-const TMI_DEFAULT_ALLOW_NAMED = ["default", "allow", "named", 'DEFAULTS'];
-const TMI_IGNORE_DEFAULT = 		["nightbot", "streamelements", "moobot"]; // LOWERCASE
+const TMI_DEFAULT_CHANNELS = 	[];		// could put this in a different file for easy user use
+const TMI_DEFAULT_ALLOW_NAMED = [];		// these do work
+const TMI_IGNORE_DEFAULT = 		["nightbot", "streamelements", "moobot", "streamlabs", "fossabot", "songlistbot"]; // LOWERCASE
 
 const MAGIC_CLASS_FORM_SAVE = '.form-save';
 
@@ -190,7 +190,7 @@ TT.page_params_set = function page_params_set(data) {
 TT.page_params_get = function page_params_get() {
 	return TT.local_store_get('urlParams');
 }
-
+	// sets a value in localStorage tied to the current page
 TT.local_store_set = function local_store_set(name, data) {
     let namePath = name + window.location.pathname;
     localStorage.setItem(namePath, JSON.stringify(data));

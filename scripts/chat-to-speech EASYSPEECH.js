@@ -20,28 +20,36 @@
  *  https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance
  *
  * speechSynthesis has properties speaking pending and paused
- *  speaking and pending can be used with the queue BUT - they're slow to update on some browsers - use own
+ *  speaking and pending can be used with the queue
  *
  * ss.paused isn't enough with queue processing so use a property
  *
  * TO DO
  *
  *  Cooldowns
+ *  read numbers option
  *  POSSIBLE - follower only
+ *  FILTER OUT ICONS
  *
- *  Speecher.ready() returns promise, true when good, false when bad
+ *  If it starts with ! but isn't a command maybe don't read it out
+ *
+ *  https://github.com/jankapunkt/easy-speech/blob/master/API.md#module_EasySpeech
+ *  Defaults https://github.com/jankapunkt/easy-speech/blob/master/API.md#module_EasySpeech--module.exports..EasySpeech.defaults
+ *
+ * EasySpeech.status() returns a shallow copy has SpeechSynthesis
+ * EasySpeech.detect() returns a shallow copy has SpeechSynthesis
  *
  */
 "use strict"
 
     // THIS IS A MODULE - no need to hide anything
 
-//import EasySpeech from "./easyspeech.module.js";
+import EasySpeech from "./easyspeech.module.js";
 
 //const TT_MUTED_MINS_MAX = 300;
     // regex's to match the input
 
-TMIConfig.TTSVars = {   // more props added from forms
+TMIConfig.TTSVars = {
     cooldownUsers: new Set(),
 
     cooldownGlobalActive: false,
@@ -60,13 +68,95 @@ TMIConfig.TTSVars = {   // more props added from forms
     sayCmds: {}
 }
 
+class Speecher {
+	speechQueue = [];
+//	isSpeaking = false;
+    isPaused = false;
+
+	stop() {
+		//this.isSpeaking = false;
+		this.stopNow = true;
+		EasySpeech.pause();
+	}
+
+	pause() {
+		//this.stopNow = true;
+        this.isPaused = true;
+		EasySpeech.pause();
+	}
+
+	resume() {
+		//this.stopNow = false;
+        this.isPaused = false;
+		EasySpeech.resume();
+		this.sayQueueProcess();
+	}
+
+    cancel() {
+        EasySpeech.cancel();
+    }
+
+    reset() {
+        EasySpeech.reset();
+    }
+
+    clear() {
+        this.speechQueue = [];
+    }
+
+		// pack = {text, pitch, rate, voice}
+
+	say(pack)
+	{
+		this.stopNow = false;
+		this.speechQueue.push(pack);
+
+		console.log("Speech Queue", this.speechQueue.length);
+		//console.log("ss", TTSVars.ss);
+		//if (!this.isSpeaking)
+		if (!TTSVars.ss.speaking || this.isPaused)   // should probably check paused
+            this.sayQueueProcess();
+	}
+
+	sayQueueProcess() {
+		//if (this.isSpeaking) {            //console.log("NO SPEEK - A ALREADY SPEAK");
+        if ( TTSVars.ss.speaking || this.isPaused ) {
+            return;
+        }
+
+		if (this.stopNow) {
+			EasySpeech.cancel();
+			//this.isSpeaking = false;
+			return;
+		}
+
+		//this.isSpeaking = true;
+			// oh my god - I thought shift was broken for sooo long
+		let pack = this.speechQueue.shift();
+
+		if ( pack ) {
+			//console.log("USING PACK", pack, "Now Q SIZE", this.speechQueue.length);
+			EasySpeech.speak(pack)
+                .then( () => {
+                    //this.isSpeaking = false;
+                    this.sayQueueProcess()
+                } )
+                .catch(e => {   // no page interaction - clear isSpeaking
+                    //this.isSpeaking = false;
+                });
+		}
+		else {
+			//this.isSpeaking = false;
+		}
+	}
+}
+
+
 
 try {   // scope starts ( in case I can demodularise this )
     var TTSVars = TMIConfig.TTSVars;
     const TTS_TEST_TEXT = "Testing the voice one two three";
-    const speech = new Speecher();
-    speech.on({error: speek_error});
-    TTSVars.speecher = speech;
+    const speech = new Speecher;
 
     let TTS_EVENTS = [
         {selector: '#saycmds [id^="saycmd-"], #saycmds input[type="range"], #saycmds select',
@@ -75,27 +165,40 @@ try {   // scope starts ( in case I can demodularise this )
         {selector: '#saycmds button[data-index]', event: 'click', function: test_voice_onclick, params: {}},
         {selector: 'input[type="range"]', event: 'input', function: slider_oninput, params: {}},
 
-        {selector: '#enablespeech', event: 'change', function: speech_enabled_checkbox_onchange, params: {}},
+        {selector: '#enablespeech', event: 'change', function: speech_enabled_onchange, params: {}},
 
-        {selector: '#pausespeech', event: 'change', function: speech_pause_checkbox_onchange, params: {}},
+        {selector: '#pausespeech', event: 'change', function: speech_pause_onchange, params: {}},
     ];
 
-    async function init_speecher() {
+    async function init_easyspeech() {
         log("Initialising Speech engine");
 
-        let ready = await speech.ready();
-
-        if (ready)
-        log("Engine Initialised");
-        else {
-            log("Speech Engine Fail")
-            return false;
-        }
+        let caps = EasySpeech.detect();
 
         TTSVars.ss = speechSynthesis;
-        TTSVars.voices = speech.getVoices();
 
-        return ready;
+        console.log("EasySpeech.detect()", caps);
+        log("Speech Synthesis " + caps['speechSynthesis'].toString())
+
+        let res = await EasySpeech.init();
+
+        log("Engine Initialised");
+
+        console.log("Status", EasySpeech.status()); // has speechSynthesis
+        console.log("easy speech", EasySpeech);
+
+        // boundary end error mark pause resume start - see docs
+        EasySpeech.on({'voiceschanged': () => o('VOICES CHANGE WELL THIS WORKS')})// no, sadly, but it should but I could just attach to the system speech
+        EasySpeech.on({'error': speek_error});// this is legit
+        //EasySpeech.on({'start': e => console.log('start', e.target.text)})
+        //EasySpeech.on({'boundary': () => console.log('boundary WELL THIS WORKS')})
+
+        //TTSVars.voices = EasySpeech.voices(); NO, you can't be trusted
+        TTSVars.voices = speechSynthesis.getVoices();
+
+        EasySpeech.defaults({rate: 1, error: (e) => console.log("EASYSPEECH ERROR DEFAULT", e)});
+
+        return res;
     };
 
         // on window load
@@ -105,20 +208,26 @@ try {   // scope starts ( in case I can demodularise this )
 
             // can we set an onvoices change?
 
-        init_speecher().then(() => {
+        init_easyspeech().then(() => {
             // set up the voice selects
             create_speech_selects_options();  // must be done BEFORE init common
             // channels populates form fields from url string
 
-            speechSynthesis.addEventListener('voiceschanged', () => {
-                console.log(g("VOICES HAVE CHANGED ss version:"), speechSynthesis.getVoices());
-                let voices = speechSynthesis.getVoices();
-                if (voices.length !== TTSVars.voices.length) {  // have to do it this way because of EDGE firing onchange events
-                    TTSVars.voices = voices;
-                    console.log("NUMBER OF VOICES NOW : ", TTSVars.voices.length);
+            let caps = EasySpeech.detect();
+
+            if ( caps.onvoiceschanged ) {
+                speechSynthesis.addEventListener('voiceschanged', () => {
+                    console.log(g("VOICES HAVE CHANGED ss version:"), speechSynthesis.getVoices());
+                    console.log( "ES version", EasySpeech.voices() );
+                    console.log( speechSynthesis  );
+                    console.log( EasySpeech );
+
+                    //TTSVars.voices = EasySpeech.voices();
+                    TTSVars.voices = speechSynthesis.getVoices();
+                    console.log("NUMBER OF VOICES: ", TTSVars.voices.length);
                     create_speech_selects_options();
-                }
-            })
+                })
+            }
 
 
             TT.forms_init_common();
@@ -171,11 +280,6 @@ try {   // scope starts ( in case I can demodularise this )
 
             lastMsgId = userstate['id'];    // unique to every message
 
-            if (TTSVars.chatQueueLimit && speech.speechQueue.length >= TTSVars.chatQueueLimit) {
-                // emit(queuetoolong)
-                return;
-            }
-
                 // are they permitted ?
             if (! TT.user_permitted( userstate )) { // console.log("USER NOT PERMITTED", userstate['username']);
                 return false;
@@ -200,7 +304,7 @@ try {   // scope starts ( in case I can demodularise this )
                         }
 
                         if (TTSVars.chatReadAll) {
-                            let params = get_voice_settings(1);
+                            let params = get_speech_vars(1);
 
                             isSayCmd = { // command rest params (voice)
                                 command: 'all-chat',
@@ -216,11 +320,19 @@ try {   // scope starts ( in case I can demodularise this )
 
                     if (isSayCmd.rest === '') return;
 
+                    let name = userstate['display-name'].replace(/_/g, ' ');
+
+                        // if no digits in username
+                    if ( !TTSVars.chatReadNameDigits ) {
+                            name = name.replace(/\d/g, ' ')
+                    }
                         // this actually writes to the global params
-                    isSayCmd.params.text = add_speech_before_after(isSayCmd.rest, userstate, channel);
-                    //isSayCmd.rest + ' said ' + name;// or username;
+                    isSayCmd.params.text = isSayCmd.rest + ' said ' + name;// or username;
 
                     speech.say(isSayCmd.params);
+                    /* EasySpeech.speak()
+                    .then(e => console.log("finished", isSpeak.params))
+                    .catch(e => e);   // let the on handler deal with it */
 
 
                     break;
@@ -228,27 +340,6 @@ try {   // scope starts ( in case I can demodularise this )
                     break;
             }
         });
-    }
-
-        // adds tagged strings before and after the message
-
-    function add_speech_before_after(msg, state, channel) {
-        if (TTSVars.chatSayBefore || TTSVars.chatSayAfter) {
-            let name = state['display-name'].replace(/_/g, ' ');
-
-            // if no digits in username
-            if ( !TTSVars.chatReadNameDigits ) {
-                name = name.replace(/\d/g, ' ')
-            }
-
-            channel = channel.slice(1); // get rid of #
-
-            let sBefore = TTSVars.chatSayBefore.replace(/{channel}/ig, channel).replace(/{user}/ig, name);
-            let sAfter = TTSVars.chatSayAfter.replace(/{channel}/ig, channel).replace(/{user}/ig, name);
-            msg = sBefore + ' ' + msg + ' ' + sAfter;
-        }
-
-        return msg;
     }
 
 
@@ -368,7 +459,7 @@ try {   // scope starts ( in case I can demodularise this )
             if ( cmd[0] !== '!') cmd = "!" + cmd;
             s.value = cmd;
 
-            commands[cmd] = get_voice_settings(index);
+            commands[cmd] = get_speech_vars(index);
         });
 
         console.log("COMMANDS AFTER", commands);
@@ -388,16 +479,15 @@ try {   // scope starts ( in case I can demodularise this )
         let voice = TTSVars.voices[vIdx];
         console.log("voice index", vIdx);
 
-        let params = get_voice_settings(index);
+        let params = get_speech_vars(index);
         params.text = TTS_TEST_TEXT;
-        params.immediate = true;
 
-        speech.speak(params);
+        EasySpeech.speak(params);
     }
 
         // grab parameters from the speech setting 1, not zero based
 
-    function get_voice_settings(index) {
+    function get_speech_vars(index) {
         let rate = +gid('rateval-'+index).value;
         let pitch = +gid('pitchval-'+index).value;
         let vIdx = +gid('voiceid-'+index).value;
@@ -437,12 +527,12 @@ try {   // scope starts ( in case I can demodularise this )
     }
 
     function speech_test () {
-        speech.speak({text: "Testing the speech engine - beep boop beep", immediate: true});
+        EasySpeech.speak({text: "Testing the speech engine - beep boop beep"});
     }
 
         // clears the speech queue
 
-    function speech_pause_checkbox_onchange (e) {
+    function speech_pause_onchange (e) {
         let t = e.target;
         if ( t.checked  ) {
             speech.pause();
@@ -452,7 +542,7 @@ try {   // scope starts ( in case I can demodularise this )
         }
     }
 
-    function speech_enabled_checkbox_onchange (e) {
+    function speech_enabled_onchange (e) {
         let t = e.target;
         if ( t.checked === false ) {
             //speech.isSpeaking = false;

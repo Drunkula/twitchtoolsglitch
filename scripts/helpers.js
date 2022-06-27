@@ -1,3 +1,8 @@
+
+
+// does an object have the property
+const hasProperty = (target = {}, prop) => prop in target || Object.hasOwn(target, prop) || !!target[prop]
+
 // helpers.js https://www.youtube.com/watch?v=EoUIS2PxKCs&t=107s
 
 function qsa(query, el=document) {

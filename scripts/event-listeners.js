@@ -44,6 +44,10 @@ const ONCHANGE_URL_UPDATE_DELAY_MS = 100;
 			let fs = qsa(ev.selector);
 			for (const f of fs) {
 				f.addEventListener(ev.event, ev.function);
+					// array or string then dispatch those events
+				if (ev.triggers) {
+
+				}
 
 				if (ev.event === 'change') {
 					f.dispatchEvent(chEv);

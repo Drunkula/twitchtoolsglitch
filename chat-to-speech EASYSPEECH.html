@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Speak My Chat : Twitch Tools</title>
+    <title>Twitch Tools</title>
     <meta name="description">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
     <script defer="" src="https://use.fontawesome.com/releases/v6.1.1/js/all.js"></script>
@@ -55,8 +55,7 @@
       <script src="/scripts/tmi-code-common.js" defer></script>
       <script src="/scripts/event-listeners.js" defer></script>
       <script src="/scripts/form-fields-save-restore.js" defer></script>
-      <script src="/scripts/Speecher.class.js" defer></script>
-      <script src="/scripts/chat-to-speech.js" defer></script>
+      <script src="/scripts/chat-to-speech.js" type="module"></script>
       <div id="flasher">
         <p>CLICK<br>THE<br>PAGE!</p>
       </div>
@@ -190,15 +189,16 @@
             <button class="delete" data-target="#mbnc"></button>
           </div>
           <div class="message-body">
-            <p>Create commands like <b>!say</b> for your chat to have their message read out.</p>
+            <p>Create commands like <b>!say</b> for your chat to have their message read out with the settings next to it.</p>
             <p>This can let you do funny things like !whinge if you choose the right voice with the right pitch and rate settings.</p>
-            <p><strong>Spy</strong> on channels while you're doing the washing up... or wearing a VR headset</p>
-            <p>Limit commands to MODS, VIPS and named users.</p>
+            <p>Or use this <b>to spy</b> on channels when you're doing the washing up... or wearing a VR headset</p>
+            <p>Commands can be restricted to MODS and VIPS and named users.</p>
             <p>&nbsp;</p>
-            <div class="block"><strong>Tip: All Chat</strong> Set the cooldowns to zero, deselect the permissions and just add chatters names who you like to the allow named field.</div>
+            <p><b>TIP:</b> If you use the "all chat" option you could deselect everyone and add the chatters names who you like to the allow named field.</p>
+            <p>&nbsp;</p>
             <p><b>Different browsers</b> have different sets of voices.  Desktop versions of Chrome has lots of great voices and Edge has absolutely tons</p>
             <p>&nbsp;</p>
-            <p>Note: Disabling and enabling the speech will clear the speech queue if there are any lined up.</p>
+            <p>Disabling and enabling the speech will clear the speech queue if there are any lined up.</p>
             <p>&nbsp;</p>
             <p><strong>Config</strong>
               <button class="button is-small is-primary modal-trigger p-1" data-target="configModal"><i class="fas fa-gear"></i></button> :
@@ -206,16 +206,13 @@
             <p><strong>All Chat:</strong> All chat will be read out that matches the permissions.  First voice settings will be used.</p>
             <p><strong>Permissions:</strong> limit to mods, vips, everyone and/or named users you trust</p>
             <p><strong>Always allowed:</strong> no matter what.  You like these people.</p>
-            <p><strong>Ignore:</strong> always ignored.  <em>Get outta here wid ya garbage</em> as <b><a href="https://www.twitch.tv/sockcop" target="_blank">Sockcop</a></b> would say.  Good time to hide chatbots.</p>
+            <p><strong>Ignore:</strong> always ignored.  <em>Get outta here wid ya garbage</em> as <b><a href="https://www.twitch.tv/sockcop" target="_blank">Sockcop</a></b> would say.</p>
             <p><strong>Emotes:</strong> can be removed from the text (recommended).</p>
             <p><strong>Digits in names:</strong> can be removed.</p>
-            <p><strong>!Commands:</strong> can be ignored - no more !giveaway x 1000 or !roflcopter annoyances</p>
-            <p><strong>Cooldowns: (implementing soon)</strong> global and user cooldowns will stop you being spammed.  They still apply in read All Chat mode.</p>
-            <p><strong>Queue limit</strong> very chatty channels might fill the speech queue up so you'll never reach the end, set a sensible limit.</p>
-            <p><strong>Say before/after</strong> tags {user} and {channel} let's you add things like <em>{user} says</em> before or <em>says {user}</em> after messages.</p>
-            <p>If you're monitoring multiple channels then <em>{user} on channel {channel} says</em> might be useful.</p>
-            <div class="block"></div>
-            <div class="block"><strong>IMPORTANT:</strong> Speech isn't allowed on many browsers unless you click page once.  You'll get a notice.</div>
+            <p><strong>!Commands:</strong> can be ignored - no more !giveaway x 1000 or !roflcopter type</p>
+            <p><strong>Cooldowns: (implementing soon)</strong></p>
+            <div class="block">global and user cooldowns will stop you being spammed.</div>
+            <div class="block"><strong>NOTE:</strong> Speech isn't allowed on many browsers unless you click inside the page.  You'll be warned if that happens.</div>
             <div class="block"><strong>Tips:</strong> "Done" on the config page, joining channels and "Get Url" saves values to the current url letting you bookmark the page without having to type in everything again.  You can easily save bookmarks with different settings.</div>
             <div class="field has-addons">
               <div class="control is-expanded">
@@ -230,106 +227,80 @@
         </div>
       </div>
       <div class="modal" id="configModal">
-        <div class="modal-background modal-dismiss"></div>
+        <div class="modal-background"></div>
         <div class="modal-card">
+          <header class="modal-card-head">
+            <p class="modal-card-title">Chat to Speech Config</p>
+            <button class="delete"></button>
+          </header>
           <section class="modal-card-body">
-            <div class="tabs is-fullwidth is-toggle is-toggle-rounded is-small" data-target="#configpanels">
-              <ul>
-                <li class="is-active"><a>Settings 1</a></li>
-                <li><a>Settings 2</a></li>
-              </ul>
-            </div>
-            <div class="block tab-content" id="configpanels">
-              <div class="tab-pane is-active">
-                <div class="field is-grouped-centered is-grouped mb-3">
-                  <div class="control">
-                    <label class="checkbox button is-link is-size-7-mobile is-responsive">
-                      <input class="form-save" type="checkbox" data-tocheckbox="TTSVars.chatReadAll" id="readallchat"> All chat
-                    </label>
-                  </div>
-                  <div class="control">
-                    <label class="checkbox button is-link is-size-7-mobile is-responsive">
-                      <input class="form-save" type="checkbox" data-tocheckbox="TTSVars.chatReadEmotes" id="chatreademotes"> emotes
-                    </label>
-                  </div>
-                  <div class="control">
-                    <label class="checkbox button is-link is-size-7-mobile is-responsive">
-                      <input class="form-save" type="checkbox" data-tocheckbox="TTSVars.chatReadNameDigits" id="chatreadnamedigits"> name digits
-                    </label>
-                  </div>
-                  <div class="control">
-                    <label class="checkbox button is-link is-size-7-mobile is-responsive">
-                      <input class="form-save" type="checkbox" data-tocheckbox="TTSVars.chatReadOtherCommands" id="chatreadothercommands"> !cmds
-                    </label>
-                  </div>
-                </div>
-                <label class="label has-text-centered">Allow speech from:</label>
-                <div class="field is-grouped-centered is-grouped permissions">
-                  <div class="control">
-                    <label class="checkbox button is-info">
-                      <input class="form-save" type="checkbox" id="everyone"> everyone
-                    </label>
-                  </div>
-                  <div class="control">
-                    <label class="checkbox button is-info">
-                      <input class="form-save" type="checkbox" checked id="mods"> mods
-                    </label>
-                  </div>
-                  <div class="control">
-                    <label class="checkbox button is-info">
-                      <input class="form-save" type="checkbox" checked id="vips"> vips
-                    </label>
-                  </div>
-                </div>
-                <label class="label">Users always allowed (even if not mods)</label>
-                <div class="field">
-                  <div class="control">
-                    <input class="input form-save form-filter-spaces-to-commas" type="text" name="allownamed" id="allownamed" placeholder="allow named users" data-toarraylc="perms.allowNamed">
-                  </div>
-                </div>
-                <label class="label">Ignored users</label>
-                <div class="field">
-                  <div class="control">
-                    <input class="input form-save form-filter-spaces-to-commas" type="text" name="ignoredusers" id="ignoredusers" placeholder="ignored users" data-toarraylc="perms.ignoredUsers">
-                  </div>
-                </div>
-                <label class="label">Speech queue limit (0 = unlimited)</label>
-                <div class="field">
-                  <div class="control">
-                    <input class="input number-input-4 form-save" type="number" id="chatqueuelimit" min="0" max="200" value="20" data-toint="TTSVars.chatQueueLimit">
-                  </div>
-                </div>
+            <div class="field is-grouped-centered is-grouped mb-3">
+              <div class="control">
+                <label class="checkbox button is-link is-size-7-mobile is-responsive">
+                  <input class="form-save" type="checkbox" data-tocheckbox="TTSVars.chatReadAll" id="readallchat"> All chat
+                </label>
               </div>
-              <div class="tab-pane">
-                <label class="label">Say before message - tags: {user} {channel}</label>
-                <div class="field">
-                  <div class="control">
-                    <input class="input form-save" type="text" id="saybefore" placeholder="say before e.g {user} say" data-tostr="TTSVars.chatSayBefore" value="{user} says">
-                  </div>
-                </div>
-                <label class="label">Say after message - tags: {user} {channel}</label>
-                <div class="field">
-                  <div class="control">
-                    <input class="input form-save" type="text" id="sayafter" placeholder="say after e.g said {user}" data-tostr="TTSVars.chatSayAfter" value="">
-                  </div>
-                </div>
-                <label class="label">Global cooldown seconds</label>
-                <div class="field">
-                  <div class="control">
-                    <input class="input number-input-5 form-save" type="number" id="globalcooldown" min="0" max="12000" value="10" data-toint="TTSVars.chatCooldownGlobal">
-                  </div>
-                </div>
-                <label class="label">User cooldown seconds</label>
-                <div class="field">
-                  <div class="control">
-                    <input class="input number-input-4 form-save" type="number" id="usercooldown" min="0" max="12000" value="60" data-toint="TTSVars.chatCooldownUser">
-                  </div>
-                </div>
+              <div class="control">
+                <label class="checkbox button is-link is-size-7-mobile is-responsive">
+                  <input class="form-save" type="checkbox" data-tocheckbox="TTSVars.chatReadEmotes" id="chatreademotes"> emotes
+                </label>
+              </div>
+              <div class="control">
+                <label class="checkbox button is-link is-size-7-mobile is-responsive">
+                  <input class="form-save" type="checkbox" data-tocheckbox="TTSVars.chatReadNameDigits" id="chatreadnamedigits"> name digits
+                </label>
+              </div>
+              <div class="control">
+                <label class="checkbox button is-link is-size-7-mobile is-responsive">
+                  <input class="form-save" type="checkbox" data-tocheckbox="TTSVars.chatReadOtherCommands" id="chatreadothercommands"> !cmds
+                </label>
+              </div>
+            </div>
+            <label class="label has-text-centered">Allow speech from:</label>
+            <div class="field is-grouped-centered is-grouped permissions">
+              <div class="control">
+                <label class="checkbox button is-info">
+                  <input class="form-save" type="checkbox" id="everyone"> everyone
+                </label>
+              </div>
+              <div class="control">
+                <label class="checkbox button is-info">
+                  <input class="form-save" type="checkbox" checked id="mods"> mods
+                </label>
+              </div>
+              <div class="control">
+                <label class="checkbox button is-info">
+                  <input class="form-save" type="checkbox" checked id="vips"> vips
+                </label>
+              </div>
+            </div>
+            <label class="label">Users always allowed (even if not mods)</label>
+            <div class="field">
+              <div class="control">
+                <input class="input form-save form-filter-spaces-to-commas" type="text" name="allownamed" id="allownamed" placeholder="allow named users" data-toarraylc="perms.allowNamed">
+              </div>
+            </div>
+            <label class="label">Ignored users</label>
+            <div class="field">
+              <div class="control">
+                <input class="input form-save form-filter-spaces-to-commas" type="text" name="ignoredusers" id="ignoredusers" placeholder="ignored users" data-toarraylc="perms.ignoredUsers">
+              </div>
+            </div>
+            <label class="label">Global cooldown seconds</label>
+            <div class="field">
+              <div class="control">
+                <input class="input number-input-5 form-save" type="number" name="globalcooldown" id="globalcooldown" min="0" max="12000" value="10" data-toint="TTSVars.chatcooldownglobal">
+              </div>
+            </div>
+            <label class="label">User cooldown seconds</label>
+            <div class="field">
+              <div class="control">
+                <input class="input number-input-4 form-save" type="number" name="usercooldown" id="usercooldown" min="0" max="12000" value="60" data-toint="TTSVars.chatcooldownuser">
               </div>
             </div>
           </section>
           <footer class="modal-card-foot">
-            <button class="button modal-dismiss is-success urlpopulate is-responsive">Done</button>
+            <button class="button modal-dismiss is-success urlpopulate">Done</button>
           </footer>
         </div>
         <button class="modal-close is-large">button</button>

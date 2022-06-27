@@ -33,7 +33,7 @@ TT.inputs_to_uri_string = function inputs_to_uri_string(selectors = '.form-save'
 				value = field.checked;
 				break;
 			default:
-				value = field.value;
+				value = field.value.trim();
 				if (field.classList.contains('form-filter-spaces-to-commas')) {
 					value = TT.form_filter_spaces_to_commas(value);
 				}

@@ -6,6 +6,7 @@ https://github.com/tmijs/docs/blob/gh-pages/_posts/v1.4.2/2019-03-03-Functions.m
 */
 	// ******************** TMI Boilerplate ****************** //
 
+{	// SCOPE START
 
 	// TMI options
 const clientOpts = 	{
@@ -22,6 +23,9 @@ const clientOpts = 	{
 
 
 const cclient = new tmi.Client(clientOpts);
+
+globalThis.cclient = cclient;
+
 TMIConfig.tmiConnected = cclient.connect();	// don't join here if you prefill channels in clientOpts
 	// returns promise. cclient.ws.readyState = 1 when connected, ws = null before connection
 
@@ -114,3 +118,5 @@ cclient.on('roomstate', (chan, state) => {
 
 
 console.debug('common tmi end.');
+
+} // SCOPE END
