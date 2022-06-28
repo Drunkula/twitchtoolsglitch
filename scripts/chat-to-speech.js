@@ -26,20 +26,12 @@
  *
  * TO DO
  *
- *  Cooldowns
  *  POSSIBLE - follower only
  *
  *  Speecher.ready() returns promise, true when good, false when bad
  *
  */
 "use strict"
-
-    // THIS IS A MODULE - no need to hide anything
-
-//import EasySpeech from "./easyspeech.module.js";
-
-//const TT_MUTED_MINS_MAX = 300;
-    // regex's to match the input
 
 TMIConfig.TTSVars = {   // more props added from forms
     cooldownUsers: new Set(),
@@ -64,6 +56,8 @@ TMIConfig.TTSVars = {   // more props added from forms
 try {   // scope starts ( in case I can demodularise this )
     var TTSVars = TMIConfig.TTSVars;
     const TTS_TEST_TEXT = "Testing the voice one two three";
+    const cooldowns = new Cooldowns();
+
     const speech = new Speecher();
     speech.on({error: speek_error});
     TTSVars.speecher = speech;
@@ -108,14 +102,12 @@ try {   // scope starts ( in case I can demodularise this )
         init_speecher().then(() => {
             // set up the voice selects
             create_speech_selects_options();  // must be done BEFORE init common
-            // channels populates form fields from url string
 
             speechSynthesis.addEventListener('voiceschanged', () => {
-                console.log(g("VOICES HAVE CHANGED ss version:"), speechSynthesis.getVoices());
                 let voices = speechSynthesis.getVoices();
                 if (voices.length !== TTSVars.voices.length) {  // have to do it this way because of EDGE firing onchange events
+                    console.log(g("VOICES HAVE CHANGED ss version:"), voices, voices.length);
                     TTSVars.voices = voices;
-                    console.log("NUMBER OF VOICES NOW : ", TTSVars.voices.length);
                     create_speech_selects_options();
                 }
             })
@@ -192,25 +184,35 @@ try {   // scope starts ( in case I can demodularise this )
                     }
 
                     let isSayCmd = is_say_command(message);  // returns obj or false
-//                    console.log("is_say_command: ", isSayCmd);
-
+                        // if read all create a fake say command
                     if (!isSayCmd) {
-                        if (! TTSVars.chatReadOtherCommands && '!' === message[0]) {
+                        if ( !TTSVars.chatReadAll || ('!' === message[0]) && TTSVars.chatReadOtherCommands !== true) {
                             return;
                         }
 
-                        if (TTSVars.chatReadAll) {
-                            let params = get_voice_settings(1);
-
-                            isSayCmd = { // command rest params (voice)
-                                command: 'all-chat',
-                                rest: message,  // use first voice by default
-                                params
-                            }
-                        } else {
-                            return;
+                            // create an all-chat say command
+                        isSayCmd = { // command rest params (voice)
+                            command: '!all-chat',
+                            rest: message,  // use first voice by default
+                            params: get_voice_settings(1)
                         }
                     }
+                        // category out a single user by setting similar commands to a single value e.g. !allsaycommands
+                    let coolParms = {
+                        channel, userstate,
+                        globalCooldown: TTSVars.chatCooldownGlobal,
+                        userCooldown: TTSVars.chatCooldownUser,
+                        modCooldown: 5,     // just as a test
+                        command: isSayCmd.command   // set to !userCategoryFake to category out only users
+                    }
+
+                    let oc = cooldowns.cooldown_check(coolParms);
+
+                    if (oc !== false ) {
+                        console.log("ON a cooldown", oc);
+                        return;
+                    }
+                    cooldowns.cooldown_set(coolParms)
 
                         // let's commands still be used
 
@@ -218,10 +220,8 @@ try {   // scope starts ( in case I can demodularise this )
 
                         // this actually writes to the global params
                     isSayCmd.params.text = add_speech_before_after(isSayCmd.rest, userstate, channel);
-                    //isSayCmd.rest + ' said ' + name;// or username;
 
                     speech.say(isSayCmd.params);
-
 
                     break;
                 default: // pfff ?
@@ -267,7 +267,6 @@ try {   // scope starts ( in case I can demodularise this )
         if (state["emotes-raw"] === null) return msg;
 
         let pos, posns = [...state["emotes-raw"].matchAll(EMOTE_PATTERN)];
-
             //let orig = msg; console.log("emotes", state["emotes-raw"], state.emotes, "I found", posns.length);
             // in reverse
         while (pos = posns.pop()) {            //msg = msg.slice(0, p1) + msg.slice(p2 + 1);   // WORKS
@@ -371,7 +370,7 @@ try {   // scope starts ( in case I can demodularise this )
             commands[cmd] = get_voice_settings(index);
         });
 
-        console.log("COMMANDS AFTER", commands);
+        console.log("Commands after update", commands);
 
         TTSVars.sayCmds = commands;
     }
@@ -386,7 +385,6 @@ try {   // scope starts ( in case I can demodularise this )
 
         let vIdx = gid('voiceid-'+index).value;
         let voice = TTSVars.voices[vIdx];
-        console.log("voice index", vIdx);
 
         let params = get_voice_settings(index);
         params.text = TTS_TEST_TEXT;

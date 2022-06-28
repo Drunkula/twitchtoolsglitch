@@ -25,70 +25,114 @@
 		userTimeout
 		modTimeout
  	}
+
+	STRATEGY
+	If it'a category then use global ?
+
+	CATEGORY
+		Sets USER and/or CATEGORY
+
+	GLOBAL but no category - sets for command
+
+
+	// if there's a global underway a user won't be set anyway
+	// if there's a category underway a user won't be set.
+	// so category AND user or GLOBAL and user will be set at the same time
+	// as long as user > global
+
+	// category = global
+
+	// get - check category, check user
+	// if no category command = category
+
+	// so we need a category/command name AND a user one
  */
 
+console.log("Cooldowns included");
 
 
-class Cooldown {
+
+{	// SCOPE
+
+const log = console.log;
+//const log = o => o;
+
+class Cooldowns {
 	cooldowns = new Map();
+		// alway allow broadcaster ?
+	allowBroadcaster = true;	// maybe not so useful for the public
 
 	// set a value in the cooldown table that will automatically destruct after X seconds.
 	// mods don't have cooldowns unless cooldownMod is set in the command
-	// categories block the command again
+	// categories can cause a cooldown on many commands block the command again
 
-	// NEED TO SET FOR A USER / CATEGORY / GLOBAL LEVEL
 	// Do mods obey the global cooldown - hmmm - normal users do
 
-	cmd_cooldown_set(params) {
-		{channel, userstate, command, category, globalCooldown, userCooldown, modCooldown} = params;
-
-		if (!userCooldown && !modCooldown) {
+	cooldown_set(params) {
+		let {channel, userstate, command, category, globalCooldown = 0, userCooldown = 0, modCooldown = 0} = params;
+			// user, mod and global								// can also check if #userstate.username = channel
+		if (!userCooldown && !modCooldown && !globalCooldown || (userstate.badges?.broadcaster && this.allowBroadcaster) ) {
 			return;
 		}
-		// if commands are in a category all the ones in the category get blocked until the cooldown is set
-		var cdIdx, cooldown, cPack = {};
-
-		// if there's only a mod cooldown what to do?
-		if (userstate.mod) {
-			if (!(cooldown = modCooldown)) {
-				return false;
-			}
-			else {	// they won't use the cooldown
-
-			}
-		} else if (userCooldown) {
-			cooldown = userCooldown;
-		}
-		else {
-			return false;
+			// if commands are in a category all the ones in the category get blocked until the cooldown is set
+			// should a mod set a cooldown on the category if they have no cooldown ?  Let's say no
+			// are they a mod ?
+		if ( userstate.mod && modCooldown )
+		{		// set a mod cooldown
+			let index = this._cooldown_name_user(params);
+			this._set_cooldown_pack(index, modCooldown);
+			log("\tCOOLDOWN INDEX MOD:", index, `for ${modCooldown}`);
+		} else if ( userCooldown > globalCooldown ) {
+			let index = this._cooldown_name_user(params);
+			this._set_cooldown_pack(index, userCooldown);
+			log("\tCOOLDOWN INDEX STANDARD USER:", index, `for ${userCooldown}`);
 		}
 
-		cdIdx = this._cooldown_name(params)
-			// take the old cooldown and delete its timer
-		if (this.cooldowns.has(cdIdx)) {
-			cPack = this.cooldowns.get(cdIdx);
+		if (globalCooldown) {
+			let index = this._cooldown_name_global(params);
+			log("\tCOOLDOWN INDEX GLOBAL:", index, `for ${globalCooldown}`);
+			this._set_cooldown_pack(index, globalCooldown);
+		}
+	}
+
+	_set_cooldown_pack(index, cooldown) {
+		let cPack = {};
+
+		if (this.cooldowns.has(index)) {
+			cPack = this.cooldowns.get(index);
 			clearTimeout(cPack.timeout);
 		}
 
 		cPack.timeSet = Date.now();
 		cPack.seconds = cooldown;
-		cPack.timeout = setTimeout( () => {this.cooldowns.delete(cdIdx);}, cooldown * 1000);
+		cPack.timeout = setTimeout( () => {this.cooldowns.delete(index); log("Deleted", index);}, cooldown * 1000);
 
-		this.cooldowns.set(cdIdx, cPack)
-
-		return cPack;
+		this.cooldowns.set(index, cPack)
 	}
 
-		// returns time left on cooldown in ms
+		// returns time left on cooldown in ms for user and global
 
-	//cooldown_check(channel, cmd, comPack, user) {
 	cooldown_check(params) {
-		var cdIdx = this._cooldown_name(params)
+		var cdIdxU = this._cooldown_name_user(params)
+		let found = false;
+		let ret = {global: false, user: false}
 
-		if (this.cooldowns.has(cdIdx)) {
-			let cd = this.cooldowns.get(cdIdx);
-			return cd.seconds * 1000 - Date.now() + cd.timeSet;
+		if (this.cooldowns.has(cdIdxU)) {
+			let cd = this.cooldowns.get(cdIdxU);
+			ret.user = cd.seconds * 1000 - Date.now() + cd.timeSet;
+			ret.userIndex = cdIdxU;
+			found = true;
 		}
+
+		var cdIdxG = this._cooldown_name_global(params)
+		if (this.cooldowns.has(cdIdxG)) {
+			let cd = this.cooldowns.get(cdIdxG);
+			ret.global =  cd.seconds * 1000 - Date.now() + cd.timeSet;
+			ret.globalIndex = cdIdxG;
+			found = true;
+		}
+
+		if (found) return ret;
 
 		return false;
 	}
@@ -96,15 +140,17 @@ class Cooldown {
 		// generate the cooldown name separators avoid clash with user names
 		// I need a remove cooldown
 
-	_cooldown_name({channel, command, category, userstate}) {
-		var cdIdx;
+	_cooldown_name_user({channel, command, category, userstate}) {
+		var cdIdx = channel;
 
 		if (category)
-			cdIdx = channel + '#' + category;
+			cdIdx += '#' + category;
 		else {
-			cdIdx = channel + cmd + '|' + userstate.username;
+			cdIdx += command;
 		}
-			// wondering if I should set up a different one for mods - yes I will
+
+		cdIdx += '|' + userstate.username;
+			// wondering if I should set up a different one for mods - yes I will even though it won't matter
 		if (userstate.mod) {
 			cdIdx += ':mod';
 		}
@@ -112,4 +158,27 @@ class Cooldown {
 		return cdIdx;
 	}
 
+		//	global for the command / category
+
+	_cooldown_name_global({channel, command, category, userstate}) {
+		let cdIdxC;
+			// use category OR
+		if (category)
+			cdIdxC = channel + '#' + category;
+		else if (command) {
+			cdIdxC = channel + command + '|' + "Global";
+		}
+		else {
+			log("Error: GLOBAL COOLDOWN NEEDS CATEGORY OR COMMAND");
+			throw new Error("Global cooldown needs a category or command")
+			return false;
+		}
+			// wondering if I should set up a different one for mods - yes I will
+
+		return cdIdxC;
+	}
 }
+
+globalThis.Cooldowns = Cooldowns;
+
+}	// END scope
