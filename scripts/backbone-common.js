@@ -104,6 +104,26 @@ TT.allow_named_init_defaults = function allow_named_init_defaults() {
 	aNamed.value = TMI_DEFAULT_ALLOW_NAMED.join(' ');
 }
 
+TT.ignored_users_add = function(user) {
+	user = user.toString().trim().toLowerCase();
+	TMIConfig.perms.ignoredUsers.push(user);
+	TMIConfig.perms.ignoredUsers = [...new Set(TMIConfig.perms.ignoredUsers)];
+	gid('ignoredusers').value = TMIConfig.perms.ignoredUsers.join(' ');
+	TT.url_populate();
+}
+
+TT.ignored_users_remove = function(user) {
+	user = user.toString().trim().toLowerCase();
+	//TMIConfig.perms.ignoredUsers.push(user);
+	let uset = new Set(TMIConfig.perms.ignoredUsers);
+	uset.delete(user);
+	TMIConfig.perms.ignoredUsers = [...uset];
+	gid('ignoredusers').value = TMIConfig.perms.ignoredUsers.join(' ');
+	TT.url_populate();
+}
+
+
+
 	// allow named input field changes and updates permissions
 	// set events for permission checkboxes everyone, mods, vips (class)
 TT.init_permission_checkboxes = function init_permission_checkboxes() {
@@ -155,7 +175,7 @@ TT.user_permitted = function user_permitted(user) {
   * @returns
   */
 
-  function o(str, clearIt, after="<br/>", divId = 'mainoutput') {
+function o(str, clearIt, after="<br/>", divId = 'mainoutput') {
 	if (clearIt)
 		document.getElementById(divId).innerHTML = '';
 
