@@ -271,3 +271,50 @@ html {
 	  background: rgb(226, 90, 0);
 	}
   }
+
+
+  /*  TTS Speech Queue */
+
+
+.speechQRow {
+	display: flex;
+	flex-wrap: nowrap;
+	justify-content: space-between;
+
+	padding-bottom: 3px;
+	margin-bottom: 4px;
+
+	align-items: center;
+
+	border-bottom: 1px solid gray;
+}
+
+.speechQUser {
+	font-size: 0.8em;
+	font-weight: bold;
+	color:rgb(0, 14, 207)
+}
+
+.speechQButtons {
+	white-space: nowrap;
+}
+
+.speechQText {
+	padding: 0 8px;
+	width: 100%;
+}
+
+@media only screen and (max-width: 600px) {
+	.speechQRow {
+		flex-wrap: wrap;
+	}
+
+	.speechQButtons {
+		align-self: flex-end;
+	}
+
+	.speechQText {
+		order: 1;	/* standard is 0 so pushes right */
+		padding: 0;
+	}
+}

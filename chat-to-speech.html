@@ -58,133 +58,133 @@
       <script src="/scripts/Speecher.class.js" defer></script>
       <script src="/scripts/Cooldowns.class.js" defer></script>
       <script src="/scripts/chat-to-speech.js" defer></script>
+      <script src="/scripts/chat-to-speech-queue.js" defer></script>
       <div id="flasher">
         <p>CLICK<br>THE<br>PAGE!</p>
       </div>
-      <div class="notification is-info not-mobile-view" id="ncnoti">Speech from CHAT
-        <button class="delete" data-target="#ncnoti"></button>
-      </div>
-      <div class="columns is-flex-direction-row-reverse">
-        <div class="column">
-          <div class="box controls">
-            <form class="not-mobile-view mb-2" id="mainform">
-              <label class="label is-hidden-mobile">Channels</label>
-              <div class="field has-addons not-mobile-view">
-                <div class="control is-expanded">
-                  <input class="input is-fullwidth form-save form-filter-spaces-to-commas" id="channels" type="text" size="50" placeholder="Channel names space or comma separated">
+      <!-- .notification.is-info.not-mobile-view#ncnoti Speech from CHAT-->
+      <!-- button.delete(data-target="#ncnoti")//- mobile have controls top
+      -->
+      <div class="box controls">
+        <form class="not-mobile-view mb-2" id="mainform">
+          <label class="label is-hidden-mobile">Channels</label>
+          <div class="field has-addons not-mobile-view">
+            <div class="control is-expanded">
+              <input class="input is-fullwidth form-save form-filter-spaces-to-commas" id="channels" type="text" size="50" placeholder="Channel names space or comma separated">
+            </div>
+            <div class="control">
+              <button class="button is-link urlpopulate" id="join">Join</button>
+            </div>
+          </div>
+        </form>
+        <div class="field is-grouped is-grouped-centered mb-0">
+          <div class="control">
+            <label class="checkbox button is-link is-size-7-mobile is-small">
+              <input type="checkbox" checked data-tocheckbox="TTSVars.chatEnabled" id="enablespeech"> enabled
+            </label>
+          </div>
+          <div class="control">
+            <label class="checkbox button is-link is-size-7-mobile is-small">
+              <input type="checkbox" data-tocheckbox="TTSVars.chatPaused" id="pausespeech"> pause
+            </label>
+          </div>
+          <div class="control">
+            <button class="button is-small is-primary mobile-view-btn">Mini View</button>
+          </div>
+          <!-- .control-->
+          <!-- 	button.button.is-small.is-warning.cooldown-set(data-add="clear") Clear-->
+          <div class="control">
+            <button class="button is-small is-primary modal-trigger" data-target="configModal"><i class="fas fa-gear"></i></button>
+          </div>
+        </div>
+        <div class="field is-grouped-centered is-grouped"></div>
+        <div class="not-mobile-view" id="saycmds">
+          <p>Speech Commands</p>
+          <div class="columns is-vcentered">
+            <div class="column">
+              <div class="control">
+                <input class="input is-small form-save" type="text" id="saycmd-1" name="saycmd-1-name" placeholder="saycmd-1 voice command">
+              </div>
+              <div class="control">
+                <div class="select is-small">
+                  <select class="form-save" id="voiceid-1">
+                    <option value="choose voice">choose voice 1</option>
+                  </select>
                 </div>
-                <div class="control">
-                  <button class="button is-link urlpopulate" id="join">Join</button>
-                </div>
-              </div>
-            </form>
-            <div class="field is-grouped-centered is-grouped">
-              <div class="control">
-                <label class="checkbox button is-link is-size-7-mobile is-small">
-                  <input type="checkbox" checked data-tocheckbox="TTSVars.chatEnabled" id="enablespeech"> enabled
-                </label>
-              </div>
-              <div class="control">
-                <label class="checkbox button is-link is-size-7-mobile is-small">
-                  <input type="checkbox" data-tocheckbox="TTSVars.chatPaused" id="pausespeech"> pause
-                </label>
-              </div>
-              <div class="control">
-                <button class="button is-small is-primary mobile-view-btn">Mini View</button>
-              </div>
-              <!-- .control-->
-              <!-- 	button.button.is-small.is-warning.cooldown-set(data-add="clear") Clear-->
-              <div class="control">
-                <button class="button is-small is-primary modal-trigger" data-target="configModal"><i class="fas fa-gear"></i></button>
               </div>
             </div>
-            <div class="field is-grouped-centered is-grouped"></div>
-            <div class="not-mobile-view" id="saycmds">
-              <p>fake speech command here</p>
-              <div class="columns is-vcentered">
-                <div class="column">
-                  <div class="control">
-                    <input class="input is-small form-save" type="text" id="saycmd-1" name="saycmd-1-name" placeholder="saycmd-1 voice command">
-                  </div>
-                  <div class="control">
-                    <div class="select is-small">
-                      <select class="form-save" id="voiceid-1">
-                        <option value="choose voice">choose voice 1</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-                <div class="column py-0">
-                  <div class="field is-horizontal is-vcentered py-0">
-                    <div class="field-body">
-                      <input class="form-save" type="range" id="rateval-1" min="0.5" max="2" step="0.1" value="1.0" data-for="rateout-1">&nbsp;rate&nbsp;<span class="mr-1" id="rateout-1" style="width: 2em;">1</span>
-                      <input class="form-save" type="range" id="pitchval-1" min="0.5" max="2" step="0.1" value="1.0" data-for="pitchout-1">&nbsp;pitch&nbsp;<span id="pitchout-1" style="width: 2em;">1</span>
-                      <button class="tag button is-small is-info ml-1" data-index="1">test</button>
-                    </div>
-                  </div>
+            <div class="column py-0">
+              <div class="field is-horizontal is-vcentered py-0">
+                <div class="field-body">
+                  <input class="form-save" type="range" id="rateval-1" min="0.5" max="2" step="0.1" value="1.0" data-for="rateout-1">&nbsp;rate&nbsp;<span class="mr-1" id="rateout-1" style="width: 2em;">1</span>
+                  <input class="form-save" type="range" id="pitchval-1" min="0.5" max="2" step="0.1" value="1.0" data-for="pitchout-1">&nbsp;pitch&nbsp;<span id="pitchout-1" style="width: 2em;">1</span>
+                  <button class="tag button is-small is-info ml-1" data-index="1">test</button>
                 </div>
               </div>
-              <div class="columns is-vcentered">
-                <div class="column">
-                  <div class="control">
-                    <input class="input is-small form-save" type="text" id="saycmd-2" name="saycmd-2-name" placeholder="saycmd-2 voice command">
-                  </div>
-                  <div class="control">
-                    <div class="select is-small">
-                      <select class="form-save" id="voiceid-2">
-                        <option value="choose voice">choose voice 2</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-                <div class="column py-0">
-                  <div class="field is-horizontal is-vcentered py-0">
-                    <div class="field-body">
-                      <input class="form-save" type="range" id="rateval-2" min="0.5" max="2" step="0.1" value="1.0" data-for="rateout-2">&nbsp;rate&nbsp;<span class="mr-1" id="rateout-2" style="width: 2em;">1</span>
-                      <input class="form-save" type="range" id="pitchval-2" min="0.5" max="2" step="0.1" value="1.0" data-for="pitchout-2">&nbsp;pitch&nbsp;<span id="pitchout-2" style="width: 2em;">1</span>
-                      <button class="tag button is-small is-info ml-1" data-index="2">test</button>
-                    </div>
-                  </div>
+            </div>
+          </div>
+          <div class="columns is-vcentered">
+            <div class="column">
+              <div class="control">
+                <input class="input is-small form-save" type="text" id="saycmd-2" name="saycmd-2-name" placeholder="saycmd-2 voice command">
+              </div>
+              <div class="control">
+                <div class="select is-small">
+                  <select class="form-save" id="voiceid-2">
+                    <option value="choose voice">choose voice 2</option>
+                  </select>
                 </div>
               </div>
-              <div class="columns is-vcentered">
-                <div class="column">
-                  <div class="control">
-                    <input class="input is-small form-save" type="text" id="saycmd-3" name="saycmd-3-name" placeholder="saycmd-3 voice command">
-                  </div>
-                  <div class="control">
-                    <div class="select is-small">
-                      <select class="form-save" id="voiceid-3">
-                        <option value="choose voice">choose voice 3</option>
-                      </select>
-                    </div>
-                  </div>
+            </div>
+            <div class="column py-0">
+              <div class="field is-horizontal is-vcentered py-0">
+                <div class="field-body">
+                  <input class="form-save" type="range" id="rateval-2" min="0.5" max="2" step="0.1" value="1.0" data-for="rateout-2">&nbsp;rate&nbsp;<span class="mr-1" id="rateout-2" style="width: 2em;">1</span>
+                  <input class="form-save" type="range" id="pitchval-2" min="0.5" max="2" step="0.1" value="1.0" data-for="pitchout-2">&nbsp;pitch&nbsp;<span id="pitchout-2" style="width: 2em;">1</span>
+                  <button class="tag button is-small is-info ml-1" data-index="2">test</button>
                 </div>
-                <div class="column py-0">
-                  <div class="field is-horizontal is-vcentered py-0">
-                    <div class="field-body">
-                      <input class="form-save" type="range" id="rateval-3" min="0.5" max="2" step="0.1" value="1.0" data-for="rateout-3">&nbsp;rate&nbsp;<span class="mr-1" id="rateout-3" style="width: 2em;">1</span>
-                      <input class="form-save" type="range" id="pitchval-3" min="0.5" max="2" step="0.1" value="1.0" data-for="pitchout-3">&nbsp;pitch&nbsp;<span id="pitchout-3" style="width: 2em;">1</span>
-                      <button class="tag button is-small is-info ml-1" data-index="3">test</button>
-                    </div>
-                  </div>
+              </div>
+            </div>
+          </div>
+          <div class="columns is-vcentered">
+            <div class="column">
+              <div class="control">
+                <input class="input is-small form-save" type="text" id="saycmd-3" name="saycmd-3-name" placeholder="saycmd-3 voice command">
+              </div>
+              <div class="control">
+                <div class="select is-small">
+                  <select class="form-save" id="voiceid-3">
+                    <option value="choose voice">choose voice 3</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="column py-0">
+              <div class="field is-horizontal is-vcentered py-0">
+                <div class="field-body">
+                  <input class="form-save" type="range" id="rateval-3" min="0.5" max="2" step="0.1" value="1.0" data-for="rateout-3">&nbsp;rate&nbsp;<span class="mr-1" id="rateout-3" style="width: 2em;">1</span>
+                  <input class="form-save" type="range" id="pitchval-3" min="0.5" max="2" step="0.1" value="1.0" data-for="pitchout-3">&nbsp;pitch&nbsp;<span id="pitchout-3" style="width: 2em;">1</span>
+                  <button class="tag button is-small is-info ml-1" data-index="3">test</button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="column">
-          <div class="box" id="mainoutput">Speechy Chatty</div>
-          <div class="not-mobile-view" id="logbox">
-            <div class="box">
-              <button class="delete is-pulled-right" data-target="#logbox"></button>
-              <h3 class="subtitle mb-1" id="loglabel">Log:</h3>
-              <div id="log"></div>
-            </div>
-          </div>
-          <button id="speechtestbtn">Speak</button>
+      </div>
+      <div class="box">
+        <div id="mainoutput"></div>
+        <p>speech queue</p>
+        <div id="speechqueue"></div>
+      </div>
+      <div class="not-mobile-view" id="logbox">
+        <div class="box">
+          <button class="delete is-pulled-right" data-target="#logbox"></button>
+          <h3 class="subtitle mb-1" id="loglabel">Log:</h3>
+          <div id="log"></div>
         </div>
       </div>
+      <button id="speechtestbtn">Speak</button>-
+      <button id="cancelbtn">Cancel</button>
       <div class="container not-mobile-view">
         <div class="message is-link" id="mbnc">
           <div class="message-header">Speechy Tool Tips
@@ -196,6 +196,8 @@
             <p><strong>Spy</strong> on channels while you're doing the washing up... or wearing a VR headset</p>
             <p>Limit commands to MODS, VIPS and named users.</p>
             <p>&nbsp;</p>
+            <div class="block"><strong>IMPORTANT:</strong> Speech isn't allowed on some browsers unless you click page once.  You'll get a notice.</div>
+            <p>The <span class="tag is-primary">Mini View</span> button toggles screen clutter.  Make sure you've joined a channel first.</p>
             <div class="block"><strong>Tip: All Chat</strong> Set the cooldowns to zero, deselect the permissions and just add chatters names who you like to the allow named field.</div>
             <p><b>Different browsers</b> have different sets of voices.  Desktop versions of Chrome has lots of great voices and Edge has absolutely tons</p>
             <p>&nbsp;</p>
@@ -216,7 +218,9 @@
             <p><strong>Say before/after</strong> tags {user} and {channel} let's you add things like <em>{user} says</em> before or <em>says {user}</em> after messages.</p>
             <p>If you're monitoring multiple channels then <em>{user} on channel {channel} says</em> might be useful.</p>
             <div class="block"></div>
-            <div class="block"><strong>IMPORTANT:</strong> Speech isn't allowed on many browsers unless you click page once.  You'll get a notice.</div>
+            <div class="block"><strong>BAN</strong> buttons remove all the user's future messages but will leave the entry on screen in case you need to unban them.  Press del to remove the entry.  If you accidentally ban someone remove their name from ignored users in settings.</div>
+            <div class="block">To keep the banned userlist copy the url to update your link, the the settings will be temporarily saved.</div>
+            <div class="block"></div>
             <div class="block"><strong>Tips:</strong> "Done" on the config page, joining channels and "Get Url" saves values to the current url letting you bookmark the page without having to type in everything again.  You can easily save bookmarks with different settings.</div>
             <div class="field has-addons">
               <div class="control is-expanded">
@@ -226,7 +230,6 @@
                 <button class="button is-danger is-small is-responsive urlpopulate">Get Url</button>
               </div>
             </div>
-            <p>The <span class="tag is-primary">Mini View</span> button toggles a reduced view useful for phones.  Make sure you've joined a channel first.</p>
           </div>
         </div>
       </div>
@@ -238,6 +241,7 @@
               <ul>
                 <li class="is-active"><a>Settings 1</a></li>
                 <li><a>Settings 2</a></li>
+                <li><a>Ignored</a></li>
               </ul>
             </div>
             <div class="block tab-content" id="configpanels">
@@ -288,16 +292,10 @@
                     <input class="input form-save form-filter-spaces-to-commas" type="text" name="allownamed" id="allownamed" placeholder="allow named users" data-toarraylc="perms.allowNamed">
                   </div>
                 </div>
-                <label class="label">Ignored users</label>
-                <div class="field">
-                  <div class="control">
-                    <input class="input form-save form-filter-spaces-to-commas" type="text" name="ignoredusers" id="ignoredusers" placeholder="ignored users" data-toarraylc="perms.ignoredUsers">
-                  </div>
-                </div>
                 <label class="label">Speech queue limit (0 = unlimited)</label>
                 <div class="field">
                   <div class="control">
-                    <input class="input number-input-4 form-save" type="number" id="chatqueuelimit" min="0" max="200" value="20" data-toint="TTSVars.chatQueueLimit">
+                    <input class="input number-input-4 form-save" type="number" id="chatqueuelimit" min="0" max="200" value="10" data-toint="TTSVars.chatQueueLimit">
                   </div>
                 </div>
               </div>
@@ -324,6 +322,14 @@
                 <div class="field">
                   <div class="control">
                     <input class="input number-input-4 form-save" type="number" id="usercooldown" min="0" max="12000" value="60" data-toint="TTSVars.chatCooldownUser">
+                  </div>
+                </div>
+              </div>
+              <div class="tab-pane">
+                <label class="label">Ignored users</label>
+                <div class="field">
+                  <div class="control">
+                    <textarea class="textarea form-save form-filter-spaces-to-commas" id="ignoredusers" rows="10" placeholder="ignored users" data-toarraylc="perms.ignoredUsers"></textarea>
                   </div>
                 </div>
               </div>

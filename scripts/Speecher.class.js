@@ -15,8 +15,14 @@
  * 	TODO
  * 		add events externally
  *
+ * beforespeak
+ * queueing
+ * voiceschanged (if number changes)
+ * ready
  *
+ *	In the pack you can specify {immediate: true} which will cancel, possibly add { saynext: true }
  *
+ * NOTE queueid is added to each utterance
  */
 
 {	// scope
@@ -28,96 +34,123 @@
 
 	const utteranceEvents = ['boundary', 'end', 'error', 'mark', 'pause', 'resume', 'start']
 
-	const SPEECHER_log = function() { console.log(...arguments); }
-	//const SPEECHER_Log = l => l;	// if you don't want logging
+	//const SPEECHER_log = console.log
+	const SPEECHER_log = l => l;	// if you don't want logging
 
 	class Speecher {
 		ss = SS;
-		speechQueue = [];
+
+		speechQueueID = 0;	// incremented every time speak() is called
+		speechQueueMap = new Map();		// IDs lets us easily delete / add
+
+		currentSpeakingID = -1;		// so you can cancel the current uttance
+
 		utterance = new SpeechSynthesisUtterance();
-
-		isSpeaking = false;
-		isPaused = false;
-
 		voices = [];
 		voiceDefault = null;
 
+		#isSpeaking = false;
+		#isPaused = false;
+
 		initialised = false;
+		gotVoicesDebug = [];	// set with a string about how the voices were found
 
-		_ovcInterval = null;	// for using the timer
-		_voicesPromise = null;
-		_readyResolve = null;
-		_readyReject = null;
-		_amIReady = null;
+		#ovcInterval = null;	// for using the timer
+		#voicesPromise = null;
+		#voicesPromiseResolve = null;
 
-		_handlers = [];	// on events
+		#readyResolve = null;
+		#readyReject = null;
+		#amIReady = null;
+			// for adding events listeners
+		#eventDummy = document.createElement('SpeecherEvents');
+		#utterance_handlers = [];	// on events for utterances
+		#cancelNextSpeak = false;// can be changed during a beforespeak event
 
-		gotVoicesDebug = '';	// set with a string about how the voices were found
+
+			// set up
 
 		constructor(args = {maxTimeout: GETVOICES_MAX_TIMEOUT, period: GETVOICES_CHECK_PERIOD}) {
 			this.ss.cancel();	// necessary if paused before reloading page
 			//this.ss.resume();
-			this._amIReady = new Promise( (res, rej) => {
-				this._readyResolve = res;
-				this._readyReject = rej;
+			this.#amIReady = new Promise( (res, rej) => {
+				this.#readyResolve = res;
+				this.#readyReject = rej;
 			});
 
-			this._set_onvoices_changed()
-			this._voicesGetTimer(args)
-				// trigger for browsers that don't fire OVC
-			this.voices = this.ss.getVoices();
+			this.#set_onvoices_changed_handler()
+			this.#voicesInitOnTimer(args)
+
+			// some browsers only trigger voiceschanged on a getVoices()
+/* 			this.voices = this.ss.getVoices();
+			if (this.voices.length) {
+				this.gotVoicesDebug.push(`Constructor ${this.voices.length} voices.`)
+				this._imReady();
+			} */
 		}
 
 			// sets the onvoicechange event handler if present
 
-		_set_onvoices_changed() {
+		#set_onvoices_changed_handler() {
+			let count = 1;
+
 			if (hasProperty(SS, OVC)) {
-				this.ss.addEventListener(OVC, e => {
-					SPEECHER_log("INITIALISED VOICES with OVC ", this.voices.length, `after ${e.timeStamp} milliseconds`);
-					//clearInterval( this.ovcInterval );	// Let it run anyway
-					this.gotVoicesDebug += `voiceschange event initialised after ${e.timeStamp}ms `;
-					this._imReady();
+				this.ss.addEventListener('voiceschanged', e => {
+					let voices = this.ss.getVoices();
+
+					let msg = `voiceschange ${e.timeStamp}ms on event #${count} with ${voices.length} found.`;
+					this.gotVoicesDebug.push(msg)
+
+					if (voices.length !== this.voices.length) {
+						this.voices = voices;
+						this.emit('voiceschanged', { debug: msg });
+					}
+
+					SPEECHER_log("** ONVOICESCHANGED :", msg);
+					//clearInterval( this.ovcInterval );	// Let it run
+					this.#imReady();
+					count++;
 				});
 			}
 		}
 			// currently letting the timer run even after other methods worked
-		_voicesGetTimer(args) {
+		#voicesInitOnTimer(args) {
 			let {maxTimeout, period} = args;
-			let pCheck = 0;
-			let numVoices = 0;
+			let iTmrMSecs = 0;
 
-			this._voicesPromise = new Promise((voicesPromiseResolve, voicesPromiseReject) => {
+			this.#voicesPromise = new Promise((voicesPromiseResolve, voicesPromiseReject) => {
+				this.#voicesPromiseResolve = voicesPromiseResolve;
+
 				const _timerIntervalHandler = () => {
 					let voices = this.ss.getVoices();
 
-					SPEECHER_log("IN INTERVAL TIMER period", pCheck, "voices: ", voices.length);
+					SPEECHER_log("- IN INTERVAL TIMER period", iTmrMSecs, "voices: ", voices.length, "current", this.voices.length);
 						// actually let's keep the timer running
-						// more added?
-					if (voices.length !== numVoices) {
-						//clearInterval(this.ovcInterval);
-						this.gotVoicesDebug += `VoiceGetTimer on period ${pCheck} `;
-						this._imReady();
-						voicesPromiseResolve(this.voices);
-						//this.gvReject("WHAT THE HELL!");
-						numVoices = voices.length;
+					if (voices.length !== this.voices.length) {
+						let msg = `VoiceGetTimer change on period ${iTmrMSecs}ms found ${voices.length}, previously : ${this.voices.length}`
+						SPEECHER_log(msg);
+						this.gotVoicesDebug.push( msg );
+						this.#imReady();
+						this.emit('voiceschanged', { debug: msg });
+						// this.voices = voices;// done in imready
+						//voicesPromiseResolve(this.voices);
 					}
 
-					pCheck += period;
-					if (pCheck > maxTimeout) {
-						clearInterval(this._ovcInterval);
+					iTmrMSecs += period;
+					if (iTmrMSecs > maxTimeout) {
+						clearInterval(this.#ovcInterval);
 
 						if (!this.initialised) {
-							this.gotVoicesDebug = "FAIL: MAXED OUT";
+							this.gotVoicesDebug.push( "FAIL: MAXED OUT" );
 							this.initialised = true;
 							voicesPromiseResolve(false);
-							this._readyResolve(false);
-							//this.readyReject("ERROR: Could not get voices");
-							//voicesPromiseReject( `ERROR: failed to initialise voices after ${maxTimeout}ms` );
+							this.#readyResolve(false);
 						}
 					}
 				}
 
-				this._ovcInterval =  setInterval( _timerIntervalHandler, period);
+				this.#ovcInterval =  setInterval( _timerIntervalHandler, period);
+				_timerIntervalHandler();
 			})
 		}
 
@@ -127,19 +160,22 @@
 			if (this.initialised) {
 				return this.ss.getVoices();	// should I use ss?
 			}
-
-			return this._voicesPromise;
+			return this.#voicesPromise;
 		}
-
+			// returns promise
 		ready() {
-			return this._amIReady;
+			return this.#amIReady;
 		}
 
-		_imReady() {
+		#imReady() {
 			this.voices = this.ss.getVoices();
 			this._find_default_voice();
 			this.initialised = true;
-			this._readyResolve(true);
+
+			this.#readyResolve(true);
+			this.#voicesPromiseResolve(this.voices);
+
+			this.emit('ready');
 		}
 
 			// add event handlers globally
@@ -147,67 +183,81 @@
 		on(evs) {
 			utteranceEvents.forEach( ev => {
 				if (evs[ev] && typeof evs[ev] === 'function') {
-					this._handlers[ev] = evs[ev];
+					this.#utterance_handlers[ev] = evs[ev];
 				}
 			})
 		}
 
 		stop() {
-			this.isSpeaking = false;
+			this.#isSpeaking = false;
 			this.stopNow = true;
-			this.ss.cancel();	// removes queue
+			this.ss.cancel();
 		}
 
 		pause() {			//this.stopNow = true;
 			//this.isSpeaking = false;	// UNSURE
-			this.isPaused = true;
+			this.#isPaused = true;
 			this.ss.pause();
 		}
 
 		resume() {			//this.stopNow = false;
-			SPEECHER_log("BEFORE RESUME", this.ss);
-			//this.ss.pause();
 			this.ss.resume();
-			this.isPaused = false;
+			this.#isPaused = false;
 			this._sayQueueProcess();
 		}
-
+			// cancels the current speaking voice - end event will trigger
 		cancel() {
 			this.ss.cancel();
 		}
-
+			//
 		reset() {
 			this.clear()
+			this.cancel();
 		}
-
+			// empties the queue
 		clear() {
-			this.speechQueue = [];
+			this.speechQueueMap.clear();
 		}
 
-			// pack = {text, pitch, rate, voice}
+			// pack = {text, pitch, rate, voice, volume}, string or utterance
+			// Returns ID of speech queue entry
 
 		speak(pack)
 		{
 			this.stopNow = false;
 
-			if (pack.immediate) {	// push to the front of the queue
-				this.speechQueue.unshift(pack);
-				this.ss.cancel();	// totally worth it.
-			} else {
-				this.speechQueue.push(pack);
+				// if it's immediate put an earlier ID into the queue
+			this.speechQueueID++;
+
+				// immediate puts to the front of the map
+
+			if (pack.immediate) {
+				this.ss.cancel();	// stop the current voice
+				pack.saynext = true;
 			}
 
-			SPEECHER_log("Speech Queue", this.speechQueue.length);
-			this._sayQueueProcess(pack.immediate);
-		}
+			if (pack.saynext) {
+				this.speechQueueMap = new Map( [ [this.speechQueueID, pack], ...this.speechQueueMap ] );
 
+			} else {
+				this.speechQueueMap.set(this.speechQueueID, pack);
+			}
+
+			SPEECHER_log("Speech Queue", this.speechQueueMap.size);
+			this._sayQueueProcess(pack.immediate);
+
+			return this.speechQueueID;
+		}
+			// alias
 		say(pack) {
 			return this.speak(pack);
 		}
-
+			// test SpeechSynthesis voice (EasySpeech method)
 		_is_voice(v) {
 			return v && v.lang && v.name && v.voiceURI;
 		}
+
+			// returns filtered voice, pitch, volume, rate and utterance handlers
 
 		_validate_params(pObj) {		//_validate_params({pitch, rate, volume, voice, ...handlers}) {
 			let filtered = { handlers: {} };
@@ -231,7 +281,7 @@
 					}
 				}
 			}
-
+				// makes sure handlers are functions
 			for (const uev of utteranceEvents) {
 				if (uev in pObj && typeof pObj[uev] === 'function') {
 					filtered.handlers[uev] = pObj[uev];
@@ -243,39 +293,67 @@
 
 			// immediate ignores speaking and paused and throws it into the queue
 
-		_sayQueueProcess(immediate = false) {
-			if ( !immediate && (this.ss.speaking || this.isPaused || this.isSpeaking) ) {
-				//SPEECHER_log("Speaking, returning");
+		async _sayQueueProcess(immediate = false) {
+			if ( !immediate && (this.ss.speaking || this.#isPaused || this.#isSpeaking) ) {
+				SPEECHER_log("Speaking, returning");
 				return;
 			}
 
 			if (this.stopNow) {
 				this.ss.cancel();
-				this.isSpeaking = false;
+				this.#isSpeaking = false;
 				return;
 			}
 
-			// oh my god - I thought shift was broken for sooo long
-			let pack = this.speechQueue.shift();
+			// the actual queue and ID queue now consist of two parts and the matching pack may have been
+			// deleted from the the map
+			/*
+			if (!this.speechQueueIDs.length) {
+				this.speechQueueMap.clear();
+				return;
+			} */
 
-			if (pack) {
-				this._process_utterance(pack);
+			this.#isSpeaking = false;
+				// I hate doing a while
+			for ( const [id, pack] of this.speechQueueMap.entries() ) {
+				if (!pack) {
+					continue;
+				}
+				this.speechQueueMap.delete(id);
 
-				SPEECHER_log("SPEAKSAY", this.utterance.text);
+				if ( !this._process_utterance(pack) ) {
+					continue;	// pack was bad
+				}
 
-				this.isSpeaking = true;
+//				SPEECHER_log("Queue ABOUT TO SAY:", this.utterance.text, this.utterance);
+//				SPEECHER_log("Speech Queue AFTER", this.speechQueueMap.size);
+				this.utterance.lang = "en-GB";  // TEST for Android
+
+				this.currentSpeakingID = id;
+
+					// emit that we're about to speak and check for a cancel
+				this.#cancelNextSpeak = false;
+				this.emit('beforespeak', { id });
+				if (this.#cancelNextSpeak) {	// they can call this.cancel_next() to stop it
+					//return this._sayQueueProcess();	// async so no recursion
+					//this.isSpeaking = false;
+					continue;
+				}
+
+				this.utterance.queueid = id;
+				this.#isSpeaking = true;
 				this.ss.speak(this.utterance)
-				this.ss.resume();	// this has been necessary
-			}
-			else {
-				this.isSpeaking = false;
+				this.ss.resume();	// this has been necessary, I think
+
+				break;
 			}
 		}
 
-		_process_utterance(pack) {
-			this.isSpeaking = true;
+			// turns a string, object or utterance into this.utterance
+			// and adds any custom handlers as well as native end and error
 
-			// is pack an utterance, object or string
+		_process_utterance(pack) {
+				// is pack an utterance, object or string
 			if ( typeof pack === 'string' ) {
 				this.utterance = new SpeechSynthesisUtterance(pack);
 				SPEECHER_log("PACK IS STRING");
@@ -293,21 +371,22 @@
 				this.utterance = u;
 			} else {
 				SPEECHER_log("ERROR: speech pack is unknown", pack);
-				this.isSpeaking = false;
-				return this._sayQueueProcess();
+				return false;
 			}
 
 			this.utterance.addEventListener('end', () => {
-				this.isSpeaking = false;
+				this.#isSpeaking = false;//	console.log(m("UTTERANCE END EVENT"));
 				this._sayQueueProcess()
 			});
 			this.utterance.addEventListener('error', e => {
 				SPEECHER_log("UTTERANCE ERROR ", e);
-				this.isSpeaking = false;
-				this._sayQueueProcess();
+				this.#isSpeaking = false;
+				this._sayQueueProcess();	// CRITICAL
 			});
 
-			this._add_handlers(this.utterance, this._handlers);
+			this._add_handlers(this.utterance, this.#utterance_handlers);
+
+			return true;
 		}
 
 			// validate is a function?	No, it's done before
@@ -332,7 +411,52 @@
 
 			this.voiceDefault = v;
 		}
-	}
+
+			// call during a "beforespeak" event to cancel
+
+		cancel_next() {
+			this.#cancelNextSpeak = true;
+		}
+
+			// cancel by id if it's in the shifting id queue it doesn't matter
+
+		cancel_id(id) {
+			id = parseInt(id);
+			this.speechQueueMap.delete( id );
+			if ( this.currentSpeakingID === id ) {
+				this.ss.cancel();			// cancel calls end handler? it seems to
+				this.#isSpeaking = false;
+				//this._sayQueueProcess();	// don't know if I need this, does cancel fire the end event?
+			}
+		}
+
+		queue_length() {
+			return this.speechQueueMap.size;
+		}
+
+		// ************** EVENTS ************** //
+
+		emit(event, data) {
+			let e = new CustomEvent(event, { detail: {
+				...data,
+				target: this,
+				utterance: this.utterance,
+				queue: this.speechQueueMap,
+				voices: this.voices }
+			});
+
+			this.#eventDummy.dispatchEvent(e);
+		}
+
+		addEventListener(event, fn) {
+			this.#eventDummy.addEventListener(event, fn)
+		}
+
+		next_id() {
+			return this.speechQueueID + 1;
+		}
+	}	// CLASS ENDS
+
 
 	globalThis.Speecher = Speecher;
 }	// scope end

@@ -27,7 +27,7 @@ const ONCHANGE_URL_UPDATE_DELAY_MS = 100;
 		{selector: '[data-tostrlc]', event: 'change', function: set_conf_string_lc, params: {}},
 		{selector: '[data-tocheckbox]', event: 'change', function: set_conf_checkbox, params: {}},
 
-		{selector: '.urlpopulate', event: 'click', function: url_populate, params: {}},
+		{selector: '.urlpopulate', event: 'click', function: ns.url_populate, params: {}},
 		{selector: '.form-save', event: 'change', function: url_populate_onchange, params: {}},
 
 	//	{selector: '.urlpopulateoc', event: 'change', function: url_populate_onchange, params: {}},	// just do on .form-save
@@ -48,7 +48,7 @@ const ONCHANGE_URL_UPDATE_DELAY_MS = 100;
 				if (ev.triggers) {
 
 				}
-
+					// might change this to params having triggers
 				if (ev.event === 'change') {
 					f.dispatchEvent(chEv);
 				} else
@@ -116,17 +116,6 @@ const ONCHANGE_URL_UPDATE_DELAY_MS = 100;
 		return v2a;
 	}
 
-	/* function Xverify_data_varname(e) {
-		console.log("FIELD", e.target);
-
-		if (!e.target.dataset['varname']) {
-			throw `No dataset-varname on field ${e.target.name}/${e.target.id}`;
-			return false;
-		}
-
-		return true;
-	} */
-
 		// string to array of 'usual' characters
 	function split_to_array(str) {
 		return str.split(/[^a-zA-Z0-9-_]/).filter(e => e);
@@ -139,12 +128,12 @@ const ONCHANGE_URL_UPDATE_DELAY_MS = 100;
 		let setIval = this.si ? this.si : null;
 
 		clearTimeout(setIval)
-		this.si = setTimeout(() => url_populate(), ONCHANGE_URL_UPDATE_DELAY_MS);
+		this.si = setTimeout(() => ns.url_populate(), ONCHANGE_URL_UPDATE_DELAY_MS);
 	}
 
 		// changes the url link and populates the thingy
 
-	function url_populate() {
+	ns.url_populate = function url_populate() {
 		let urlParams = TT.inputs_to_uri_string(MAGIC_CLASS_FORM_SAVE, true);
 
 		urlParams = 'autojoin=true&' + urlParams;
