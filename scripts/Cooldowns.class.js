@@ -29,6 +29,7 @@
 	// if there's a global underway a user won't be set anyway IF CHECKED
 	// if there's a category underway a user won't be set. IF CHECKED
 */
+"use strict"
 
 console.log("Cooldowns included");
 
@@ -112,7 +113,7 @@ class Cooldowns {
 		let found = false;
 
 		if (params.userstate) {
-			var cdIdxU = this._cooldown_name_user(params)
+			let cdIdxU = this._cooldown_name_user(params)
 
 			if (this.cooldowns.has(cdIdxU)) {
 				let cd = this.cooldowns.get(cdIdxU);
@@ -122,7 +123,7 @@ class Cooldowns {
 			}
 		}
 
-		var cdIdxG = this._cooldown_name_global(params)
+		let cdIdxG = this._cooldown_name_global(params)
 		if (this.cooldowns.has(cdIdxG)) {
 			let cd = this.cooldowns.get(cdIdxG);
 			ret.global =  cd.seconds * 1000 - Date.now() + cd.timeSet;
@@ -136,7 +137,7 @@ class Cooldowns {
 		// generates a cooldown index string based on the user and category or command
 
 	_cooldown_name_user({channel, command, category, userstate}) {
-		var cdIdx = channel;
+		let cdIdx = channel;
 
 		if (category)
 			cdIdx += '#' + category;
@@ -179,6 +180,7 @@ class Cooldowns {
 	}
 }
 
-globalThis.Cooldowns = Cooldowns;
+//globalThis.Cooldowns = Cooldowns;
+TT.Cooldowns = Cooldowns;
 
 }	// END scope

@@ -12,9 +12,11 @@
 	gid for document.getElementById
 	sleep promise for sleep(200).then(...)
 */
-const TT_DEBUGGING = true;
+"use strict";
 
 (() => {	// keep the main bulma stuff out of the mainspace
+	const TT_DEBUGGING = true;
+
 	let tt_log = TT_DEBUGGING ? console.log : () => {};	// logging function
 
 	docReady(init_bulma_components);
@@ -97,7 +99,7 @@ const TT_DEBUGGING = true;
 				}
 			}*/
 
-		for( group in tabGroups ) {
+		for( let group in tabGroups ) {
 			tt_log('group:', group);
 				// go over each set adding a click - the click also has to reiterate over the groups
 			let subSets = tabGroups[group].sets;

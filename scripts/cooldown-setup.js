@@ -1,4 +1,4 @@
-
+/*
 	// add to the global pile
 TMIConfig.mutedCooldownSecsRemaining = 180;
 TMIConfig.mutedCooldownDefaultSeconds = 180;
@@ -64,4 +64,4 @@ function muted_cooldown_interval_timer() {
 	}
 
 	cooldownSecsDiv.innerHTML = 'Done';
-}
+} */

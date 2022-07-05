@@ -14,9 +14,11 @@
  *
  * I could give different channels different colours, have a colour list
  */
+"use strict"
+TMIConfig.NCNChatterSet = new Set();	// first chats stored as channel+name
 
- TMIConfig.NCNChatterSet = new Set();	// first chats stored as channel+name
- let NCNChatterSet = TMIConfig.NCNChatterSet;
+{	// SCOPE
+let NCNChatterSet = TMIConfig.NCNChatterSet;
 
 	 // window onload
 
@@ -43,7 +45,7 @@ window.addEventListener('load', () => {
 
 	 // message handler - does the new chatter logging
 
-cclient.on('message', (channel, userstate, message, self) => {
+TT.cclient.on('message', (channel, userstate, message, self) => {
 		// Don't listen to my own messages..
 	if (self) return;
 
@@ -63,3 +65,4 @@ cclient.on('message', (channel, userstate, message, self) => {
 });
 
 
+}	// SCOPE

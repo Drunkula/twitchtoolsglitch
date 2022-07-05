@@ -1,4 +1,4 @@
- let NCNChatterSet = new Set();	// first chats stored as channel+name
+"use strict"
 
 	 // window onload
 

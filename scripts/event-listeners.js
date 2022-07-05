@@ -1,19 +1,17 @@
-
-const MAGIC_CLASS_URLPOPULATE_BTN = '.urlpopulate';
-const MAGIC_CLASS_URLPOPULATE_ONCHANGE = '.urlpopulateoc';
-
 //const MAGIC_CLASS_IGNORED_USERS = '';
 //const MAGIC_CLASS_JOIN = '';
 //const MAGIC_CLASS_ARRAY_LC = '.toarraylc';	// add to TTVars as an array of lower case
-
+"use strict";
 	// doesn't trigger an event
-
-const ONCHANGE_URL_UPDATE_DELAY_MS = 100;
-
 	// Common events
 	// ADDS TT.add_event_listeners
 
-(function(ns) {
+(function(ns) {	// SCOPE using jQuery methodology
+
+	const ONCHANGE_URL_UPDATE_DELAY_MS = 100;
+	const MAGIC_CLASS_URLPOPULATE_BTN = '.urlpopulate';
+	const MAGIC_CLASS_URLPOPULATE_ONCHANGE = '.urlpopulateoc';
+
 
 	const TT_EVENT_ITEMS = [
 		{selector: '#mainform', event: 'submit', function: join_chans_submit_handler, params: {}},
@@ -134,7 +132,7 @@ const ONCHANGE_URL_UPDATE_DELAY_MS = 100;
 		// changes the url link and populates the thingy
 
 	ns.url_populate = function url_populate() {
-		let urlParams = TT.inputs_to_uri_string(MAGIC_CLASS_FORM_SAVE, true);
+		let urlParams = TT.inputs_to_uri_string(TT.MAGIC_CLASS_FORM_SAVE, true);
 
 		urlParams = 'autojoin=true&' + urlParams;
 			// sets the value in localStorage to use in form values restore
@@ -169,7 +167,7 @@ const ONCHANGE_URL_UPDATE_DELAY_MS = 100;
 	}
 
 
-})(globalThis.TT = globalThis.TT || {});
+})(TT = TT || {});
 
 /*
 

@@ -36,12 +36,12 @@ TMIConfig.TTSVars = {   // more props added from forms
 
 
 try {   // scope starts ( in case I can demodularise this )
-    var TTSVars = TMIConfig.TTSVars;
+    const TTSVars = TMIConfig.TTSVars;
     const TTS_MOD_COOLDOWN = 5;
     const TTS_TEST_TEXT = "Testing the voice one two three";
-    const cooldowns = new Cooldowns();
 
-    const speech = new Speecher();
+    const cooldowns = new TT.Cooldowns();
+    const speech = new TT.Speecher();
 
     speech.on({error: speek_error});
     // it's too late speech.on({start: (e) => {console.log("ON START", e); e.target.text = "CAN IT BE CHANGED?"; e.target.volume = 0.6; e.target.lang = "en-US";  e.target.rate = 2.0; e.target.pitch = 1.5; }})
@@ -65,25 +65,6 @@ try {   // scope starts ( in case I can demodularise this )
 
         {selector: '#pausespeech', event: 'change', function: speech_pause_checkbox_onchange, params: {}},
     ];
-
-    async function init_speecher() {
-        log("Initialising Speech engine");
-
-        let ready = await speech.ready();
-
-        if (ready) {
-            log("Engine Initialised");
-        }
-        else {
-            log("Speech Engine Fail")
-            return false;
-        }
-
-        TTSVars.ss = speechSynthesis;
-        TTSVars.voices = speech.getVoices();
-
-        return ready;
-    };
 
         // on window load
 
@@ -130,11 +111,29 @@ try {   // scope starts ( in case I can demodularise this )
             // main listener
         add_chat_to_speech_tmi_listener();
         init_flasher_tech();
-
-//        TTSVars.cooldownSecsDiv = gid('cooldowncountdown');
-        //TTSVars.cooldownDiv = gid('cooldownoutput')
     });// on load ends
 
+
+        // async so we can await readyness
+
+    async function init_speecher() {
+        log("Initialising Speech engine");
+
+        let ready = await speech.ready();
+
+        if (ready) {
+            log("Engine Initialised");
+        }
+        else {
+            log("Speech Engine Fail")
+            return false;
+        }
+
+        TTSVars.ss = speechSynthesis;
+        TTSVars.voices = speech.getVoices();
+
+        return ready;
+    };
 
         // I should of course include the channel, cclient is global
         // tmi code is re-adding event listeners on disconnects
@@ -144,7 +143,7 @@ try {   // scope starts ( in case I can demodularise this )
     {       // https://dev.twitch.tv/docs/irc/tags#globaluserstate-twitch-tags
         let lastMsgId = null;   // after a reconnect TMI sometimes sents repeats
 
-        cclient.on('message', (channel, userstate, message, self) => {
+        TT.cclient.on('message', (channel, userstate, message, self) => {
             if (self || TTSVars.chatEnabled === false) return;   // Don't listen to my own messages..
 
             if (lastMsgId === userstate['id']) {  // had a case of double messaging
@@ -305,9 +304,9 @@ try {   // scope starts ( in case I can demodularise this )
         // filter emotes BEFORE calling this
     function is_say_command (str) {
         if (str[0] === '!') {	// get the first word with ! lowercased
-            var words = str.split(' ').filter(e => e);
+            let words = str.split(' ').filter(e => e);
                 // rest of first word to lower case
-            var inCmd = words[0].toLowerCase();
+            let inCmd = words[0].toLowerCase();
                                                         //console.log(`words`, words);
             if (inCmd in TTSVars.sayCmds) {
                 words.shift();  // get rid of command

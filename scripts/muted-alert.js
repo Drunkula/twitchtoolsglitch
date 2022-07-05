@@ -5,11 +5,13 @@
  */
 "use strict"
 
+{   // SCOPE
+
 const TT_MUTED_MINS_MAX = 300;
     // regex's to match the input
 const muteRegexs = [/!muted/i, /\b[you|mic].*\bmute/i, /can[']?t.*hear.*you/i]
 
-TMIConfig.chatMsgNewVars = {
+TMIConfig.NCMVars = {
     onCooldown: false,
     cooldownDefaultSecs : 181,
     cooldownSecsRemaining : 180,  // that'll be changing
@@ -24,7 +26,7 @@ TMIConfig.chatMsgNewVars = {
     cooldownSecsDiv: null
 }
 
-const chatMsgNewVars = TMIConfig.chatMsgNewVars;
+const NCMVars = TMIConfig.NCMVars;
 
 
     // on window load
@@ -35,7 +37,7 @@ window.addEventListener('load', (event) => {
     TT.forms_init_common(); // channels populates form fields from url string
     //tt_forms_init_common_permissions(); // ABSORBED allonamed and checkboxes
 
-    chatMsgNewVars.alertSound = document.getElementById('ding');
+    NCMVars.alertSound = document.getElementById('ding');
 
         // auto sets array in TMIConfig.perms to lower case - set to a global system and we can put this as common
         // main listener
@@ -46,8 +48,8 @@ window.addEventListener('load', (event) => {
 
     NCM_set_default_cooldown_onchange();
 
-    chatMsgNewVars.cooldownSecsDiv = gid('cooldowncountdown');
-    chatMsgNewVars.cooldownDiv = gid('cooldownoutput')
+    NCMVars.cooldownSecsDiv = gid('cooldowncountdown');
+    NCMVars.cooldownDiv = gid('cooldownoutput')
 
     setInterval(muted_cooldown_interval_timer, 1000);// DEBUG want 1000 in real use
         // autojoin
@@ -65,7 +67,7 @@ function add_new_chat_message_tmi_listener()
 {       // https://dev.twitch.tv/docs/irc/tags#globaluserstate-twitch-tags
     let lastMsgId = null;   // after a reconnect TMI sometimes sents repeats
 
-    cclient.on('message', (channel, userstate, message, self) => {
+    TT.cclient.on('message', (channel, userstate, message, self) => {
         if (self) return;   // Don't listen to my own messages..
 
         if (lastMsgId === userstate['id'])
@@ -93,11 +95,11 @@ function add_new_chat_message_tmi_listener()
  */
 
 function NCM_check_new_chat_message_alert(user, channel, msg) {
-    if ( chatMsgNewVars.onCooldown || gid('enablealert').checked === false ) {
+    if ( NCMVars.onCooldown || gid('enablealert').checked === false ) {
         return;
     }
 
-    var allowDing = TT.user_permitted(user);
+    let allowDing = TT.user_permitted(user);
 
         // ding away
     if (allowDing) {
@@ -107,18 +109,18 @@ function NCM_check_new_chat_message_alert(user, channel, msg) {
                 o(channel+' Ding allowed for ' + user.username)
 
                 if ( gid('playsound').checked ) {
-                    chatMsgNewVars.alertSound.play()
+                    NCMVars.alertSound.play()
                         .catch(e => log('<rb>PLAY FAILED:</rb> '+e.toString())); //  you have to have interected with the document first
                 }
 
                 if ( gid('flashscreen').checked ) {
-                    chatMsgNewVars.flashFunc();
+                    NCMVars.flashFunc();
                 }
 
                 //mutedVars.cooldownCallback = setInterval( () => mutedVars.onCooldown = false, mutedVars.cooldownSecs * 1000);
 
-                chatMsgNewVars.onCooldown = true;
-                chatMsgNewVars.cooldownSecsRemaining = chatMsgNewVars.cooldownDefaultSecs;
+                NCMVars.onCooldown = true;
+                NCMVars.cooldownSecsRemaining = NCMVars.cooldownDefaultSecs;
 
                 break;
 
@@ -142,7 +144,7 @@ function NCM_set_default_cooldown_onchange() {
         if (coolMins < 0) coolMins = 0;
         if (coolMins > TT_MUTED_MINS_MAX) coolMins = TT_MUTED_MINS_MAX;
 
-        chatMsgNewVars.cooldownDefaultSecs = coolMins * 60;
+        NCMVars.cooldownDefaultSecs = coolMins * 60;
 
         defCool.value = coolMins;
 
@@ -155,7 +157,7 @@ function NCM_set_default_cooldown_onchange() {
 
 
 function NCM_init_cooldown_time_inc_buttons() {
-	var btns = qsa('.cooldown-set');
+	let btns = qsa('.cooldown-set');
 
 	btns.forEach( (btn) => {
 		let addS = btn.dataset['add'];
@@ -163,13 +165,13 @@ function NCM_init_cooldown_time_inc_buttons() {
 		if (addS === "clear") {
 			btn.onclick = () => {
 				console.log("Clearing timeout");	// imagine their should be a function here
-				chatMsgNewVars.cooldownSecsRemaining = 0;
+				NCMVars.cooldownSecsRemaining = 0;
 			}
 		}
 		else {
 			btn.onclick = () => {
-				console.log('adding mini', addS,'to', chatMsgNewVars.cooldownSecsRemaining);
-				chatMsgNewVars.cooldownSecsRemaining += ~~addS;	// integerise, otherwise it acts as a string
+				console.log('adding mini', addS,'to', NCMVars.cooldownSecsRemaining);
+				NCMVars.cooldownSecsRemaining += ~~addS;	// integerise, otherwise it acts as a string
 			}
 		}
 	})
@@ -178,31 +180,34 @@ function NCM_init_cooldown_time_inc_buttons() {
 
     // decreases the timer and outputs the time remaining.  yes, it's got more than one duty
 
+    NCMVars.cooldownBtnText = null;
+
 function muted_cooldown_interval_timer() {
-	if (chatMsgNewVars.cooldownSecsRemaining > 0) {
-        chatMsgNewVars.onCooldown = true;    // saves checks when adding time
+	if (NCMVars.cooldownSecsRemaining > 0) {
+        NCMVars.onCooldown = true;    // saves checks when adding time
 
 		let out = '';
 
-		if (chatMsgNewVars.cooldownSecsRemaining <= 60) {
-			out = chatMsgNewVars.cooldownSecsRemaining;
+		if (NCMVars.cooldownSecsRemaining <= 60) {
+			out = NCMVars.cooldownSecsRemaining;
 		}
 		else {
-			out = Math.round(chatMsgNewVars.cooldownSecsRemaining / 60) + 'm';
+			out = Math.round(NCMVars.cooldownSecsRemaining / 60) + 'm';
 		}
             // don't redraw if the output hasn't changed (minutes)
-		if (this.myLastIntOutput != out)
-			chatMsgNewVars.cooldownSecsDiv.innerHTML = out;
 
-		this.myLastIntOutput = out;	// don't keep changing if it's on minutes
+		if (NCMVars.cooldownBtnText != out)
+			NCMVars.cooldownSecsDiv.innerHTML = out;
 
-		chatMsgNewVars.cooldownSecsRemaining--;
+		NCMVars.cooldownBtnText = out;	// don't keep changing if it's on minutes
+
+		NCMVars.cooldownSecsRemaining--;
 
 		return;
 	}
     else {
-        chatMsgNewVars.onCooldown = false;
-        chatMsgNewVars.cooldownSecsDiv.innerHTML = 'Over';
+        NCMVars.onCooldown = false;
+        NCMVars.cooldownSecsDiv.innerHTML = 'Over';
     }
 }
 
@@ -216,31 +221,34 @@ function init_flasher_tech() {        // if a flasher is there set up a func
     flashBox.onclick = stop_flash;  // allow a click to cancel
 
     let flashFunc = () => {
-        clearTimeout(chatMsgNewVars.flashSetTimeout);
+        clearTimeout(NCMVars.flashSetTimeout);
 
         flashBox.classList.add('flasher');
 
-        chatMsgNewVars.flashSetTimeout = setTimeout(() => {
+        NCMVars.flashSetTimeout = setTimeout(() => {
             flashBox.classList.remove('flasher');
-        }, chatMsgNewVars.flashDuration);
+        }, NCMVars.flashDuration);
     }
 
     if (flashBox) { console.log('FLASHER ASSIGNED');
-        chatMsgNewVars.flashFunc = flashFunc;
+        NCMVars.flashFunc = flashFunc;
     }
 
     document.getElementById('flashtestbtn').onclick = flashFunc;
 }
 
 function Xstart_flash() {
-    clearTimeout(chatMsgNewVars.flashSetTimeout);
+    clearTimeout(NCMVars.flashSetTimeout);
     flashBox.classList.add('flasher');
-    chatMsgNewVars.flashSetTimeout = setTimeout(stop_flash, chatMsgNewVars.flashDuration);
+    NCMVars.flashSetTimeout = setTimeout(stop_flash, NCMVars.flashDuration);
 }
 
 function stop_flash() {
     let flashBox = gid('flasher');
     flashBox.classList.remove('flasher');
 
-    clearTimeout(chatMsgNewVars.flashSetTimeout);
+    clearTimeout(NCMVars.flashSetTimeout);
 }
+
+
+}   // scope

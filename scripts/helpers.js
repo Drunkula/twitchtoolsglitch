@@ -1,4 +1,4 @@
-
+"use strict"
 
 // does an object have the property
 const hasProperty = (target = {}, prop) => prop in target || Object.hasOwn(target, prop) || !!target[prop]

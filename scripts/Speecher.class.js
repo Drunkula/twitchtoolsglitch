@@ -15,8 +15,8 @@
  * 	TODO
  * 		add events externally
  *
- * beforespeak
- * queueing
+ * beforespeak - allows you to examine the utterance and call cancel_next()
+ * queueing not implemented
  * voiceschanged (if number changes)
  * ready
  *
@@ -24,6 +24,7 @@
  *
  * NOTE queueid is added to each utterance
  */
+"use strict"
 
 {	// scope
 	const hasProperty = (target = {}, prop) => prop in target || Object.hasOwn(target, prop) || !!target[prop]
@@ -34,8 +35,9 @@
 
 	const utteranceEvents = ['boundary', 'end', 'error', 'mark', 'pause', 'resume', 'start']
 
-	//const SPEECHER_log = console.log
-	const SPEECHER_log = l => l;	// if you don't want logging
+	const SPEECHER_LOGGING = true;
+
+	const SPEECHER_log = SPEECHER_LOGGING ? console.debug : l => l;	// if you don't want logging
 
 	class Speecher {
 		ss = SS;
@@ -65,7 +67,7 @@
 			// for adding events listeners
 		#eventDummy = document.createElement('SpeecherEvents');
 		#utterance_handlers = [];	// on events for utterances
-		#cancelNextSpeak = false;// can be changed during a beforespeak event
+		#cancelNextSpeak = false;	// can be changed during a beforespeak event
 
 
 			// set up
@@ -80,13 +82,6 @@
 
 			this.#set_onvoices_changed_handler()
 			this.#voicesInitOnTimer(args)
-
-			// some browsers only trigger voiceschanged on a getVoices()
-/* 			this.voices = this.ss.getVoices();
-			if (this.voices.length) {
-				this.gotVoicesDebug.push(`Constructor ${this.voices.length} voices.`)
-				this._imReady();
-			} */
 		}
 
 			// sets the onvoicechange event handler if present
@@ -113,7 +108,9 @@
 				});
 			}
 		}
+
 			// currently letting the timer run even after other methods worked
+
 		#voicesInitOnTimer(args) {
 			let {maxTimeout, period} = args;
 			let iTmrMSecs = 0;
@@ -169,7 +166,7 @@
 
 		#imReady() {
 			this.voices = this.ss.getVoices();
-			this._find_default_voice();
+			this.#find_default_voice();
 			this.initialised = true;
 
 			this.#readyResolve(true);
@@ -203,7 +200,7 @@
 		resume() {			//this.stopNow = false;
 			this.ss.resume();
 			this.#isPaused = false;
-			this._sayQueueProcess();
+			this.#sayQueueProcess();
 		}
 			// cancels the current speaking voice - end event will trigger
 		cancel() {
@@ -244,7 +241,7 @@
 			}
 
 			SPEECHER_log("Speech Queue", this.speechQueueMap.size);
-			this._sayQueueProcess(pack.immediate);
+			this.#sayQueueProcess(pack.immediate);
 
 			return this.speechQueueID;
 		}
@@ -253,17 +250,17 @@
 			return this.speak(pack);
 		}
 			// test SpeechSynthesis voice (EasySpeech method)
-		_is_voice(v) {
+		#is_voice(v) {
 			return v && v.lang && v.name && v.voiceURI;
 		}
 
 			// returns filtered voice, pitch, volume, rate and utterance handlers
 
-		_validate_params(pObj) {		//_validate_params({pitch, rate, volume, voice, ...handlers}) {
+		#validate_params(pObj) {		//_validate_params({pitch, rate, volume, voice, ...handlers}) {
 			let filtered = { handlers: {} };
 
 			let v = pObj.voice;
-			filtered.voice = this._is_voice(v) ? v : this.voiceDefault;
+			filtered.voice = this.#is_voice(v) ? v : this.voiceDefault;
 
 			const maxMins = {
 				pitch: {min: 0.5, max: 2.0, default: 1.0},
@@ -293,9 +290,9 @@
 
 			// immediate ignores speaking and paused and throws it into the queue
 
-		async _sayQueueProcess(immediate = false) {
+		#sayQueueProcess(immediate = false) {
 			if ( !immediate && (this.ss.speaking || this.#isPaused || this.#isSpeaking) ) {
-				SPEECHER_log("Speaking, returning");
+				//SPEECHER_log("Speaking, returning");
 				return;
 			}
 
@@ -305,14 +302,6 @@
 				return;
 			}
 
-			// the actual queue and ID queue now consist of two parts and the matching pack may have been
-			// deleted from the the map
-			/*
-			if (!this.speechQueueIDs.length) {
-				this.speechQueueMap.clear();
-				return;
-			} */
-
 			this.#isSpeaking = false;
 				// I hate doing a while
 			for ( const [id, pack] of this.speechQueueMap.entries() ) {
@@ -321,7 +310,7 @@
 				}
 				this.speechQueueMap.delete(id);
 
-				if ( !this._process_utterance(pack) ) {
+				if ( !this.#process_utterance(pack) ) {
 					continue;	// pack was bad
 				}
 
@@ -334,9 +323,8 @@
 					// emit that we're about to speak and check for a cancel
 				this.#cancelNextSpeak = false;
 				this.emit('beforespeak', { id });
-				if (this.#cancelNextSpeak) {	// they can call this.cancel_next() to stop it
-					//return this._sayQueueProcess();	// async so no recursion
-					//this.isSpeaking = false;
+					// they can call this.cancel_next() to stop this utterance
+				if (this.#cancelNextSpeak) {
 					continue;
 				}
 
@@ -352,7 +340,7 @@
 			// turns a string, object or utterance into this.utterance
 			// and adds any custom handlers as well as native end and error
 
-		_process_utterance(pack) {
+		#process_utterance(pack) {
 				// is pack an utterance, object or string
 			if ( typeof pack === 'string' ) {
 				this.utterance = new SpeechSynthesisUtterance(pack);
@@ -363,8 +351,8 @@
 			} else if (hasProperty(pack, 'text')) {	// obj I'm guessing
 				SPEECHER_log("PACK IS object");
 				let u = new SpeechSynthesisUtterance(pack.text);
-				let p = this._validate_params(pack);
-				this._add_handlers(u, p.handlers);
+				let p = this.#validate_params(pack);
+				this.#utterance_add_handlers(u, p.handlers);
 
 				u.pitch = p.pitch; u.rate = p.rate; u.volume = p.volume; u.voice = p.voice;
 
@@ -376,21 +364,21 @@
 
 			this.utterance.addEventListener('end', () => {
 				this.#isSpeaking = false;//	console.log(m("UTTERANCE END EVENT"));
-				this._sayQueueProcess()
+				this.#sayQueueProcess()
 			});
 			this.utterance.addEventListener('error', e => {
 				SPEECHER_log("UTTERANCE ERROR ", e);
 				this.#isSpeaking = false;
-				this._sayQueueProcess();	// CRITICAL
+				this.#sayQueueProcess();	// CRITICAL
 			});
 
-			this._add_handlers(this.utterance, this.#utterance_handlers);
+			this.#utterance_add_handlers(this.utterance, this.#utterance_handlers);
 
 			return true;
 		}
 
 			// validate is a function?	No, it's done before
-		_add_handlers(u, handlers) {
+		#utterance_add_handlers(u, handlers) {
 			for (const ev in handlers) {
 				if (utteranceEvents.includes(ev)) {
 					u.addEventListener(ev, handlers[ev]);
@@ -398,7 +386,7 @@
 			}
 		}
 
-		_find_default_voice() {
+		#find_default_voice() {
 			let v =	this.voices.find(v => v.default);
 
 			if (!v) {
@@ -412,7 +400,7 @@
 			this.voiceDefault = v;
 		}
 
-			// call during a "beforespeak" event to cancel
+			// call during a "beforespeak" event to cancel the next speaking voice
 
 		cancel_next() {
 			this.#cancelNextSpeak = true;
@@ -458,6 +446,7 @@
 	}	// CLASS ENDS
 
 
-	globalThis.Speecher = Speecher;
+	//globalThis.Speecher = Speecher;
+	TT.Speecher = Speecher;
 }	// scope end
 

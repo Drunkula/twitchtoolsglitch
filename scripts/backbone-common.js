@@ -1,10 +1,33 @@
-const TMI_DEFAULT_CHANNELS = 	[];		// could put this in a different file for easy user use
-const TMI_DEFAULT_ALLOW_NAMED = [];		// these do work
-const TMI_IGNORE_DEFAULT = 		["nightbot", "streamelements", "moobot", "streamlabs", "fossabot", "songlistbot"]; // LOWERCASE
+/*
+	TT and TMIConfig will be our global repositories
+	TT for functions, the other for vars - makes it easy to track in the console debugger
+	TT.set_conf('some.var.name', value) can be used to set values in TMIConfig so you can
+	use set_conf('MY_MODULE.someprop', value) to store local settings
+*/
+"use strict"
 
-const MAGIC_CLASS_FORM_SAVE = '.form-save';
+var _____MY_SPECIAL_DEBUG_DUMMY____ = 'dummy';
 
-TT = {}	// OUR NAMESPACE
+function TT_DEBUG_list_window() {	// lets us list global vars from console to check for polluting the timelines
+	let output = false;
+	console.log('---------------------------');
+	for(let b in window) {
+		if(output && window.hasOwnProperty(b))
+			console.log(b);
+		if (b === "_____MY_SPECIAL_DEBUG_DUMMY____") output = true;
+	}
+	console.log('---------------------------');
+	console.log("This", this);
+}
+
+var TT = {} // OUR NAMESPACE can't be a constant for now as I've used TT = TT || {} elsewhere
+
+TT.TMI_DEFAULT_CHANNELS = 	[];		// could put this in a different file for easy user use
+TT.TMI_DEFAULT_ALLOW_NAMED =[];		// these do work
+TT.TMI_IGNORE_DEFAULT =		["nightbot", "streamelements", "moobot", "streamlabs", "fossabot", "songlistbot"]; // LOWERCASE
+
+TT.MAGIC_CLASS_FORM_SAVE = '.form-save';
+
 
 // NOTE - all .form-save items will have their onchange triggered
 // NOTE - no they don't, now it's onchange items.
@@ -18,8 +41,8 @@ var TMIConfig = {	// MOST tools add their config to this to make observing the v
         allowEveryone : false,
         allowMods : true,
         allowVips : true,
-        allowNamed : TMI_DEFAULT_ALLOW_NAMED,
-		ignoredUsers: TMI_IGNORE_DEFAULT,
+        allowNamed : TT.TMI_DEFAULT_ALLOW_NAMED,
+		ignoredUsers: TT.TMI_IGNORE_DEFAULT,
     }
 }
 
@@ -35,7 +58,7 @@ TT.forms_init_common = function forms_init_common() {
 
 	TT.forms_init_common_permissions();
 		// form values will overwrite defaults
-	TT.restore_form_values(MAGIC_CLASS_FORM_SAVE);
+	TT.restore_form_values(TT.MAGIC_CLASS_FORM_SAVE);
 
 	TT.add_event_listeners();
 
@@ -66,8 +89,6 @@ TT.trigger_onchange_on = function trigger_onchange_on(selector) {
 	});
 }
 
-
-
 	// if permissions are used you'll have allownamed, everyone, mods, vips
 
 TT.forms_init_common_permissions = function forms_init_common_permissions() {
@@ -83,7 +104,7 @@ TT.forms_init_common_permissions = function forms_init_common_permissions() {
 TT.init_channels_defaults = function init_channels_defaults () {
 	let channo = gid('channels');
 	if (channo) {
-		channo.value = TMI_DEFAULT_CHANNELS.join(' ');
+		channo.value = TT.TMI_DEFAULT_CHANNELS.join(' ');
 		/* if (TMIConfig.restoredParams['channels'] === undefined) {		} */
 	}
 }
@@ -93,7 +114,7 @@ TT.init_channels_defaults = function init_channels_defaults () {
 TT.ignored_users_init_defaults = function tt_ignored_users_init_defaults() {
 	let igUsrs = gid('ignoredusers');
 	if (!igUsrs) return;
-	igUsrs.value =  TMI_IGNORE_DEFAULT.join(' ');
+	igUsrs.value =  TT.TMI_IGNORE_DEFAULT.join(' ');
 }
 
 	// sets onchange event for the allowname field
@@ -101,7 +122,7 @@ TT.ignored_users_init_defaults = function tt_ignored_users_init_defaults() {
 TT.allow_named_init_defaults = function allow_named_init_defaults() {
 	let aNamed = gid('allownamed');
 	if (!aNamed) return	//if (TMIConfig.restoredParams['allownamed'] === undefined)
-	aNamed.value = TMI_DEFAULT_ALLOW_NAMED.join(' ');
+	aNamed.value = TT.TMI_DEFAULT_ALLOW_NAMED.join(' ');
 }
 
 TT.ignored_users_add = function(user) {
@@ -114,14 +135,12 @@ TT.ignored_users_add = function(user) {
 
 TT.ignored_users_remove = function(user) {
 	user = user.toString().trim().toLowerCase();
-	//TMIConfig.perms.ignoredUsers.push(user);
 	let uset = new Set(TMIConfig.perms.ignoredUsers);
 	uset.delete(user);
 	TMIConfig.perms.ignoredUsers = [...uset];
 	gid('ignoredusers').value = TMIConfig.perms.ignoredUsers.join(' ');
 	TT.url_populate();
 }
-
 
 
 	// allow named input field changes and updates permissions
@@ -161,44 +180,6 @@ TT.user_permitted = function user_permitted(user) {
 	}
 
 	return allowed;
-}
-
-
-/**
- * Simple outputs to named divs
- */
-
- /**
-  * Output to that div top first
-  * @param {string} str
-  * @param {bool} clearIt
-  * @returns
-  */
-
-function o(str, clearIt, after="<br/>", divId = 'mainoutput') {
-	if (clearIt)
-		document.getElementById(divId).innerHTML = '';
-
-	if (!str) return;
-
-	var ndiv = `<div onclick="this.remove()">${str + after}</div>`;
-		// https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
-	document.getElementById(divId).insertAdjacentHTML('afterbegin', ndiv);
-}
-
-/**
-  * Output to that div top first
-  * @param {string} str
-  * @param {bool} clearIt
-  * @returns
-  */
-
- function log(str, clearIt, after="<br/>") {
-	if (clearIt)
-		return document.getElementById('log').innerHTML = str + after;
-
-	// https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
-	document.getElementById('log').insertAdjacentHTML('afterbegin', str + after);
 }
 
 
@@ -288,13 +269,15 @@ function gid(id, el = document) {
 
 	// colours for console output
 
-(() => {
-	var funcs = { r, g, b, w, c, m, y, k } = [ ['r', 1], ['g', 2], ['b', 4], ['w', 7], ['c', 6], ['m', 5], ['y', 3], ['k', 0] ]
-	.reduce(// wtf is going on, why the brackets?
-		(cols, col) => ( {...cols,  [col[0]]: f => `\x1b[1m\x1b[3${col[1]}m${f}\x1b[0m`} )
-		, {}
-	);
+/* (() => {
+	let funcs = { r, g, b, w, c, m, y, k } = [ ['r', 1], ['g', 2], ['b', 4], ['w', 7], ['c', 6], ['m', 5], ['y', 3], ['k', 0] ]
+	.reduce( (cols, col) => ( {...cols,  [col[0]]: f => `\x1b[1m\x1b[3${col[1]}m${f}\x1b[0m`} ), {});
 })();
+ */
+
+var { r, g, b, w, c, m, y, k } = [ ['r', 1], ['g', 2], ['b', 4], ['w', 7], ['c', 6], ['m', 5], ['y', 3], ['k', 0] ]
+.reduce( (cols, col) => ( {...cols,  [col[0]]: f => `\x1b[1m\x1b[3${col[1]}m${f}\x1b[0m`} ), {});
+
 
 function sleep(ms) {		// sleep(200).then(...)
 	return new Promise(res => {
@@ -313,4 +296,41 @@ function docReady(fn) {
 	} else {
 		document.addEventListener("DOMContentLoaded", fn);
 	}
+}
+
+/**
+ * Simple outputs to named divs
+ */
+
+ /**
+  * Output to that div top first
+  * @param {string} str
+  * @param {bool} clearIt
+  * @returns
+  */
+
+  function o(str, clearIt, after="<br/>", divId = 'mainoutput') {
+	if (clearIt)
+		document.getElementById(divId).innerHTML = '';
+
+	if (!str) return;
+
+	var ndiv = `<div onclick="this.remove()">${str + after}</div>`;
+		// https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
+	document.getElementById(divId).insertAdjacentHTML('afterbegin', ndiv);
+}
+
+/**
+  * Output to that div top first
+  * @param {string} str
+  * @param {bool} clearIt
+  * @returns
+  */
+
+ function log(str, clearIt, after="<br/>") {
+	if (clearIt)
+		return document.getElementById('log').innerHTML = str + after;
+
+	// https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
+	document.getElementById('log').insertAdjacentHTML('afterbegin', str + after);
 }

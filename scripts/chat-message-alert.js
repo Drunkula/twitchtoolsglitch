@@ -30,9 +30,9 @@ const TT_CHAT_MSG_SECS_BEFORE_ALERT_MAX = 120;
         cooldownSecsDiv: null
     }
         // proxy me do - means observing in dev tools is easy
-    var NCMVars = TMIConfig.NCMVars;
+    const NCMVars = TMIConfig.NCMVars;
 
-    var NCMEvents = [
+    const NCMEvents = [
         {selector: '#defaultcooldown', event: 'change', function: ncm_default_cooldown_onchange, params: {}},
         {selector: '.cooldown-set', event: 'click', function: ncm_cooldown_inc, params: {}},
         {selector: '#secsbeforealert', event: 'click', function: ncm_secs_before_alert_onchange, params: {}},
@@ -84,7 +84,7 @@ const TT_CHAT_MSG_SECS_BEFORE_ALERT_MAX = 120;
         // https://dev.twitch.tv/docs/irc/tags#globaluserstate-twitch-tags
         let lastMsgId = null;   // after a reconnect TMI sometimes sents repeats
 
-        cclient.on('message', (channel, userstate, message, self) => {
+        TT.cclient.on('message', (channel, userstate, message, self) => {
             if (self || lastMsgId === userstate['id']) return;   // Don't listen to my own messages..
 
             lastMsgId = userstate['id'];    // unique to every message
@@ -248,6 +248,8 @@ const TT_CHAT_MSG_SECS_BEFORE_ALERT_MAX = 120;
 
         // decreases the timer and outputs the time remaining.  yes, it's got more than one duty
 
+    NCMVars.cooldownBtnText = null;
+
     function NCM_cooldown_interval_timer() {
         let out = '';
 
@@ -269,9 +271,9 @@ const TT_CHAT_MSG_SECS_BEFORE_ALERT_MAX = 120;
         }
 
             // don't redraw if the output hasn't changed (minutes / Over)
-        if (this.myLastIntOutput != out) {
+        if (NCMVars.cooldownBtnText != out) {
             NCMVars.cooldownSecsDiv.innerText = out;
-            this.myLastIntOutput = out;
+            NCMVars.cooldownBtnText= out;
         }
     }
 

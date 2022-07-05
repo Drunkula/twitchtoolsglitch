@@ -2,13 +2,13 @@
  * https://github.com/tmijs/docs/tree/gh-pages/_posts/v1.4.2
  *
  */
+"use strict"
 
-let NCNChatterSet = new Set();	// first chats stored as channel+name
+
 console.log("SUBS GIFTS CHEERS");
 // easy way of finding if there are url params
-console.log("window.location.search", window.location.search);
-
-console.log("localStorage", localStorage);
+//console.log("window.location.search", window.location.search);
+//console.log("localStorage", localStorage);
 
 	// window onload
 
@@ -37,15 +37,17 @@ docReady( () => {
 
 	console.log("CALLBACKS", callbacks);
 
-	for (f of callbacks) {
-		cclient.on(f.name, f);
+	for (let f in callbacks) {
+		console.log("Adding TMI callback", f);
+		//TT.cclient.on(f, callbacks.f);
+		TT.cclient.on(f, callbacks[f]);
 	}
 });
 
 
 	// message handler - does the new chatter logging
-
-cclient.on('message', (channel, userstate, message, self) => {
+/*
+TT.cclient.on('message', (channel, userstate, message, self) => {
 		// Don't listen to my own messages..
 	if (self) return;
 
@@ -54,19 +56,13 @@ cclient.on('message', (channel, userstate, message, self) => {
 	switch(userstate["message-type"]) {
 		case "action":
 		case "chat":
-			if (NCNChatterSet.has(user)) {   // they already in the array?
-				return;
-			}
-			//NCNChatterSet.add(user);
-			//o(`<y>${channel}</y> ${userstate['display-name']}`);
-			// console.log(userstate);
 			break;
 	}
 });
+ */
 
 
-
-let callbacks = [
+let callbacks = {
 		// system-msg is the useful part of the methods e.g. "WardenOfTheDead48 gifted a Tier 1 sub to SoulGlitch3s!"
 		// msg-param-recipient-user-name but receipient can be used
 
@@ -77,37 +73,37 @@ let callbacks = [
 
         // ***** SUB / CHEERS ***** //
 		// userstate has bits, display-name, username, color
-	cheer               = function (channel, userstate, msg)
+	cheer               : function (channel, userstate, msg)
 		{console.log('** CHEER ** : channel, userstate, msg', channel, userstate, msg); console.log('args:', arguments);},
         //resub         = (["resub", "subanniversary"], [[channel, username, streakMonths, msg, userstate, methods]]) {},
 
-    resub               = function (channel, username, months, message, userstate, methods)
+    resub               : function (channel, username, months, message, userstate, methods)
 		{console.log('** RESUB ** (channel, username, months, message, userstate, methods', arguments)},
     //(["resub", "subanniversary"], [[channel, username, streakMonths, msg, userstate, methods]]);
 
-    subscription        = function (channel, username, method, message, userstate)
+    subscription        : function (channel, username, method, message, userstate)
 		{console.log('** SUBSCRIPTION **', channel, username, method, message, userstate, arguments)},
                     // oh god, this went a bit mental
-    subgift             = function (channel, username, streakMonths, recipient, methods, userstate)
+    subgift             : function (channel, username, streakMonths, recipient, methods, userstate)
 		{ console.log('** SUB GIFT ** channel, username, streakMonths, recipient, methods, userstate', arguments); },
 
-    anonsubgift         = function (channel, streakMonths, recipient, methods, userstate)
+    anonsubgift         : function (channel, streakMonths, recipient, methods, userstate)
 		{console.log('** ANON SUB GIFT **'); for(arg of arguments) {console.log(arg); }},
 
-    submysterygift      = function (channel, username, numbOfSubs, methods, userstate)
+    submysterygift      : function (channel, username, numbOfSubs, methods, userstate)
 		{console.log('** SUB MYSTERY GIFT **'); for(arg of arguments) {console.log(arg); }},
 
-    anonsubmysterygift  = function (channel, giftSubCount, methods, userstate)
+    anonsubmysterygift  : function (channel, giftSubCount, methods, userstate)
 		{console.log('** SUBS ANON MYSTERY **'); for(arg of arguments) {console.log(arg); }},
 
-    primepaidupgrade    = function (channel, username, methods, userstate)
+    primepaidupgrade    : function (channel, username, methods, userstate)
 		{console.log('** Prime Paid Upgrade **'); for(arg of arguments) {console.log(arg); }},
 
-    giftpaidupgrade     = function (channel, username, sender, userstate)
+    giftpaidupgrade     : function (channel, username, sender, userstate)
 		{console.log('** gift paid upgrade **'); for(arg of arguments) {console.log(arg); }},    // upgrading from a gift from a sender
 
-    anongiftpaidupgrade = function (channel, username, userstate)
+    anongiftpaidupgrade : function (channel, username, userstate)
 		{console.log('** Anon paid gift upgrade **'); for(arg of arguments) {console.log(arg); }}, // use upgraded from an anonymous gift sub
-];
+};
 
 })();

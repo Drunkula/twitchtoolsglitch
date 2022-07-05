@@ -1,4 +1,7 @@
 'use strict'
+
+{	// SCOPE
+
 const FORM_RESTORE_VERBOSE = false;
 	/**
  	*	Returns form fields as uri encode pairs separated by &
@@ -129,3 +132,7 @@ TT.form_filter_commas_to_spaces = function form_filter_commas_to_spaces(str) {
 	str = str.match(/\w+/g);
 	return str ? str.join(' ') : '';
 }
+
+
+
+}	// scope
