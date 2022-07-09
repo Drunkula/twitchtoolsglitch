@@ -6,9 +6,9 @@
  */
 "use strict"
 
-const TT_CHAT_MSG_COOLDOWN_MINS_MAX = 300;
-const TT_CHAT_MSG_SECS_BEFORE_ALERT_MAX = 120;
 {// scope start
+    const TT_CHAT_MSG_COOLDOWN_MINS_MAX = 300;
+    const TT_CHAT_MSG_SECS_BEFORE_ALERT_MAX = 120;
 
         // regex's to match the input
 
@@ -16,6 +16,8 @@ const TT_CHAT_MSG_SECS_BEFORE_ALERT_MAX = 120;
         onCooldown: true,
         cooldownDefaultSecs : 180,
         cooldownSecsRemaining : 180,  // that'll be changing
+
+        cooldownBtnText: 'n/a',
 
         secsBeforeAlert : 15,       // in case you spot a chatter and want to add to the cooldown
 
@@ -43,6 +45,8 @@ const TT_CHAT_MSG_SECS_BEFORE_ALERT_MAX = 120;
     window.addEventListener('load', (event) => {
         log('LOADED');
 
+        TT.forms_init_common(); // channels populates form fields from url string
+            // after init as defaults changed
         TT.add_event_listeners(NCMEvents);
 
         let clearChatters = () => { o('', true); };
@@ -50,12 +54,13 @@ const TT_CHAT_MSG_SECS_BEFORE_ALERT_MAX = 120;
             // adds functions to buttons with confirm countdown
         TT.button_add_confirmed_func('.clearChatConf', clearChatters);
 
-        TT.forms_init_common(); // channels populates form fields from url string
+            // set after forms_init
+        NCM_set_default_cooldown();
 
             // main listener
         NCM_add_tmi_listener();
 
-        // clicking the alert
+            // clicking the alert
         gid('alertnotification').onclick = () => {
             NCM_clear_final_coundown();
             NCM_set_default_cooldown();
@@ -224,8 +229,6 @@ const TT_CHAT_MSG_SECS_BEFORE_ALERT_MAX = 120;
 
         NCMVars.cooldownDefaultSecs = coolMins * 60;
 
-        e.target.value = coolMins;
-
         console.log('SETTING DEFAULT TO ', coolMins, 'minutes');
     }
 
@@ -248,7 +251,9 @@ const TT_CHAT_MSG_SECS_BEFORE_ALERT_MAX = 120;
 
         // decreases the timer and outputs the time remaining.  yes, it's got more than one duty
 
-    NCMVars.cooldownBtnText = null;
+        /**
+         *
+         */
 
     function NCM_cooldown_interval_timer() {
         let out = '';

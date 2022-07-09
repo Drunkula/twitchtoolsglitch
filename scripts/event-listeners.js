@@ -15,21 +15,20 @@
 
 	const TT_EVENT_ITEMS = [
 		{selector: '#mainform', event: 'submit', function: join_chans_submit_handler, params: {}},
-		{selector: '#channels', event: 'change', function: url_populate_onchange, params: {}},
+//		{selector: '#channels', event: 'change', function: url_populate_onchange, params: {}},
 
 		{selector: '[data-toarray]', event: 'change', function: set_conf_array, params: {}},
 		{selector: '[data-toarraylc]', event: 'change', function: set_conf_array_lc, params: {}},
 
 		{selector: '[data-toint]', event: 'change', function: set_conf_int, params: {}},
+		{selector: '[data-tofloat]', event: 'change', function: set_conf_float, params: {}},
 		{selector: '[data-tostr]', event: 'change', function: set_conf_string, params: {}},
 		{selector: '[data-tostrlc]', event: 'change', function: set_conf_string_lc, params: {}},
 		{selector: '[data-tocheckbox]', event: 'change', function: set_conf_checkbox, params: {}},
 
 		{selector: '.urlpopulate', event: 'click', function: ns.url_populate, params: {}},
+			// any change in any .form-save value updates the url
 		{selector: '.form-save', event: 'change', function: url_populate_onchange, params: {}},
-
-	//	{selector: '.urlpopulateoc', event: 'change', function: url_populate_onchange, params: {}},	// just do on .form-save
-	//	{selector: 'button.delete', event: 'change', function: tt_allow_named_onchange, params: {}},
 	]
 
 		// adds event listeners - if it's onchange it's triggered
@@ -43,10 +42,10 @@
 			for (const f of fs) {
 				f.addEventListener(ev.event, ev.function);
 					// array or string then dispatch those events
-				if (ev.triggers) {
-
+/* 				if (ev.triggers) {
+					// for the future, but for now lazy below
 				}
-					// might change this to params having triggers
+ */					// LAZY, dangerous, might change this to params having triggers
 				if (ev.event === 'change') {
 					f.dispatchEvent(chEv);
 				} else
@@ -66,28 +65,61 @@
 		// maps to int checking max and min
 
 	function set_conf_int(e) {	//verify_data_varname(e);
+		let valOrig = e.target.value;	// will be string
+
 		let i = parseInt(e.target.value);
 
 		if ( isNaN(i) ) {
 			i = parseInt(e.target.defaultValue);
-			e.target.value = i;
 		}
 
 		if (e.target.max) {
 			let m = parseInt(e.target.max);
 			if (i > m) {
-				i = m;	e.target.value = i;
+				i = m;
 			}
 		}
 		if (e.target.min) {
 			let m = parseInt(e.target.min);
-			if (i < m) {
-				i = m; e.target.value = i;
+			if (i < m) {console.log("to int less min");
+				i = m;
+			}
+		}
+			// update original if it's a wrongun
+		if (i.toString() !== valOrig) e.target.value = i.toString();
+			// set the var
+		return TT.set_conf(e.target.dataset.toint, i);
+	}
+
+		// maps to int checking max and min
+
+	function set_conf_float(e) {	//verify_data_varname(e);
+		let valOrig = e.target.value;
+		let i = parseFloat(valOrig);
+
+		if ( isNaN(i) ) {
+			i = parseFloat(e.target.defaultValue);
+		}
+
+		if (e.target.max) {
+			let m = parseFloat(e.target.max);
+			if (i > m) {
+				i = m;
 			}
 		}
 
-		return TT.set_conf(e.target.dataset.toint, i);
+		if (e.target.min) {
+			let m = parseFloat(e.target.min);
+			if (i < m) {
+				i = m;
+			}
+		}
+
+		if (i.toString() !== valOrig) e.target.value = i.toString();
+
+		return TT.set_conf(e.target.dataset.tofloat, i);
 	}
+
 
 	function set_conf_string_lc(e) {	//verify_data_varname(e);
 		return TT.set_conf(e.target.dataset.tostrlc, e.target.value.trim().toLowerCase())
@@ -136,9 +168,9 @@
 
 		urlParams = 'autojoin=true&' + urlParams;
 			// sets the value in localStorage to use in form values restore
-		TT.page_params_set(urlParams);
-
+		TT.localstore_save(urlParams);
 		let url = window.location.origin + window.location.pathname + '?' + urlParams;
+
 		history.replaceState({}, null, url);
 			// fill the link box
 		let urlBox = gid('linkurl');
@@ -149,7 +181,7 @@
 	// common form submit handler for joining channels
 
 	function join_chans_submit_handler(e) {
-		e.preventDefault();
+		e.preventDefault();	// do not remove this
 
 		const joinBtn = gid('join');
 

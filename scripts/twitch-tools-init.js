@@ -226,7 +226,7 @@ TT.button_add_confirmed_func = function (query, func, seconds = 3) {
 		let bWidth = btn.offsetWidth;
 		let maxWidth = bWidth;
 		let btnInterval;	// setInterval
-
+			// fn to return to original state
 		let resetBtn = () => {
 			clearInterval(btnInterval);
 			confirmCountdownUnderway = false;
@@ -236,7 +236,7 @@ TT.button_add_confirmed_func = function (query, func, seconds = 3) {
 		}
 			// add click event
 
-		btn.onclick = async () => {
+		btn.onclick = async (e) => {
 			if (confirmCountdownUnderway) {	// carry out the callback if we're in the countdown
 				func();
 				resetBtn();
@@ -245,7 +245,7 @@ TT.button_add_confirmed_func = function (query, func, seconds = 3) {
 
 			confirmCountdownUnderway = true;
 
-			btnInterval = setInterval( (function() {
+			btnInterval = setInterval( (function this_fn() {
 				if (countdown === 0) {
 					resetBtn();
 					return;
@@ -254,7 +254,7 @@ TT.button_add_confirmed_func = function (query, func, seconds = 3) {
 				let c = `Confirm ${countdown}`;
 				countdown--;
 
-				btn.innerHTML = c;
+				btn.textContent = c;
 				//toggle = !toggle;
 
 				if (btn.offsetWidth > maxWidth) {
@@ -263,7 +263,8 @@ TT.button_add_confirmed_func = function (query, func, seconds = 3) {
 					btn.style.width = maxWidth + 'px';
 				}
 					// function is immediately invoked and returns itself to the interval
-				return arguments.callee;
+				//return arguments.callee;	// nope, not in strict mode
+				return this_fn;
 			})(), 1000 );
 		}
 	});	// end of cbutsForeach

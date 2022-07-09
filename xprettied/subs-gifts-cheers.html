@@ -3,10 +3,13 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>localStorage : Twitch Tools</title>
+    <title>Subs, gifts and cheers : Twitch Tools</title>
     <meta name="description">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
     <script defer="" src="https://use.fontawesome.com/releases/v6.1.1/js/all.js"></script>
+    <!-- highlight auto in <pre><code> tags-->
+    <!-- link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/androidstudio.min.css")-->
+    <!-- script(defer='' src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js")-->
     <link rel="stylesheet" href="/css/styles.css">
   </head>
   <body>
@@ -48,17 +51,69 @@
     <div class="block mx-5 my-3 main-container">
       <script src="/scripts/backbone-common.js" defer></script>
       <script src="/scripts/twitch-tools-init.js" defer></script>
-      <!-- script(src="/scripts/tmi.min.js"defer)-->
-      <!-- script(src="/scripts/tmi-code-common.js")-->
+      <script src="/scripts/tmi.min.js" defer></script>
+      <script src="/scripts/tmi-code-common.js" defer></script>
       <script src="/scripts/event-listeners.js" defer></script>
       <script src="/scripts/form-fields-save-restore.js" defer></script>
-      <script src="/scripts/localstorage.js" defer></script>
-      <div class="notification is-info not-mobile-view" id="ncnoti">LocalStorage delete by page
+      <script src="/scripts/subs-gifts-cheers.js" defer></script>
+      <div class="notification is-info not-mobile-view" id="ncnoti">Subs Gifts Cheers
         <button class="delete" data-target="#ncnoti"></button>
       </div>
       <div class="columns is-flex-direction-row-reverse">
         <div class="column">
-          <div class="box" id="mainoutput"></div>
+          <div class="box controls">
+            <form class="not-mobile-view" id="mainform">
+              <label class="label is-hidden-mobile">Channels</label>
+              <div class="field has-addons">
+                <div class="control is-expanded">
+                  <input class="input is-fullwidth form-save form-filter-spaces-to-commas" id="channels" type="text" size="50" placeholder="Channel names space or comma separated">
+                </div>
+                <div class="control">
+                  <button class="button is-link urlpopulate" id="join">Join</button>
+                </div>
+              </div>
+            </form>
+            <div class="field is-grouped-centered is-grouped">
+              <!-- dropdowns larger view - maybe do little for both-->
+              <div class="control is-hidden-mobile">
+                <div class="dropdown is-responsive is-small">
+                  <div class="dropdown-trigger">
+                    <button class="button is-primary"><span>Clear chatters:</span><span class="icon is-small"><i class="fas fa-comment-slash"></i></span></button>
+                  </div>
+                  <div class="dropdown-menu">
+                    <div class="dropdown-content"><a class="dropdown-item" id="clearnew">Confirm</a>
+                      <div class="dropdown-divider"></div><a class="dropdown-item">Cancel</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="control is-hidden-mobile">
+                <div class="dropdown is-small is-right">
+                  <div class="dropdown-trigger">
+                    <button class="button is-primary"><span>Reset:</span><span class="icon is-small"><i class="fas fa-power-off"></i></span></button>
+                  </div>
+                  <div class="dropdown-menu">
+                    <div class="dropdown-content"><a class="dropdown-item" id="resetnew">Confirm</a>
+                      <div class="dropdown-divider"></div><a class="dropdown-item">Cancel</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- small buttons mobile view-->
+              <div class="control is-hidden-tablet">
+                <button class="button is-small is-info clearChatConf">Clear Chat</button>
+              </div>
+              <div class="control is-hidden-tablet">
+                <button class="button is-small is-info resetChatConf">Reset</button>
+              </div>
+              <div class="control">
+                <button class="button is-small is-primary mobile-view-btn">Mini View</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="box" id="mainoutput">Subs, gifts, cheers - this doesn't work yet, unless you press F12 and look at the javascript console.  Sorrreeeeee.</div>
           <div class="not-mobile-view" id="logbox">
             <div class="box">
               <button class="delete is-pulled-right" data-target="#logbox"></button>

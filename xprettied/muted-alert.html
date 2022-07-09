@@ -7,6 +7,9 @@
     <meta name="description">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
     <script defer="" src="https://use.fontawesome.com/releases/v6.1.1/js/all.js"></script>
+    <!-- highlight auto in <pre><code> tags-->
+    <!-- link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/androidstudio.min.css")-->
+    <!-- script(defer='' src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js")-->
     <link rel="stylesheet" href="/css/styles.css">
   </head>
   <body>
@@ -111,6 +114,7 @@
                 <button class="button is-small is-primary modal-trigger" data-target="configModal"><i class="fas fa-gear"></i></button>
               </div>
             </div>
+            <div class="field is-grouped-centered is-grouped"></div>
           </div>
         </div>
         <div class="column">
@@ -182,17 +186,17 @@
             <div class="field is-grouped-centered is-grouped permissions">
               <div class="control">
                 <label class="checkbox button is-info">
-                  <input class="form-save" id="everyone" type="checkbox" data-tocheckbox="perms.allowEveryone"> everyone
+                  <input class="form-save" type="checkbox" id="everyone"> everyone
                 </label>
               </div>
               <div class="control">
                 <label class="checkbox button is-info">
-                  <input class="form-save" id="mods" type="checkbox" checked data-tocheckbox="perms.allowMods"> mods
+                  <input class="form-save" type="checkbox" checked id="mods"> mods
                 </label>
               </div>
               <div class="control">
                 <label class="checkbox button is-info">
-                  <input class="form-save" id="vips" type="checkbox" checked data-tocheckbox="perms.allowVips"> vips
+                  <input class="form-save" type="checkbox" checked id="vips"> vips
                 </label>
               </div>
             </div>

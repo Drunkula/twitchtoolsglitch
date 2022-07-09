@@ -17,18 +17,17 @@
  *
  * TO DO
  *   POSSIBLE - follower only
+ *      add a delay before adding to the speech queue so they can be nixed
+ *      check for mod message deletions
  *
  *  Speecher.ready() returns promise, true when good, false when bad
  */
 "use strict"
 
-TMIConfig.TTSVars = {   // more props added from forms
-    cooldownDiv: null,
-    cooldownSecsDiv: null,
-
+TMIConfig.TTSVars = {       // more props added from forms
     flashSetTimeout: null,
     flashDuration: 3500,    // milliseconds
-    flashFunc: x => x,  // does nothing for now
+    flashFunc: x => x,      // does nothing for now
         // updated by the speecher callbacks and speech parameter onchanges
     voices: [],
     sayCmds: {}
@@ -42,9 +41,7 @@ try {   // scope starts ( in case I can demodularise this )
 
     const cooldowns = new TT.Cooldowns();
     const speech = new TT.Speecher();
-
-    speech.on({error: speek_error});
-    // it's too late speech.on({start: (e) => {console.log("ON START", e); e.target.text = "CAN IT BE CHANGED?"; e.target.volume = 0.6; e.target.lang = "en-US";  e.target.rate = 2.0; e.target.pitch = 1.5; }})
+    speech.on({error: speech_error_callback});
     TTSVars.speecher = speech;
 
     speech.addEventListener('voicessschanged', e => {
@@ -56,7 +53,7 @@ try {   // scope starts ( in case I can demodularise this )
             event: 'change', function: update_say_commands, params: {}},
         {selector: '#speechtestbtn', event: 'click', function: speech_test, params: {}},
 
-        {selector: '#cancelbtn', event: 'click', function: () => speech.ss.cancel(), params: {}},
+        {selector: '#cancelbtn', event: 'click', function: () => speech.cancel(), params: {}},
 
         {selector: '#saycmds button[data-index]', event: 'click', function: test_voice_onclick, params: {}},
         {selector: 'input[type="range"]', event: 'input', function: slider_oninput, params: {}},
@@ -64,12 +61,13 @@ try {   // scope starts ( in case I can demodularise this )
         {selector: '#enablespeech', event: 'change', function: speech_enabled_checkbox_onchange, params: {}},
 
         {selector: '#pausespeech', event: 'change', function: speech_pause_checkbox_onchange, params: {}},
+
+        {selector: '#volumemaster', event: 'input', function: volume_master_slider_oninput, params: {}},
     ];
 
         // on window load
 
     window.addEventListener('load', async (event) => {
-        let isError = false;
 
         init_speecher().then(() => {
                 // set up the voice selects
@@ -77,19 +75,22 @@ try {   // scope starts ( in case I can demodularise this )
 
             speech.addEventListener('voiceschanged', () => {
                 let voices = speechSynthesis.getVoices();
-                //if (voices.length !== TTSVars.voices.length)
-                {  // have to do it this way because of EDGE firing onchange events
-                    console.log(g("VOICES HAVE CHANGED ss version:"), voices.length);
+                if (voices.length !== TTSVars.voices.length)
+                {  // have to do it this way because of EDGE firing onvoiceschanged events willy nilly
+                    console.log(g("Number of voices has changed:"), voices.length);
                     TTSVars.voices = voices;
                     create_speech_selects_options();
                 }
             });
 
+            speech.addEventListener('beforespeak', () => speech.utterance.volume = TTSVars.volumemaster)
 
             TT.forms_init_common();
 
             TT.add_event_listeners(TTS_EVENTS);
-                // set the default values
+                // main listener
+            add_chat_to_speech_tmi_listener();
+            init_flasher_tech();
 
             if (TMIConfig.autojoin) {
                 console.log(r("Auto Joining channels..."));
@@ -99,18 +100,12 @@ try {   // scope starts ( in case I can demodularise this )
         .catch( e => {
             log('<b>INIT ERROR:</b> ' + e.toString())
             o(e.toString(), true)
-            o('<h4 class="subtitle is-4">Please try a different browser</h4>')
-            o('<h3 class="title is-3">Sadly No Speech available</h3>')
+            if (TTSVars.voices.length === 0) {
+                o('<h4 class="subtitle is-4">Please try a different browser</h4>')
+                o('<h3 class="title is-3">Sadly No Speech available</h3>')
+            }
         })
 
-        if (isError) {
-            return;
-        }
-
-            // auto sets array in TMIConfig.perms to lower case - set to a global system and we can put this as common
-            // main listener
-        add_chat_to_speech_tmi_listener();
-        init_flasher_tech();
     });// on load ends
 
 
@@ -149,7 +144,6 @@ try {   // scope starts ( in case I can demodularise this )
             if (lastMsgId === userstate['id']) {  // had a case of double messaging
                 return;
             }
-
             lastMsgId = userstate['id'];    // unique to every message
 
             if (TTSVars.chatQueueLimit && speech.queue_length() >= TTSVars.chatQueueLimit) {
@@ -165,52 +159,50 @@ try {   // scope starts ( in case I can demodularise this )
                 // Handle different message types..
             switch(userstate["message-type"]) {
                 case "action": case "chat": case "whisper":
-                    // check if the user or global timeout is in effect.
-                    // filter out emotes
+                        // filter out emotes
                     if ( ! TTSVars.chatReadEmotes && userstate['emotes-raw'] !== null) {
                         message = filter_out_emotes(message, userstate);
                     }
 
-                    let isSayCmd = is_say_command(message);  // returns obj or false
+                    let sayCmdPack = is_say_command(message);  // returns obj or false
                         // if read all create a fake say command
-                    if (!isSayCmd) {
+                    if (!sayCmdPack) {
                         if ( !TTSVars.chatReadAll || ('!' === message[0]) && TTSVars.chatReadOtherCommands !== true) {
                             return;
                         }
-
                             // create an all-chat say command
-                        isSayCmd = { // command rest params (voice)
+                        sayCmdPack = {
                             command: '!all-chat',
-                            rest: message,  // use first voice by default
-                            params: get_voice_settings(1)
+                            rest: message,
+                            params: get_voice_settings(1)   // use first voice by default
                         }
                     }
+                        // empty message - return
+                    if (sayCmdPack.rest.trim() === '') return;
+
+
                         // category out a single user by setting similar commands to a single value e.g. !allsaycommands
-                    let coolParms = {
+                    let cooldownParams = {
                         channel: 'ALL-CHANS',    // cooldowns are CHANNEL based - so set to a common value if you want to put globals on for all
+                        command: sayCmdPack.command,   // set to !userCategoryFake to category out only users
+                        //category: "text-to-speech-"+ channel,   // example to category out channels individually
                         userstate,
                         globalCooldown: TTSVars.chatCooldownGlobal,
-                        //category: "text-to-speech-"+ channel,   // example to category out channels individually
                         userCooldown: TTSVars.chatCooldownUser,
-                        modCooldown: TTS_MOD_COOLDOWN,     // just as a test
-                        command: isSayCmd.command   // set to !userCategoryFake to category out only users
+                        modCooldown: TTS_MOD_COOLDOWN     // tested working
                     }
 
-                    let oc = cooldowns.cooldown_check(coolParms);
+                    let oc = cooldowns.cooldown_check(cooldownParams);
 
-                    if (oc !== false ) {
-                        console.log("ON a cooldown", oc);
+                    if (oc !== false ) {    // returns an object of user and global cooldown if on a cooldown
+                        console.debug("ON a cooldown", oc);
                         return;
                     }
-                    cooldowns.cooldown_set(coolParms)
+                    cooldowns.cooldown_set(cooldownParams)
 
-                        // let's commands still be used
+                        // event handlers for utterance
 
-                    if (isSayCmd.rest.trim() === '') return;
-
-                        //
-
-                    isSayCmd.params.end = e => {
+                    sayCmdPack.params.end = e => {
                         try {
                             TTSVars.speech_queue_remove_entry(e.target.queueid);
                         } catch (error) {
@@ -218,7 +210,7 @@ try {   // scope starts ( in case I can demodularise this )
                             console.error(`Error removing speech queue row # ${e.target.queueid} on utterance end event`)
                         }
                     };
-                    isSayCmd.params.error = e => {
+                    sayCmdPack.params.error = e => {
                         try {
                             TTSVars.speech_queue_remove_entry(e.target.queueid);
                         } catch (error) {
@@ -227,12 +219,14 @@ try {   // scope starts ( in case I can demodularise this )
                         }
                     };
 
+                        // display the speech
+
                     let id = speech.next_id();
-                    TTSVars.speech_queue_list_add({user: userstate["display-name"], text: isSayCmd.rest, id})
+                    TTSVars.speech_queue_list_add({user: userstate["display-name"], text: sayCmdPack.rest, id})
 
                         // this actually writes to the global params
-                    isSayCmd.params.text = add_speech_before_after(isSayCmd.rest, userstate, channel);
-                    let nid = speech.say(isSayCmd.params);
+                    sayCmdPack.params.text = add_speech_before_after(sayCmdPack.rest, userstate, channel);
+                    let nid = speech.say(sayCmdPack.params);
 
                     if (id !== nid) {
                         console.error('NEXT ID AND PREVIOUS DID NOT MATCH', id, nid);
@@ -293,14 +287,14 @@ try {   // scope starts ( in case I can demodularise this )
 
         // if browser requires interaction before allowing speech then flash the screen
 
-    function speek_error(e) {
+    function speech_error_callback(e) {
         if (e.error === "not-allowed") {
             TTSVars.flashFunc();
         }
     }
 
-        // commands must always start with !
-        // returns rest of string without command
+        // Does the text match one of the defined !command text inputs
+        // returns obj {command: "!say", rest: "after command", params: [voices pitch/rate paramaters matching the !command]
         // filter emotes BEFORE calling this
     function is_say_command (str) {
         if (str[0] === '!') {	// get the first word with ! lowercased
@@ -347,7 +341,6 @@ try {   // scope starts ( in case I can demodularise this )
 
                 frag.appendChild(opt);
             }
-
             //s.appendChild(frag);
             s.replaceChildren(frag);
         }
@@ -362,10 +355,6 @@ try {   // scope starts ( in case I can demodularise this )
         if (sout = gid(sout)) {
             sout.innerText = e.target.value;
         }
-    }
-
-    function test_voice_onclick (e) {
-        test_voice(e.target.dataset['index'])
     }
 
         // sets TTSVars.sayCmds for easy access, triggered by onchange of any command params
@@ -393,9 +382,14 @@ try {   // scope starts ( in case I can demodularise this )
         TTSVars.sayCmds = commands;
     }
 
-        // test speak button
+        // test voice settings button
+
+    function test_voice_onclick (e) {
+        test_voice(e.target.dataset['index'])
+    }
 
     function test_voice(index) {
+        /*
         let vals = ['rateval', 'pitchval', 'voiceid']
 
         let rate = +gid('rateval-'+index).value;
@@ -403,10 +397,11 @@ try {   // scope starts ( in case I can demodularise this )
 
         let vIdx = gid('voiceid-'+index).value;
         let voice = TTSVars.voices[vIdx];
-
+        */
         let params = get_voice_settings(index);
         params.text = TTS_TEST_TEXT;
         params.immediate = true;
+        params.volume = TTSVars.volumemaster;
 
         speech.speak(params);
     }
@@ -422,21 +417,17 @@ try {   // scope starts ( in case I can demodularise this )
         return {rate, pitch, voice}
     }
 
-
         // flashers might end up common
 
     function init_flasher_tech() {        // if a flasher is there set up a func
         let flashBox = gid('flasher');
         flashBox.onclick = stop_flash;  // allow a click to cancel
 
+        TTSVars.flashActive = false;
+
         let flashFunc = () => {
-            clearTimeout(TTSVars.flashSetTimeout);
-
-            flashBox.classList.add('flasher');
-
-            TTSVars.flashSetTimeout = setTimeout(() => {
-                flashBox.classList.remove('flasher');
-            }, TTSVars.flashDuration);
+            if (TTSVars.flashActive) return;
+            start_flash();
         }
 
         if (flashBox) { console.log('FLASHER ASSIGNED');
@@ -444,19 +435,31 @@ try {   // scope starts ( in case I can demodularise this )
         }
     }
 
+    function start_flash() {
+        TTSVars.flashActive = true;
+        clearTimeout(TTSVars.flashSetTimeout);
+
+        let flashBox = gid('flasher');
+        flashBox.classList.add('flasher');
+
+        TTSVars.flashSetTimeout = setTimeout(() => {
+            stop_flash();
+        }, TTSVars.flashDuration);
+    }
 
     function stop_flash() {
+        TTSVars.flashActive = false;
+        clearTimeout(TTSVars.flashSetTimeout);
+
         let flashBox = gid('flasher');
         flashBox.classList.remove('flasher');
-
-        clearTimeout(TTSVars.flashSetTimeout);
     }
 
     function speech_test () {
         speech.speak({text: "Testing the speech engine - beep boop beep", saynext: true});
     }
 
-        // clears the speech queue
+        // pause and resume checkbox
 
     function speech_pause_checkbox_onchange (e) {
         let t = e.target;
@@ -468,24 +471,25 @@ try {   // scope starts ( in case I can demodularise this )
         }
     }
 
+        // enabled checkbox clears the speech queue visually and aurally
+
     function speech_enabled_checkbox_onchange (e) {
         let t = e.target;
         if ( t.checked === false ) {
-            //speech.isSpeaking = false;
             speech.cancel();
             speech.clear();
-            TTSVars.speech_list_clear();
-            //speech.reset();
+            TTSVars.speech_list_clear();    // on screen list
         }
-        else {
-            //speech.isSpeaking = false;
-            //speech.resume();
-            //speech.sayQueueProcess();
-        }
+    }
+
+        // display value //speech.utterance.volume = e.target.value; // can't change during
+
+    function volume_master_slider_oninput(e) {
+        gid('volumemasterdisplay').textContent = Math.round( e.target.value * 100.0 );
     }
 
 }   // SCOPE ENDS
 catch (e) {
-    console.log("Errorrr", e);
-    o("Error: " + e.toString());
+    console.log("Error in Chat to Speech", e);
+    o("Error in chat to speech: " + e.toString());
 }

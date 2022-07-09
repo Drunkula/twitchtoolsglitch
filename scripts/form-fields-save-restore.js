@@ -63,7 +63,7 @@ TT.inputs_to_uri_string = function inputs_to_uri_string(selectors = '.form-save'
 	let inputs = document.querySelectorAll(selector);
 
 	if (!paramString && localStorageFallback) {
-		paramString = TT.page_params_get();
+		paramString = TT.localstore_load();
 	}
 
 	let getVars = TT.param_string_to_array(paramString);
@@ -72,17 +72,17 @@ TT.inputs_to_uri_string = function inputs_to_uri_string(selectors = '.form-save'
 		const name = field.name ? field.name : (idIfNoName && field.id ? field.id : null);
 
 		if ( !name) {
-			if (FORM_RESTORE_VERBOSE) console.log("restore_form_values : Field does not have a name : ", field);
+			if (FORM_RESTORE_VERBOSE) console.error("restore_form_values : Field does not have a name : ", field);
 			return;
 		}
 
 		if ( !(name in getVars) ) {
-			if (FORM_RESTORE_VERBOSE) console.log("restore_form_values : field has no url match : ", name)
+			if (FORM_RESTORE_VERBOSE) console.error("restore_form_values : field has no url match : ", name)
 			return;
 		}
 
 		if ( !field.type ) {
-			if (FORM_RESTORE_VERBOSE) console.log("restore_form_values : field has no type : ", field)
+			if (FORM_RESTORE_VERBOSE) console.error("restore_form_values : field has no type : ", field)
 			return;
 		}
 
@@ -113,6 +113,8 @@ TT.inputs_to_uri_string = function inputs_to_uri_string(selectors = '.form-save'
 		}
 	});
 }
+
+	// breaks uri string into key/value pairs
 
 TT.param_string_to_array = function param_string_to_array( params = window.location.search ) {
 	let getVars = [];

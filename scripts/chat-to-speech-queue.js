@@ -67,10 +67,29 @@
 		}
 	}
 
+		// remove with id but forcible if del button used
+
+	TTSVars.speech_queue_remove_entry = function spq_remove(id, force = false) {
+		id = gid('sq-' + id);
+		if ( !id  || ( id.frozen && force === false ) ) {
+			return false;
+		}
+		id.remove();
+	}
+
+		// freeze row if ban hit - stops utterance end events clearing the row
+
+	function speech_queue_entry_freeze(id) {
+		id = gid('sq-' + id);
+		if (id) {
+			id.frozen = true;
+		}
+	}
+
 		// ban freezes the current entry allowing you do unban.
 		// on ban all the user's other entries are cleared and their name is added to ignored users.
 
-	const ban_button_onclick = function ban_button_onclick(e) {
+	function ban_button_onclick(e) {
 		let user = e.target.dataset.user;
 		let sameUser = qsa(`[data-user="${user}"]`)
 		let id = e.target.dataset.id;
@@ -87,7 +106,7 @@
 		else {	// not banned, so ban, stop all speech, add to bad users
 			console.log("BANNING", user);
 			TT.ignored_users_add(user);
-			TTSVars.speech_queue_entry_freeze(id);	// stop the entry from being removed by a speech end event
+			speech_queue_entry_freeze(id);	// stop the entry from being removed by a speech end event
 				//
 			sameUser.forEach(e => {
 				TTSVars.speecher.cancel_id(e.dataset.id);
@@ -102,34 +121,16 @@
 		}
 	}
 
-		// remove with id but forcible if del button used
-
-	TTSVars.speech_queue_remove_entry = function spq_remove(id, force = false) {
-		id = gid('sq-' + id);
-		if ( !id  || ( id.frozen && force === false ) ) {
-			return false;
-		}
-		id.remove();
-	}
-		// freeze row if ban hit - stops utterance end events clearing the row
-	TTSVars.speech_queue_entry_freeze = function spq_remove(id, force = false) {
-		id = gid('sq-' + id);
-		if (id) {
-			id.frozen = true;
-		}
-	}
-
 		// delete buttons remove rows no problem
 
-	const del_button_onclick = function del_button_onclick(e) {
+	function del_button_onclick(e) {
 		TTSVars.speecher.cancel_id(e.target.dataset.id);
 		// delete this?
 		gid('sq-' + e.target.dataset.id)?.remove();
 	}
 		// document create element
-	const dce = function dce(i) {
+	function dce(i) {
 		return document.createElement(i);
 	}
-
 
 }	// SCOPE ENDS

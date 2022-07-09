@@ -7,6 +7,9 @@
     <meta name="description">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
     <script defer="" src="https://use.fontawesome.com/releases/v6.1.1/js/all.js"></script>
+    <!-- highlight auto in <pre><code> tags-->
+    <!-- link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/androidstudio.min.css")-->
+    <!-- script(defer='' src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js")-->
     <link rel="stylesheet" href="/css/styles.css">
   </head>
   <body>
@@ -95,7 +98,7 @@
           <div class="columns is-vcentered">
             <div class="column">
               <div class="control">
-                <input class="input is-small form-save" type="text" id="saycmd-1" name="saycmd-1-name" placeholder="!command">
+                <input class="input is-small form-save" type="text" id="saycmd-1" name="saycmd-1-name" placeholder="saycmd-1 voice command">
               </div>
               <div class="control">
                 <div class="select is-small">
@@ -118,7 +121,7 @@
           <div class="columns is-vcentered">
             <div class="column">
               <div class="control">
-                <input class="input is-small form-save" type="text" id="saycmd-2" name="saycmd-2-name" placeholder="!command">
+                <input class="input is-small form-save" type="text" id="saycmd-2" name="saycmd-2-name" placeholder="saycmd-2 voice command">
               </div>
               <div class="control">
                 <div class="select is-small">
@@ -141,7 +144,7 @@
           <div class="columns is-vcentered">
             <div class="column">
               <div class="control">
-                <input class="input is-small form-save" type="text" id="saycmd-3" name="saycmd-3-name" placeholder="!command">
+                <input class="input is-small form-save" type="text" id="saycmd-3" name="saycmd-3-name" placeholder="saycmd-3 voice command">
               </div>
               <div class="control">
                 <div class="select is-small">
@@ -163,7 +166,7 @@
           </div>
         </div>
         <hr class="not-mobile-view">
-        <div class="columns is-centered is-mobile not-mobile-view">
+        <div class="columns is-centered not-mobile-view">
           <div class="column is-10-mobile is-8-tablet is-6-desktop mt-0">
             <div class="has-text-centered subtitle mb-0">master volume</div>
             <div class="is-flex is-align-content-center">
@@ -203,11 +206,11 @@
             <p>Limit commands to MODS, VIPS and named users.</p>
             <p>&nbsp;</p>
             <div class="block"><strong>IMPORTANT:</strong> Speech isn't allowed on some browsers unless you click page once.  You'll get a notice.</div>
-            <div class="block">The <span class="tag is-primary">Mini View</span> button toggles screen clutter.  Make sure you've joined a channel first.</div>
-            <div class="block"><strong>Tip: All Chat</strong> To hear just people you like set the cooldowns to zero, deselect the permissions and add their names to allowed users.  You can monitor all chat on smaller channels, but for crazy ones the queue limit will save you.</div>
-            <p><b>Different browsers</b> have different sets of voices.  Desktop versions of Chrome have lots of great voices and Edge has absolutely tons.</p>
+            <p>The <span class="tag is-primary">Mini View</span> button toggles screen clutter.  Make sure you've joined a channel first.</p>
+            <div class="block"><strong>Tip: All Chat</strong> Set the cooldowns to zero, deselect the permissions and just add chatters names who you like to the allow named field.</div>
+            <p><b>Different browsers</b> have different sets of voices.  Desktop versions of Chrome has lots of great voices and Edge has absolutely tons</p>
             <p>&nbsp;</p>
-            <p>Note: Disabling and enabling the speech will clear the queue.</p>
+            <p>Note: Disabling and enabling the speech will clear the speech queue if there are any lined up.</p>
             <p>&nbsp;</p>
             <p><strong>Config</strong>
               <button class="button is-small is-primary modal-trigger p-1" data-target="configModal"><i class="fas fa-gear"></i></button> :
@@ -219,7 +222,7 @@
             <p><strong>Emotes:</strong> can be removed from the text (recommended).</p>
             <p><strong>Digits in names:</strong> can be removed.</p>
             <p><strong>!Commands:</strong> can be ignored - no more !giveaway x 1000 or !roflcopter annoyances</p>
-            <p><strong>Cooldowns:</strong> global and user cooldowns will stop you being spammed.  They still apply in read All Chat mode.</p>
+            <p><strong>Cooldowns: (implementing soon)</strong> global and user cooldowns will stop you being spammed.  They still apply in read All Chat mode.</p>
             <p><strong>Queue limit</strong> very chatty channels might fill the speech queue up so you'll never reach the end, set a sensible limit.</p>
             <p><strong>Say before/after</strong> tags {user} and {channel} let's you add things like <em>{user} says</em> before or <em>says {user}</em> after messages.</p>
             <p>If you're monitoring multiple channels then <em>{user} on channel {channel} says</em> might be useful.</p>
@@ -237,7 +240,6 @@
                 <button class="button is-danger is-small is-responsive urlpopulate">Get Url</button>
               </div>
             </div>
-            <div class="block"><strong>Todo:</strong> filter BTTV emotes, clear entries on mod ban / delete message actions, possibly delay before speaking so entries can be vetted.</div>
           </div>
         </div>
       </div>
@@ -280,17 +282,17 @@
                 <div class="field is-grouped-centered is-grouped permissions">
                   <div class="control">
                     <label class="checkbox button is-info">
-                      <input class="form-save" id="everyone" type="checkbox" data-tocheckbox="perms.allowEveryone"> everyone
+                      <input class="form-save" type="checkbox" id="everyone"> everyone
                     </label>
                   </div>
                   <div class="control">
                     <label class="checkbox button is-info">
-                      <input class="form-save" id="mods" type="checkbox" checked data-tocheckbox="perms.allowMods"> mods
+                      <input class="form-save" type="checkbox" checked id="mods"> mods
                     </label>
                   </div>
                   <div class="control">
                     <label class="checkbox button is-info">
-                      <input class="form-save" id="vips" type="checkbox" checked data-tocheckbox="perms.allowVips"> vips
+                      <input class="form-save" type="checkbox" checked id="vips"> vips
                     </label>
                   </div>
                 </div>

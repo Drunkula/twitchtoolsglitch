@@ -3,10 +3,13 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>localStorage : Twitch Tools</title>
+    <title>New Chatter : Twitch Tools</title>
     <meta name="description">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
     <script defer="" src="https://use.fontawesome.com/releases/v6.1.1/js/all.js"></script>
+    <!-- highlight auto in <pre><code> tags-->
+    <!-- link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/androidstudio.min.css")-->
+    <!-- script(defer='' src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js")-->
     <link rel="stylesheet" href="/css/styles.css">
   </head>
   <body>
@@ -48,17 +51,70 @@
     <div class="block mx-5 my-3 main-container">
       <script src="/scripts/backbone-common.js" defer></script>
       <script src="/scripts/twitch-tools-init.js" defer></script>
-      <!-- script(src="/scripts/tmi.min.js"defer)-->
-      <!-- script(src="/scripts/tmi-code-common.js")-->
+      <script src="/scripts/tmi.min.js" defer></script>
+      <script src="/scripts/tmi-code-common.js" defer></script>
       <script src="/scripts/event-listeners.js" defer></script>
       <script src="/scripts/form-fields-save-restore.js" defer></script>
-      <script src="/scripts/localstorage.js" defer></script>
-      <div class="notification is-info not-mobile-view" id="ncnoti">LocalStorage delete by page
+      <script src="/scripts/new-chatter-notifications.js" defer></script>
+      <div class="notification is-info not-mobile-view" id="ncnoti">New Chatters
         <button class="delete" data-target="#ncnoti"></button>
       </div>
       <div class="columns is-flex-direction-row-reverse">
         <div class="column">
-          <div class="box" id="mainoutput"></div>
+          <div class="box controls">
+            <form class="not-mobile-view" id="mainform">
+              <label class="label is-hidden-mobile">Channels</label>
+              <div class="field has-addons">
+                <div class="control is-expanded">
+                  <input class="input is-fullwidth form-save form-filter-spaces-to-commas" id="channels" type="text" size="50" placeholder="Channel names space or comma separated">
+                </div>
+                <div class="control">
+                  <button class="button is-link urlpopulate" id="join">Join</button>
+                </div>
+              </div>
+            </form>
+            <!-- label.label#ncl(for="newchats") new Chatters:-->
+            <div class="field is-grouped-centered is-grouped">
+              <!-- dropdowns larger view - maybe do little for both-->
+              <div class="control is-hidden-mobile">
+                <div class="dropdown is-responsive is-small">
+                  <div class="dropdown-trigger">
+                    <button class="button is-primary"><span>Clear chatters:</span><span class="icon is-small"><i class="fas fa-comment-slash"></i></span></button>
+                  </div>
+                  <div class="dropdown-menu">
+                    <div class="dropdown-content"><a class="dropdown-item" id="clearnew">Confirm</a>
+                      <div class="dropdown-divider"></div><a class="dropdown-item">Cancel</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="control is-hidden-mobile">
+                <div class="dropdown is-small is-right">
+                  <div class="dropdown-trigger">
+                    <button class="button is-primary"><span>Reset:</span><span class="icon is-small"><i class="fas fa-power-off"></i></span></button>
+                  </div>
+                  <div class="dropdown-menu">
+                    <div class="dropdown-content"><a class="dropdown-item" id="resetnew">Confirm</a>
+                      <div class="dropdown-divider"></div><a class="dropdown-item">Cancel</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- small buttons mobile view-->
+              <div class="control is-hidden-tablet">
+                <button class="button is-small is-info clearChatConf">Clear Chat</button>
+              </div>
+              <div class="control is-hidden-tablet">
+                <button class="button is-small is-info resetChatConf">Reset</button>
+              </div>
+              <div class="control">
+                <button class="button is-small is-primary mobile-view-btn">Mini View</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="box" id="mainoutput">New chatter list</div>
           <div class="not-mobile-view" id="logbox">
             <div class="box">
               <button class="delete is-pulled-right" data-target="#logbox"></button>
@@ -70,11 +126,18 @@
       </div>
       <div class="container not-mobile-view">
         <div class="message is-link" id="mbnc">
-          <div class="message-header">Subby giffy cheery
+          <div class="message-header">New Chatter Tips
             <button class="delete" data-target="#mbnc"></button>
           </div>
           <div class="message-body">
-            <p class="mb-4">TBlheenn</p>
+            <p class="mb-4">The new chatter tool lets you easily say hello to people without having to scroll through your entire chat history.</p>
+            <p class="mb-4">After joining a channel when somebody chats they'll be added to the list just once so you can say hello to everyone at the start of your stream.  You can <strong>click names to dismiss them</strong> as you go, or just hit the clear button.  Chatters won't be added again unless you hit reset.</p>
+            <p class="mb-4">Popping off camera for a bit - clear the list and you'll know if any new chatters have joined since you were gone.</p>
+            <p class="mb-4">The reset button will forget the previous chatters so they'll be added again.  If you're signing off then reset and it'll make it easy to see who's saying goodbye.</p>
+            <h3 class="is-size-5">Tips:</h3>
+            <p class="mb-4">You can use ?channels=X,Y,Z after the url to preload channels and &amp;autojoin=true will save you clicking that button.</p>
+            <p class="mb-4">This lets you conveniently bookmark <em>new-chatters.html?channels=my_channel&amp;autojoin=true</em></p>
+            <p class="mb-4">The <span class="tag is-primary">Mini view</span> button will give a view good for phones, just make sure you've joined a channel first.</p>
             <div class="field has-addons">
               <div class="control is-expanded">
                 <input class="input is-small" id="linkurl" placeholder="Url to bookmark">
