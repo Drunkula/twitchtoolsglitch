@@ -13,31 +13,29 @@
         // regex's to match the input
 
     TMIConfig.NCMVars = {
-        onCooldown: true,
-        cooldownDefaultSecs : 180,
-        cooldownSecsRemaining : 180,  // that'll be changing
+        flashEnabled: true,
+        playSound: true,
+        cooldownDefaultMins: 5, // all set with data-to...
 
-        cooldownBtnText: 'n/a',
+        cooldownBtnText: 'n/a',     // "cache" for button output
 
         secsBeforeAlert : 15,       // in case you spot a chatter and want to add to the cooldown
-
         alertPending: false,
 
-        flashSetTimeout: null,
-        flashDuration: 3500,    // milliseconds
-        flashFunc: x => x,  // does nothing for now
         alertSound: null,   // embedded sound item for alertSound.play()
+        alertEnabled: true, // also set by checkbox
 
-        cooldownDiv: null,
-        cooldownSecsDiv: null
+        cooldownSecsDiv: null,  // countdown display
+
+        flasher: new Flasher(),
+        countdown: new Countdown(),
     }
         // proxy me do - means observing in dev tools is easy
     const NCMVars = TMIConfig.NCMVars;
 
     const NCMEvents = [
-        {selector: '#defaultcooldown', event: 'change', function: ncm_default_cooldown_onchange, params: {}},
-        {selector: '.cooldown-set', event: 'click', function: ncm_cooldown_inc, params: {}},
-        {selector: '#secsbeforealert', event: 'click', function: ncm_secs_before_alert_onchange, params: {}},
+        {selector: '#defaultcooldown', event: 'change', function: ncm_default_cooldown_input_onchange, params: {}},
+        {selector: '.cooldown-set', event: 'click',     function: ncm_cooldown_time_btn_handlers, params: {}},
     ];
 
         // on window load
@@ -45,17 +43,20 @@
     window.addEventListener('load', (event) => {
         log('LOADED');
 
+            // divs for countdowns
+        NCMVars.cooldownSecsDiv = gid('cooldowncountdown');
+        NCMVars.alertSound = document.getElementById('ding');
+
         TT.forms_init_common(); // channels populates form fields from url string
             // after init as defaults changed
         TT.add_event_listeners(NCMEvents);
 
-        let clearChatters = () => { o('', true); };
-
             // adds functions to buttons with confirm countdown
+        let clearChatters = () => { o('', true); };
         TT.button_add_confirmed_func('.clearChatConf', clearChatters);
 
             // set after forms_init
-        NCM_set_default_cooldown();
+        NCM_init_countdown();
 
             // main listener
         NCM_add_tmi_listener();
@@ -63,41 +64,43 @@
             // clicking the alert
         gid('alertnotification').onclick = () => {
             NCM_clear_final_coundown();
-            NCM_set_default_cooldown();
+            NCM_init_countdown();
         }
 
-            // divs for countdowns
-        NCMVars.cooldownSecsDiv = gid('cooldowncountdown');
-        NCMVars.cooldownDiv = gid('cooldownoutput')
-        NCMVars.alertSound = document.getElementById('ding');
-
-        setInterval(NCM_cooldown_interval_timer, 1000);
-
-        init_flasher_tech();
-
-        // autojoin
+            // autojoin
         if (TMIConfig.autojoin) { console.log(r("Auto Joining channels..."));
             TT.join_chans();
         }
     });// on load ends
 
 
+    function NCM_init_countdown () {
+        let countdown = NCMVars.countdown;
+        countdown.set_default(NCMVars.cooldownDefaultMins * 60);
+        countdown.on('tick', NCM_cooldown_tick_callback);
+        countdown.start();
+    }
+
         // MAIN Twitch listener
 
     function NCM_add_tmi_listener()
-    {
-        // https://dev.twitch.tv/docs/irc/tags#globaluserstate-twitch-tags
+    {        // https://dev.twitch.tv/docs/irc/tags#globaluserstate-twitch-tags
         let lastMsgId = null;   // after a reconnect TMI sometimes sents repeats
 
         TT.cclient.on('message', (channel, userstate, message, self) => {
-            if (self || lastMsgId === userstate['id']) return;   // Don't listen to my own messages..
+            if (NCMVars.countdown.active() || self || lastMsgId === userstate['id'] || NCMVars.alertPending ||
+                NCMVars.alertEnabled === false || TMIConfig.perms.ignoredUsers.includes(userstate.username)             )
+            {
+                return;   // Don't listen to my own messages..
+            }
 
             lastMsgId = userstate['id'];    // unique to every message
 
                 // Handle different message types..
             switch(userstate["message-type"]) {
-                case "action": case "chat": case "whisper":
-                    NCM_check_new_chat_message_alert(userstate, channel, message);
+                case "chat": case "action": case "whisper":
+                    o(`<span class="list-channel">${channel}</span> : <span class="list-user">${userstate['display-name']}</span> : <span class="list-message">${message}</span>`);
+                    NCM_begin_final_countdown();
                     break;
                 default: // pfff ?
                     break;
@@ -106,38 +109,12 @@
     }
 
 
-    /**
-     *  sod the channel for now
-     */
-
-
-    function NCM_check_new_chat_message_alert(user, channel, msg) {
-        if (NCMVars.onCooldown || NCMVars.alertPending) {        //console.log('Still on a cooldown'); // DEBUG
-            return;
-        }
-            // disabled
-        if (gid('enablealert').checked === false) {
-            return;
-        }
-
-        if ( TMIConfig.perms.ignoredUsers.includes(user.username) ) {
-            console.log('IGNORING:', user.username);
-            return;
-        }
-
-            // ding time
-        NCM_begin_final_countdown();
-
-        o(channel+' New Chat message from ' + user.username)
-    }
-
-        // pre-ding
+        // pre-ding small popup - could use a second countdown but I can't be faffed
 
     function NCM_begin_final_countdown() {
-
         let secsB4Alert = NCMVars.secsBeforeAlert;
         let span4CountdownSecs = gid('alertcountdown');
-        span4CountdownSecs.innerText = secsB4Alert;
+        span4CountdownSecs.textContent = secsB4Alert;
 
         NCMVars.alertPending = true;
         NCM_show_final_countdown(true);
@@ -145,16 +122,14 @@
         NCMVars.finalCountdownSI = setInterval( () => {
             secsB4Alert--;
                 // time been added or alert disabled ?
-            if ( NCMVars.cooldownSecsRemaining > 0 || !gid('enablealert').checked ) {
-                NCM_clear_final_coundown();
-                    // cheat to stop countdown alert reshowing when +time buttons used
-                NCMVars.onCooldown = true;
+            if ( NCMVars.countdown.active() || NCMVars.alertEnabled === false ) {
+                NCM_clear_final_coundown();  // cheat to stop countdown alert reshowing when +time buttons used
                 return;
             }
                 // FIRE!
             if (secsB4Alert <= 0) {
                 NCM_alerts_fire();
-                NCM_set_default_cooldown();
+                NCMVars.countdown.reset();
                 NCM_clear_final_coundown();
             }
 
@@ -175,154 +150,75 @@
 
     function NCM_clear_final_coundown() {
         clearInterval( NCMVars.finalCountdownSI );
-        NCMVars.alertPending = false;
         NCM_show_final_countdown(false);
+        NCMVars.alertPending = false;
     }
 
         // play the music, light the lights.
 
     function NCM_alerts_fire() {
-        //if ( gid('playsound').checked ) {
         if ( NCMVars.playSound ) {
             NCMVars.alertSound.play()
                 .catch(e => log('<rb>PLAY FAILED:</rb> '+e.toString())); //  you have to have interected with the document first
         }
 
-        //if ( gid('flashscreen').checked ) {
-        if ( NCMVars.flashEnabled ) {
-            NCMVars.flashFunc();
+        if ( NCMVars.flashEnabled ) {   // auto set data-tocheckbox
+            NCMVars.flasher.start_flash();
         }
-    }
-
-        // I'm getting into this micro func thing
-
-    function NCM_set_default_cooldown() {
-        NCMVars.onCooldown = true;
-        NCMVars.cooldownSecsRemaining = NCMVars.cooldownDefaultSecs;
-    }
-
-        // secs before input input change
-
-    function ncm_secs_before_alert_onchange (e) {
-        let f = e.target;
-
-        let secsB4Alert = ~~f.value; // int
-
-        if (secsB4Alert < 0) secsB4Alert = 0;
-        if (secsB4Alert > TT_CHAT_MSG_SECS_BEFORE_ALERT_MAX) secsB4Alert = TT_CHAT_MSG_SECS_BEFORE_ALERT_MAX;
-
-        NCMVars.secsBeforeAlert = secsB4Alert;
-        f.value = secsB4Alert;
-        console.log('Secs Before Alert TO ', secsB4Alert, 'seconds');
     }
 
 
         /**
-         *  The default cooldown minutes onchange handler sets the value in the 'globals'
+         *  The input for default cooldown handler sets the value in the 'globals'
          */
 
-    function ncm_default_cooldown_onchange (e) {
-        let coolMins = ~~e.target.value; // int
+    function ncm_default_cooldown_input_onchange (e) {
+        let defCool = gid('defaultcooldown');
 
-        if (coolMins < 0) coolMins = 0;
-        if (coolMins > TT_CHAT_MSG_COOLDOWN_MINS_MAX) coolMins = TT_CHAT_MSG_COOLDOWN_MINS_MAX;
-
-        NCMVars.cooldownDefaultSecs = coolMins * 60;
-
-        console.log('SETTING DEFAULT TO ', coolMins, 'minutes');
+        defCool.onchange = (e) => {
+            NCMVars.countdown.set_default( parseInt(e.target.value) * 60 );
+            console.log('SETTING DEFAULT TO ', parseInt(e.target.value) * 60, 'minutes');
+        }
     }
 
         // during the final countdown these values get bustesd
 
-    function ncm_cooldown_inc(e) {
-        let btn = e.target;
-        let addS = btn.dataset['add'];
+    function ncm_cooldown_time_btn_handlers(e) {
+//        let btn = e.target;
+        let addS = e.target.dataset['add'];
 
-        if (addS === "clear") {
-            console.log("Clearing timeout");	// imagine their should be a function here
-            NCMVars.cooldownSecsRemaining = 0;
+        if (addS === "clear") {            console.log("Clearing timeout");	// imagine their should be a function here
+            NCMVars.countdown.set_time(0)
         }
-        else {
-            console.log('adding mini', addS,'to', NCMVars.cooldownSecsRemaining);
-            NCMVars.cooldownSecsRemaining += ~~addS;	// integerise, otherwise it acts as a string
+        else {            //console.log('adding mini', addS,'to', NCMVars.cooldownSecsRemaining);            //NCMVars.cooldownSecsRemaining += ~~addS;	// integerise, otherwise it acts as a string
+            NCMVars.countdown.add_secs(addS);
+            NCMVars.countdown.start();
         }
     }
 
-
-        // decreases the timer and outputs the time remaining.  yes, it's got more than one duty
 
         /**
+         *  Updates cooldown countdown output on each tick
          *
+         * OLD comment said : decreases the timer and outputs the time remaining.  yes, it's got more than one duty
          */
 
-    function NCM_cooldown_interval_timer() {
+    function NCM_cooldown_tick_callback(secs) {
         let out = '';
 
-        if (NCMVars.cooldownSecsRemaining > 0) {
-            NCMVars.onCooldown = true;    // saves checks when adding time
-
-            if (NCMVars.cooldownSecsRemaining <= 60) {
-                out = NCMVars.cooldownSecsRemaining;
-            }
-            else {
-                out = Math.round(NCMVars.cooldownSecsRemaining / 60) + 'm';
-            }
-
-            NCMVars.cooldownSecsRemaining--;
+        if (secs > 0) {
+            out = secs < 60 ? secs : Math.round(secs / 60) + 'm';
         }
         else {
-            NCMVars.onCooldown = false;
             out = 'Over';
         }
-
             // don't redraw if the output hasn't changed (minutes / Over)
         if (NCMVars.cooldownBtnText != out) {
-            NCMVars.cooldownSecsDiv.innerText = out;
             NCMVars.cooldownBtnText= out;
+            NCMVars.cooldownSecsDiv.textContent = out;
         }
     }
 
 
-
-
-        // ***********************************************
-        // *********** FLASHER FUNCS *********************
-        // ***********************************************
-
-
-    function init_flasher_tech() {        // if a flasher is there set up a func
-
-        let flashBox = gid('flasher');
-        flashBox.onclick = stop_flash;  // allow a click to cancel
-
-        let flashFunc = () => {
-            clearTimeout(NCMVars.flashSetTimeout);
-
-            flashBox.classList.add('flasher');
-
-            NCMVars.flashSetTimeout = setTimeout(() => {
-                flashBox.classList.remove('flasher');
-            }, NCMVars.flashDuration);
-        }
-
-        if (flashBox) { console.log('FLASHER ASSIGNED');
-            NCMVars.flashFunc = flashFunc;
-        }
-
-        document.getElementById('flashtestbtn').onclick = flashFunc;
-    }
-
-    /* function Xstart_flash() {
-        clearTimeout(NCMVars.flashSetTimeout);
-        flashBox.classList.add('flasher');
-        NCMVars.flashSetTimeout = setTimeout(stop_flash, NCMVars.flashDuration);
-    } */
-
-    function stop_flash() {
-        let flashBox = gid('flasher');
-        flashBox.classList.remove('flasher');
-
-        clearTimeout(NCMVars.flashSetTimeout);
-    }
 
 }//scope ends

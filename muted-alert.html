@@ -52,6 +52,7 @@
       <script src="/scripts/tmi-code-common.js" defer></script>
       <script src="/scripts/event-listeners.js" defer></script>
       <script src="/scripts/form-fields-save-restore.js" defer></script>
+      <script src="/scripts/Flasher+Countdown.class.js" defer></script>
       <script src="/scripts/muted-alert.js" defer></script>
       <div id="flasher">
         <p>YOU'RE<br>MUTED!</p>
@@ -164,17 +165,17 @@
             <div class="field is-grouped-centered is-grouped mb-3">
               <div class="control">
                 <label class="checkbox button is-link is-size-7-mobile">
-                  <input class="form-save" type="checkbox" checked id="playsound"> play sound
+                  <input class="form-save" id="playsound" type="checkbox" checked data-tocheckbox="MUTEDVars.soundEnabled"> play sound
                 </label>
               </div>
               <div class="control">
                 <label class="checkbox button is-link is-size-7-mobile">
-                  <input class="form-save" type="checkbox" checked id="flashscreen"> flash screen
+                  <input class="form-save" id="flashscreen" type="checkbox" checked data-tocheckbox="MUTEDVars.flashEnabled"> flash screen
                 </label>
               </div>
               <div class="control">
                 <label class="checkbox button is-link is-size-7-mobile">
-                  <input type="checkbox" checked id="enablealert"> enabled
+                  <input id="enablealert" type="checkbox" checked data-tocheckbox="MUTEDVars.alertEnabled"> enabled
                 </label>
               </div>
             </div>
@@ -205,7 +206,7 @@
             <label class="label">Default cooldown minutes</label>
             <div class="field">
               <div class="control">
-                <input class="input number-input-3 form-save" type="number" name="defaultcooldown" id="defaultcooldown" min="0" max="300" value="3">
+                <input class="input number-input-3 form-save" id="defaultcooldown" type="number" min="0" max="300" value="3" data-toint="MUTEDVars.cooldownDefaultMins">
               </div>
             </div>
           </section>

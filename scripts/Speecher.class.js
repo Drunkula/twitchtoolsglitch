@@ -35,7 +35,7 @@
 
 	const utteranceEvents = ['boundary', 'end', 'error', 'mark', 'pause', 'resume', 'start']
 
-	const SPEECHER_LOGGING = true;
+	const SPEECHER_LOGGING = false;
 
 	const SPEECHER_log = SPEECHER_LOGGING ? console.debug : l => l;	// if you don't want logging
 

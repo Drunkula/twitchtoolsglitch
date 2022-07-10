@@ -209,7 +209,17 @@ html {
 	cursor: grab;
 }
 
-
+.list-user {
+	color:rgb(0, 14, 207);
+}
+.list-channel {
+	font-weight: bold;
+	font-size: 0.8em;
+	color: #f80000;
+}
+.list-message {
+	font-size: 0.9em;
+}
 
 
 #flasher {

@@ -45,7 +45,7 @@ try {   // scope starts ( in case I can demodularise this )
     TTSVars.speecher = speech;
 
     speech.addEventListener('voicessschanged', e => {
-        console.log("VOICES HAVE CHANGED in Speech", e);
+        console.debug("VOICES HAVE CHANGED in Speech", e);
     })
 
     let TTS_EVENTS = [
@@ -77,7 +77,7 @@ try {   // scope starts ( in case I can demodularise this )
                 let voices = speechSynthesis.getVoices();
                 if (voices.length !== TTSVars.voices.length)
                 {  // have to do it this way because of EDGE firing onvoiceschanged events willy nilly
-                    console.log(g("Number of voices has changed:"), voices.length);
+                    console.debug(g("Number of voices has changed:"), voices.length);
                     TTSVars.voices = voices;
                     create_speech_selects_options();
                 }
@@ -93,7 +93,7 @@ try {   // scope starts ( in case I can demodularise this )
             init_flasher_tech();
 
             if (TMIConfig.autojoin) {
-                console.log(r("Auto Joining channels..."));
+                console.debug(r("Auto Joining channels..."));
                 TT.join_chans();
             }
         })  // init_speecher ends
@@ -152,7 +152,7 @@ try {   // scope starts ( in case I can demodularise this )
             }
 
                 // are they permitted ?
-            if (! TT.user_permitted( userstate )) { // console.log("USER NOT PERMITTED", userstate['username']);
+            if (! TT.user_permitted( userstate )) { console.debug("USER NOT PERMITTED", userstate['username']);
                 return false;
             }
 
@@ -330,9 +330,7 @@ try {   // scope starts ( in case I can demodularise this )
             let frag = document.createDocumentFragment();
 
             for (const voiceidx in TTSVars.voices) {
-            //for (const voice of vSorted) {
                 let voice = TTSVars.voices[voiceidx]
-                //let voiceidx = TTSVars.voices.indexOf(voice)
 
                 let opt = document.createElement('option');
                 opt.value = voiceidx;
@@ -377,8 +375,6 @@ try {   // scope starts ( in case I can demodularise this )
             commands[cmd] = get_voice_settings(index);
         });
 
-        //console.log("Commands after update", commands);
-
         TTSVars.sayCmds = commands;
     }
 
@@ -389,15 +385,6 @@ try {   // scope starts ( in case I can demodularise this )
     }
 
     function test_voice(index) {
-        /*
-        let vals = ['rateval', 'pitchval', 'voiceid']
-
-        let rate = +gid('rateval-'+index).value;
-        let pitch = +gid('pitchval-'+index).value;
-
-        let vIdx = gid('voiceid-'+index).value;
-        let voice = TTSVars.voices[vIdx];
-        */
         let params = get_voice_settings(index);
         params.text = TTS_TEST_TEXT;
         params.immediate = true;
@@ -417,7 +404,7 @@ try {   // scope starts ( in case I can demodularise this )
         return {rate, pitch, voice}
     }
 
-        // flashers might end up common
+        // flashers might end up common THE ARE - can rip this out
 
     function init_flasher_tech() {        // if a flasher is there set up a func
         let flashBox = gid('flasher');
