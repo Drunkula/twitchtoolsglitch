@@ -1,14 +1,14 @@
 /*
 	TT and TMIConfig will be our global repositories
-	TT for functions, the other for vars - makes it easy to track in the console debugger
+	TT for functions, the other for each tool's vars - makes it easy to track in the console debugger
 	TT.set_conf('some.var.name', value) can be used to set values in TMIConfig so you can
 	use set_conf('MY_MODULE.someprop', value) to store local settings
 */
 "use strict"
 
 var _____MY_SPECIAL_DEBUG_DUMMY____ = 'dummy';	// properties are placed in order in window, so skip until we hit this
-
-function TT_DEBUG_list_window() {	// lets us list global vars from console to check for polluting the timelines
+	// lets us list global vars from console to check for polluting the timelines (forgetting strict)
+function TT_DEBUG_list_window() {
 	let output = false;
 	console.log('---------------------------');
 	for(let b in window) {
@@ -47,11 +47,11 @@ var TMIConfig = {	// MOST tools add their config to this to make observing easy
 }
 
 
-/**
- * Repopulates form fields from url
- * formats channels field
- * ONCHANGE triggered on all .form-save fields after - not any more
- */
+	/**
+	 * Repopulates form fields from url
+	 * formats channels field
+	 * ONCHANGE triggered on all .form-save fields after - not any more
+	 */
 
 TT.forms_init_common = function forms_init_common() {
 	TMIConfig.restoredParams = TT.get_restore_params();
@@ -62,7 +62,7 @@ TT.forms_init_common = function forms_init_common() {
 
 	TT.add_event_listeners();
 
-		// log label onclick clears - should split out
+		// log label onclick clears - should split out as this is clunk
 	let ll = gid('loglabel');
 	if (ll) {
 		ll.onclick = () => { log('', true); }
@@ -109,7 +109,9 @@ TT.allow_named_init_defaults = function allow_named_init_defaults() {
 	if (!aNamed) return	//if (TMIConfig.restoredParams['allownamed'] === undefined)
 	aNamed.value = TT.TMI_DEFAULT_ALLOW_NAMED.join(' ');
 }
-	// turning this into an event emit to update the input would be overkill
+
+	// turning these into event emits to update the input would be overkill
+
 TT.ignored_users_add = function(user) {
 	user = user.toString().trim().toLowerCase();
 	TMIConfig.perms.ignoredUsers.push(user);
@@ -274,12 +276,9 @@ function docReady(fn) {
 	}
 }
 
-/**
- * Simple outputs to named divs
- */
 
  /**
-  * Output to that div top first
+  * Simple outputs to named divs  = real laziness
   * @param {string} str
   * @param {bool} clearIt
   * @returns
@@ -303,7 +302,7 @@ function docReady(fn) {
   * @returns
   */
 
- function log(str, clearIt, after="<br/>") {
+function log(str, clearIt, after="<br/>") {
 	if (clearIt)
 		return document.getElementById('log').innerHTML = str + after;
 

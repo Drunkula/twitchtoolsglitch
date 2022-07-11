@@ -19,8 +19,12 @@
  *   POSSIBLE - follower only
  *      add a delay before adding to the speech queue so they can be nixed
  *      check for mod message deletions
+ *          https://github.com/tmijs/docs/blob/gh-pages/_posts/v1.4.2/2019-03-03-Events.md#messagedeleted
+ *          https://github.com/tmijs/docs/blob/gh-pages/_posts/v1.4.2/2019-03-03-Events.md#ban
  *
  *  Speecher.ready() returns promise, true when good, false when bad
+ *
+ * https://gist.github.com/AlcaDesign/6213ff17d3981c861adf BTTV emote possible
  */
 "use strict"
 
@@ -68,6 +72,50 @@ try {   // scope starts ( in case I can demodularise this )
         // on window load
 
     window.addEventListener('load', async (event) => {
+
+TT.cclient.on('emotesets', function() {
+    console.log("EMOTE SETS", arguments);
+})
+
+TT.bttv = {}
+
+TT.cclient.on('roomstate', (chan, state) => {
+    console.log("Getting bttv for ", chan);
+	//console.debug("Roomstate:", chan, state);
+
+    let headers = {
+        'Access-Control-Allow-Origin':'*',
+    //    'Access-Control-Allow-Origin':'http://127.0.0.1:3000',
+        "Access-Control-Request-Method": "GET",
+    //    Accept: 'application/json'
+    }
+
+    let opts = {
+        mode: 'cors', method: 'GET',
+        headers
+    }
+
+    console.log("OPTS", opts);
+
+    chan = chan.slice(1);
+    fetch(`https://api.betterttv.net/2/channels/${chan}`, opts)
+    .then(response => response.json())
+    .then( data => console.log("BTTV for ", chan, data) )
+    .catch( e => console.log("Error", e.toString() ) )
+
+    //.then(response => response.json())
+    //.then(data => console.log(data));
+})
+
+/*
+function addAsyncCall(channel) {
+    asyncCalls.push(get('https://api.betterttv.net/2/channels/' + channel, {}, { Accept: 'application/json' }, 'GET', function(data) {
+            mergeBTTVEmotes(data, channel);
+        }), false);
+}
+
+*/
+
 
         init_speecher().then(() => {
                 // set up the voice selects
@@ -219,18 +267,14 @@ try {   // scope starts ( in case I can demodularise this )
                         }
                     };
 
-                        // display the speech
+                        // Display BEFORE calling say so errors automatically cull the row.
 
-                    let id = speech.next_id();
-                    TTSVars.speech_queue_list_add({user: userstate["display-name"], text: sayCmdPack.rest, id})
+                    let nid = speech.next_id();
+                    TTSVars.speech_queue_list_add({user: userstate["display-name"], text: sayCmdPack.rest, id: nid})
 
                         // this actually writes to the global params
                     sayCmdPack.params.text = add_speech_before_after(sayCmdPack.rest, userstate, channel);
-                    let nid = speech.say(sayCmdPack.params);
-
-                    if (id !== nid) {
-                        console.error('NEXT ID AND PREVIOUS DID NOT MATCH', id, nid);
-                    }
+                    speech.say(sayCmdPack.params);
 
                     break;
                 default: // pfff ?

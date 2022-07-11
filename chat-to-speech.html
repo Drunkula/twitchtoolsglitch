@@ -320,16 +320,22 @@
                     <input class="input form-save" type="text" id="sayafter" placeholder="say after e.g said {user}" data-tostr="TTSVars.chatSayAfter" value="">
                   </div>
                 </div>
-                <label class="label">Global cooldown seconds</label>
-                <div class="field">
-                  <div class="control">
-                    <input class="input number-input-5 form-save" type="number" id="globalcooldown" min="0" max="12000" value="10" data-toint="TTSVars.chatCooldownGlobal">
+                <div class="columns is-mobile">
+                  <div class="column">
+                    <label class="label">Global cooldown seconds</label>
+                    <div class="field">
+                      <div class="control">
+                        <input class="input number-input-5 form-save" type="number" id="globalcooldown" min="0" max="12000" value="10" data-toint="TTSVars.chatCooldownGlobal">
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <label class="label">User cooldown seconds</label>
-                <div class="field">
-                  <div class="control">
-                    <input class="input number-input-4 form-save" type="number" id="usercooldown" min="0" max="12000" value="60" data-toint="TTSVars.chatCooldownUser">
+                  <div class="column">
+                    <label class="label">User cooldown seconds</label>
+                    <div class="field">
+                      <div class="control">
+                        <input class="input number-input-4 form-save" type="number" id="usercooldown" min="0" max="12000" value="60" data-toint="TTSVars.chatCooldownUser">
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -53,10 +53,11 @@
 		buttons.appendChild(btnBan);
 		buttons.appendChild(btnDel);
 			// username - text - buttons
-		speechQRow.appendChild(username)
+		speechQRow.append(username, speech, buttons);
+/* 		speechQRow.appendChild(username)
 		speechQRow.appendChild(speech)
 		speechQRow.appendChild(buttons)
-
+ */
 		frag.appendChild(speechQRow);
 		$speechQDiv.appendChild(frag)
 	}

@@ -129,8 +129,6 @@
 						this.gotVoicesDebug.push( msg );
 						this.#imReady();
 						this.emit('voiceschanged', { debug: msg });
-						// this.voices = voices;// done in imready
-						//voicesPromiseResolve(this.voices);
 					}
 
 					iTmrMSecs += period;
