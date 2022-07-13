@@ -25,6 +25,14 @@
  *  Speecher.ready() returns promise, true when good, false when bad
  *
  * https://gist.github.com/AlcaDesign/6213ff17d3981c861adf BTTV emote possible
+ *
+ * https://kunszg.com/emotes?search=amouranth
+ *
+ * https://api.7tv.app/v2/cosmetics/avatars
+ *
+ * https://kunszg.com/commands/code/emotes
+ * 7TV ${api[2]}/users/${userId[0].userId}/emotes
+ * https://api.7tv.app/users/125387632/emotes
  */
 "use strict"
 
@@ -43,6 +51,8 @@ try {   // scope starts ( in case I can demodularise this )
     const TTS_MOD_COOLDOWN = 5;
     const TTS_TEST_TEXT = "Testing the voice one two three";
 
+    const emote_filter = new Emoter()
+    TT.emote_filter = emote_filter;
     const cooldowns = new TT.Cooldowns();
     const speech = new TT.Speecher();
     speech.on({error: speech_error_callback});
@@ -73,88 +83,57 @@ try {   // scope starts ( in case I can demodularise this )
 
     window.addEventListener('load', async (event) => {
 
-TT.cclient.on('emotesets', function() {
-    console.log("EMOTE SETS", arguments);
-})
+    TT.cclient.on('emotesets', function() {
+        console.log("EMOTE SETS", arguments);
+    })
 
-TT.bttv = {}
+        // fetch the emote names for the room
 
-TT.cclient.on('roomstate', (chan, state) => {
-    console.log("Getting bttv for ", chan);
-	//console.debug("Roomstate:", chan, state);
-
-    let headers = {
-        'Access-Control-Allow-Origin':'*',
-    //    'Access-Control-Allow-Origin':'http://127.0.0.1:3000',
-        "Access-Control-Request-Method": "GET",
-    //    Accept: 'application/json'
-    }
-
-    let opts = {
-        mode: 'cors', method: 'GET',
-        headers
-    }
-
-    console.log("OPTS", opts);
-
-    chan = chan.slice(1);
-    fetch(`https://api.betterttv.net/2/channels/${chan}`, opts)
-    .then(response => response.json())
-    .then( data => console.log("BTTV for ", chan, data) )
-    .catch( e => console.log("Error", e.toString() ) )
-
-    //.then(response => response.json())
-    //.then(data => console.log(data));
-})
-
-/*
-function addAsyncCall(channel) {
-    asyncCalls.push(get('https://api.betterttv.net/2/channels/' + channel, {}, { Accept: 'application/json' }, 'GET', function(data) {
-            mergeBTTVEmotes(data, channel);
-        }), false);
-}
-
-*/
+    TT.cclient.on('roomstate', async (chan, state) => {
+        console.log("Getting bttv / franker for ", chan, `room id ${state['room-id']}`);
+        let results = await emote_filter.fetch(state['room-id']);
+        console.log("FETCH FILTER FOR ", chan, results);
+    })
 
 
-        init_speecher().then(() => {
-                // set up the voice selects
-            create_speech_selects_options();  // must be done BEFORE init common
+    init_speecher().then(() => {
+            // set up the voice selects
+        create_speech_selects_options();  // must be done BEFORE init common
 
-            speech.addEventListener('voiceschanged', () => {
-                let voices = speechSynthesis.getVoices();
-                if (voices.length !== TTSVars.voices.length)
-                {  // have to do it this way because of EDGE firing onvoiceschanged events willy nilly
-                    console.debug(g("Number of voices has changed:"), voices.length);
-                    TTSVars.voices = voices;
-                    create_speech_selects_options();
-                }
-            });
-
-            speech.addEventListener('beforespeak', () => speech.utterance.volume = TTSVars.volumemaster)
-
-            TT.forms_init_common();
-
-            TT.add_event_listeners(TTS_EVENTS);
-                // main listener
-            add_chat_to_speech_tmi_listener();
-            init_flasher_tech();
-
-            if (TMIConfig.autojoin) {
-                console.debug(r("Auto Joining channels..."));
-                TT.join_chans();
+        speech.addEventListener('voiceschanged', () => {
+            let voices = speechSynthesis.getVoices();
+            if (voices.length !== TTSVars.voices.length)
+            {  // have to do it this way because of EDGE firing onvoiceschanged events willy nilly
+                console.debug(g("Number of voices has changed:"), voices.length);
+                TTSVars.voices = voices;
+                create_speech_selects_options();
             }
-        })  // init_speecher ends
-        .catch( e => {
-            log('<b>INIT ERROR:</b> ' + e.toString())
-            o(e.toString(), true)
-            if (TTSVars.voices.length === 0) {
-                o('<h4 class="subtitle is-4">Please try a different browser</h4>')
-                o('<h3 class="title is-3">Sadly No Speech available</h3>')
-            }
-        })
+        });
 
-    });// on load ends
+        speech.addEventListener('beforespeak', () => speech.utterance.volume = TTSVars.volumemaster)
+
+        TT.forms_init_common();
+
+        TT.add_event_listeners(TTS_EVENTS);
+            // main listener
+        add_chat_to_speech_tmi_listener();
+        init_flasher_tech();
+
+        if (TMIConfig.autojoin) {
+            console.debug(r("Auto Joining channels..."));
+            TT.join_chans();
+        }
+    })  // init_speecher ends
+    .catch( e => {
+        log('<b>INIT ERROR:</b> ' + e.toString())
+        o(e.toString(), true)
+        if (TTSVars.voices.length === 0) {
+            o('<h4 class="subtitle is-4">Please try a different browser</h4>')
+            o('<h3 class="title is-3">Sadly No Speech available</h3>')
+        }
+    })
+
+});// on load ends
 
 
         // async so we can await readyness
@@ -208,31 +187,38 @@ function addAsyncCall(channel) {
             switch(userstate["message-type"]) {
                 case "action": case "chat": case "whisper":
                         // filter out emotes
-                    if ( ! TTSVars.chatReadEmotes && userstate['emotes-raw'] !== null) {
-                        message = filter_out_emotes(message, userstate);
-                    }
+                    let sayCommand = is_say_command(message);  // returns !command / false
+                    let sayCmdPack = {};
+                    let commandSliceOffset = 0   // amount to strip from message
 
-                    let sayCmdPack = is_say_command(message);  // returns obj or false
-                        // if read all create a fake say command
-                    if (!sayCmdPack) {
+                    if (sayCommand === false) {
                         if ( !TTSVars.chatReadAll || ('!' === message[0]) && TTSVars.chatReadOtherCommands !== true) {
                             return;
                         }
                             // create an all-chat say command
-                        sayCmdPack = {
-                            command: '!all-chat',
-                            rest: message,
-                            params: get_voice_settings(1)   // use first voice by default
-                        }
+                        sayCommand = '!all-chat'
+                        sayCmdPack.params = get_voice_settings(1);
+                    } else {
+                        commandSliceOffset = sayCommand.length + 1;
+                        sayCmdPack.params = TTSVars.sayCmds[sayCommand]
                     }
-                        // empty message - return
-                    if (sayCmdPack.rest.trim() === '') return;
 
+                    sayCmdPack.command = sayCommand;
+
+                    if ( ! TTSVars.chatReadEmotes ) {
+                        message = emote_filter.filter(message, userstate);
+                    }
+                        // if we're here
+                    message = message.slice(commandSliceOffset);
+                    if (message.length === 0) return;
+
+                    sayCmdPack.message = message;
+                        // if read all create a fake say command
 
                         // category out a single user by setting similar commands to a single value e.g. !allsaycommands
                     let cooldownParams = {
                         channel: 'ALL-CHANS',    // cooldowns are CHANNEL based - so set to a common value if you want to put globals on for all
-                        command: sayCmdPack.command,   // set to !userCategoryFake to category out only users
+                        command: sayCommand ? sayCommand : '!all-chat',   // set to !userCategoryFake to category out only users
                         //category: "text-to-speech-"+ channel,   // example to category out channels individually
                         userstate,
                         globalCooldown: TTSVars.chatCooldownGlobal,
@@ -249,7 +235,7 @@ function addAsyncCall(channel) {
                     cooldowns.cooldown_set(cooldownParams)
 
                         // event handlers for utterance
-
+console.log("COMMAND PACK", sayCmdPack);
                     sayCmdPack.params.end = e => {
                         try {
                             TTSVars.speech_queue_remove_entry(e.target.queueid);
@@ -270,10 +256,10 @@ function addAsyncCall(channel) {
                         // Display BEFORE calling say so errors automatically cull the row.
 
                     let nid = speech.next_id();
-                    TTSVars.speech_queue_list_add({user: userstate["display-name"], text: sayCmdPack.rest, id: nid})
+                    TTSVars.speech_queue_list_add({user: userstate["display-name"], text: message, id: nid})
 
                         // this actually writes to the global params
-                    sayCmdPack.params.text = add_speech_before_after(sayCmdPack.rest, userstate, channel);
+                    sayCmdPack.params.text = add_speech_before_after(message, userstate, channel);
                     speech.say(sayCmdPack.params);
 
                     break;
@@ -304,31 +290,6 @@ function addAsyncCall(channel) {
         return msg;
     }
 
-
-        /*  They are ZERO based and 0 10 would be 11 characters
-        emotes: array DOESN'T have them in order
-            245: ['10-24']
-            28087: ['41-47']
-            300425351: ['26-39']
-        raw HAS them in order so you can reverse through them
-        emotes-raw: "245:10-24/300425351:26-39/28087:41-47"
-        */
-
-    const EMOTE_PATTERN = /(\d+)-(\d+)/g;
-
-    function filter_out_emotes(msg, state) {
-        if (state["emotes-raw"] === null) return msg;
-
-        let pos, posns = [...state["emotes-raw"].matchAll(EMOTE_PATTERN)];
-            //let orig = msg; console.log("emotes", state["emotes-raw"], state.emotes, "I found", posns.length);
-            // in reverse
-        while (pos = posns.pop()) {            //msg = msg.slice(0, p1) + msg.slice(p2 + 1);   // WORKS
-            msg = msg.slice(0, +pos[1]) + msg.slice(+pos[2] + 1);   // WORKS
-        }
-            //console.log("emotes RETURNING\n", msg.trim(), "\nfrom\n", orig, "length:", msg.trim().length);
-        return msg.trim();
-    }
-
         // if browser requires interaction before allowing speech then flash the screen
 
     function speech_error_callback(e) {
@@ -342,21 +303,18 @@ function addAsyncCall(channel) {
         // filter emotes BEFORE calling this
     function is_say_command (str) {
         if (str[0] === '!') {	// get the first word with ! lowercased
-            let words = str.split(' ').filter(e => e);
+            let words = str.split(' ');//.filter(e => e);
                 // rest of first word to lower case
             let inCmd = words[0].toLowerCase();
-                                                        //console.log(`words`, words);
-            if (inCmd in TTSVars.sayCmds) {
-                words.shift();  // get rid of command
-                return {
-                    command: inCmd,
-                    rest: words.join(' '),
-                    params: TTSVars.sayCmds[inCmd]
-                }
-            }
+
+            return inCmd in TTSVars.sayCmds ? inCmd : false;
         }
 
         return false;
+    }
+
+    function strip_command(str) {
+        return str.slice( str.indexOf(' ') + 1);
     }
 
 
@@ -519,8 +477,8 @@ function addAsyncCall(channel) {
         gid('volumemasterdisplay').textContent = Math.round( e.target.value * 100.0 );
     }
 
-}   // SCOPE ENDS
+}   // try / SCOPE ENDS
 catch (e) {
-    console.log("Error in Chat to Speech", e);
+    console.error("Error in Chat to Speech", e);
     o("Error in chat to speech: " + e.toString());
 }

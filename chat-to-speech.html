@@ -54,6 +54,8 @@
       <script src="/scripts/form-fields-save-restore.js" defer></script>
       <script src="/scripts/Speecher.class.js" defer></script>
       <script src="/scripts/Cooldowns.class.js" defer></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js" defer></script>
+      <script src="/scripts/Emoter.class.js" defer></script>
       <script src="/scripts/chat-to-speech.js" defer></script>
       <script src="/scripts/chat-to-speech-queue.js" defer></script>
       <div id="flasher">
@@ -202,7 +204,7 @@
             <p><strong>Spy</strong> on channels while you're doing the washing up... or wearing a VR headset</p>
             <p>Limit commands to MODS, VIPS and named users.</p>
             <p>&nbsp;</p>
-            <div class="block"><strong>IMPORTANT:</strong> Speech isn't allowed on some browsers unless you click page once.  You'll get a notice.</div>
+            <div class="block"><strong>IMPORTANT:</strong> Speech isn't allowed on some browsers unless you click the page.  You'll get a notice.</div>
             <div class="block">The <span class="tag is-primary">Mini View</span> button toggles screen clutter.  Make sure you've joined a channel first.</div>
             <div class="block"><strong>Tip: All Chat</strong> To hear just people you like set the cooldowns to zero, deselect the permissions and add their names to allowed users.  You can monitor all chat on smaller channels, but for crazy ones the queue limit will save you.</div>
             <p><b>Different browsers</b> have different sets of voices.  Desktop versions of Chrome have lots of great voices and Edge has absolutely tons.</p>
@@ -216,7 +218,7 @@
             <p><strong>Permissions:</strong> limit to mods, vips, everyone and/or named users you trust</p>
             <p><strong>Always allowed:</strong> no matter what.  You like these people.</p>
             <p><strong>Ignore:</strong> always ignored.  <em>Get outta here wid ya garbage</em> as <b><a href="https://www.twitch.tv/sockcop" target="_blank">Sockcop</a></b> would say.  Good time to hide chatbots.</p>
-            <p><strong>Emotes:</strong> can be removed from the text (recommended).</p>
+            <p><strong>Emotes:</strong> can be removed from the text (recommended).  Most unicode emotes and Twitch, BTTV and Franker are gone. 7TV to come.</p>
             <p><strong>Digits in names:</strong> can be removed.</p>
             <p><strong>!Commands:</strong> can be ignored - no more !giveaway x 1000 or !roflcopter annoyances</p>
             <p><strong>Cooldowns:</strong> global and user cooldowns will stop you being spammed.  They still apply in read All Chat mode.</p>
@@ -224,11 +226,14 @@
             <p><strong>Say before/after</strong> tags {user} and {channel} let's you add things like <em>{user} says</em> before or <em>says {user}</em> after messages.</p>
             <p>If you're monitoring multiple channels then <em>{user} on channel {channel} says</em> might be useful.</p>
             <div class="block"></div>
-            <div class="block"><strong>BAN</strong> buttons remove all the user's future messages but will leave the entry on screen in case you need to unban them.  Press del to remove the entry.  If you accidentally ban someone remove their name from ignored users in settings.</div>
+            <div class="block"><strong>BAN</strong> buttons remove all the user's future messages but will leave the entry on screen in case you need to unban them.  Press del to remove the entry.  If you accidentally ban someone remove their name from ignored users in settings.  Mod action bans/message deletes will eventually delete from the queue.</div>
             <div class="block">To keep the banned userlist copy the url to update your link, the the settings will be temporarily saved.</div>
             <div class="block"></div>
             <div class="block"><strong>Tips:</strong> "Done" on the config page, joining channels and "Get Url" saves values to the current url letting you bookmark the page without having to type in everything again.  You can easily save bookmarks with different settings.</div>
-            <p>Just realised if a mod deletes a message I should automatically remove it from the queue - I'll add that.</p>
+            <div class="block"></div>
+            <div class="block">Want more commands?  Open the page in multiple tabs and have different command sets on each - and bookmark each version.  The CPU usage of each page is tiny.  Orrrr.....</div>
+            <div class="block"></div>
+            <div class="block"><strong>Devs:</strong> <a href="https://github.com/Drunkula/twitchtoolsglitch" target="_blank">Download the tools</a>, cut and paste the voice parameters, update the ids and the extra commands will automatically work.  I've deliberately not used modules so all the code can be run directly from your computer.  Good to you I am.  And yes, my code is horrible.</div>
             <div class="field has-addons">
               <div class="control is-expanded">
                 <input class="input is-small" id="linkurl" placeholder="Url to bookmark">
@@ -237,7 +242,7 @@
                 <button class="button is-danger is-small is-responsive urlpopulate">Get Url</button>
               </div>
             </div>
-            <div class="block"><strong>Todo:</strong> filter BTTV emotes, clear entries on mod ban / delete message actions, possibly delay before speaking so entries can be vetted.</div>
+            <div class="block"><strong>Todo:</strong> filter 7TV emotes, clear entries on mod ban / delete actions, possibly delay before speaking so entries can be vetted.</div>
           </div>
         </div>
       </div>
