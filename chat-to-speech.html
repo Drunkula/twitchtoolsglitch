@@ -91,7 +91,6 @@
             <button class="button is-small is-primary modal-trigger" data-target="configModal"><i class="fas fa-gear"></i></button>
           </div>
         </div>
-        <!--.field.is-grouped-centered.is-grouped.not-mobile-view-->
         <div class="not-mobile-view" id="saycmds">
           <p>Speech Commands</p>
           <div class="columns is-vcentered">
@@ -101,7 +100,7 @@
               </div>
               <div class="control">
                 <div class="select is-small">
-                  <select class="form-save" id="voiceid-1">
+                  <select class="form-save voice-select" id="voiceid-1">
                     <option value="choose voice">choose voice 1</option>
                   </select>
                 </div>
@@ -117,6 +116,7 @@
               </div>
             </div>
           </div>
+          <p>Speech Commands</p>
           <div class="columns is-vcentered">
             <div class="column">
               <div class="control">
@@ -124,7 +124,7 @@
               </div>
               <div class="control">
                 <div class="select is-small">
-                  <select class="form-save" id="voiceid-2">
+                  <select class="form-save voice-select" id="voiceid-2">
                     <option value="choose voice">choose voice 2</option>
                   </select>
                 </div>
@@ -140,6 +140,7 @@
               </div>
             </div>
           </div>
+          <p>Speech Commands</p>
           <div class="columns is-vcentered">
             <div class="column">
               <div class="control">
@@ -147,7 +148,7 @@
               </div>
               <div class="control">
                 <div class="select is-small">
-                  <select class="form-save" id="voiceid-3">
+                  <select class="form-save voice-select" id="voiceid-3">
                     <option value="choose voice">choose voice 3</option>
                   </select>
                 </div>
@@ -231,7 +232,7 @@
             <div class="block"></div>
             <div class="block"><strong>Tips:</strong> "Done" on the config page, joining channels and "Get Url" saves values to the current url letting you bookmark the page without having to type in everything again.  You can easily save bookmarks with different settings.</div>
             <div class="block"></div>
-            <div class="block">Want more commands?  Open the page in multiple tabs and have different command sets on each - and bookmark each version.  The CPU usage of each page is tiny.  Orrrr.....</div>
+            <div class="block">Want more commands?  <a class="tag is-info is-small" href="chat-to-speech-tabs.html">either go here</a> or open the page in multiple tabs and have different command sets on each - and bookmark each version.  The CPU usage of each page is tiny.  Orrrr.....</div>
             <div class="block"></div>
             <div class="block"><strong>Devs:</strong> <a href="https://github.com/Drunkula/twitchtoolsglitch" target="_blank">Download the tools</a>, cut and paste the voice parameters, update the ids and the extra commands will automatically work.  I've deliberately not used modules so all the code can be run directly from your computer.  Good to you I am.  And yes, my code is horrible.</div>
             <div class="field has-addons">
@@ -242,7 +243,7 @@
                 <button class="button is-danger is-small is-responsive urlpopulate">Get Url</button>
               </div>
             </div>
-            <div class="block"><strong>Todo:</strong> filter 7TV emotes, clear entries on mod ban / delete actions, possibly delay before speaking so entries can be vetted.</div>
+            <div class="block"><strong>Todo:</strong> clear entries on mod ban / delete actions, possibly delay before speaking so entries can be vetted.</div>
           </div>
         </div>
       </div>

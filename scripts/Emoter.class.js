@@ -226,7 +226,7 @@ class Emoter {
 			if (d.error) {
 				console.warn('Error on 7tv globals', d)
 				return [];
-			}
+			}console.log("7TV", d);
 				// please let this work, it's pretty
 			d.forEach( ({name}) => this.globals7TV.push(name))
 			return this.globals7TV;

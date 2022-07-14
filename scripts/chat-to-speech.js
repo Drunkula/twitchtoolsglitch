@@ -324,7 +324,7 @@ console.log("COMMAND PACK", sayCmdPack);
      */
 
     function create_speech_selects_options () {
-        let selects = qsa("#saycmds select")
+        let selects = qsa(".voice-select")
 
         log("Number of voices : " + TTSVars.voices.length)
 
