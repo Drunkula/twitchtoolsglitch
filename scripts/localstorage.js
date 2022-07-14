@@ -3,7 +3,7 @@
 	 // window onload
 
  window.addEventListener('load', () => {
-	log('LOADED');
+//	log('LOADED');
 
 	TT.forms_init_common();
 

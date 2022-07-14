@@ -17,7 +17,7 @@
           <div class="navbar-menu" id="nav-links-component">
             <div class="navbar-start"><a class="navbar-item" href="/">Home.</a>
               <div class="navbar-item has-dropdown is-hoverable"><a class="navbar-link">Tools List</a>
-                <div class="navbar-dropdown is-boxed"><a class="navbar-item" href="chat-to-speech.html">Speech from chat</a><a class="navbar-item" href="new-chatter.html">New Chatters alert (say hello to new chatters easily)</a><a class="navbar-item" href="muted-alert.html">You're Muted alert</a><a class="navbar-item" href="chat-alert.html">New Message alert - don't miss chat messages (good for small channels)</a><a class="navbar-item" href="subs-gifts-cheers.html">Subs, gifts, cheers</a><a class="navbar-item" href="localstorage.html">localstorage killer</a><a class="navbar-item" href="#"><b>There'll be more...</b></a><a class="navbar-item" href="#">VIPs / Named chatters or WRONG 'UNS join</a><a class="navbar-item" href="#">OBS scene and mic control mod chat commands (!unmute, !brb, !game)</a><a class="navbar-item" href="#">OBS web control panel for your mods</a><a class="navbar-item" href="#">And your suggestions.</a>
+                <div class="navbar-dropdown is-boxed"><a class="navbar-item" href="chat-to-speech.html">Speech from chat</a><a class="navbar-item" href="new-chatter.html">New Chatters alert (say hello to new chatters easily)</a><a class="navbar-item" href="muted-alert.html">You're Muted alert</a><a class="navbar-item" href="chat-alert.html">New Message alert - don't miss chat messages (good for small channels)</a><a class="navbar-item" href="chat-to-speech-tabs.html">Speech from chat REDUX - just more commands, really</a><a class="navbar-item" href="subs-gifts-cheers.html">Subs, gifts, cheers - it doesn't work yet (well it does, but it doesn't)</a><a class="navbar-item" href="localstorage.html">localstorage killer</a><a class="navbar-item" href="#"><b>There'll be more...</b></a><a class="navbar-item" href="#">VIPs / Named chatters or WRONG 'UNS join</a><a class="navbar-item" href="#">OBS scene and mic control mod chat commands (!unmute, !brb, !game)</a><a class="navbar-item" href="#">OBS web control panel for your mods</a><a class="navbar-item" href="#">And your suggestions.</a>
                   <hr class="navbar-divider is-hidden-desktop">
                 </div>
               </div>
@@ -207,7 +207,7 @@
             <p>&nbsp;</p>
             <div class="block"><strong>IMPORTANT:</strong> Speech isn't allowed on some browsers unless you click the page.  You'll get a notice.</div>
             <div class="block">The <span class="tag is-primary">Mini View</span> button toggles screen clutter.  Make sure you've joined a channel first.</div>
-            <div class="block"><strong>Tip: All Chat</strong> To hear just people you like set the cooldowns to zero, deselect the permissions and add their names to allowed users.  You can monitor all chat on smaller channels, but for crazy ones the queue limit will save you.</div>
+            <div class="block"><strong>Tip: All Chat</strong> you might want to <strong>set the cooldowns to zero</strong>.  And to hear just people you like , deselect the permissions and add their names to allowed users.  You can monitor all chat on smaller channels, but for crazy ones the queue limit will save you.</div>
             <p><b>Different browsers</b> have different sets of voices.  Desktop versions of Chrome have lots of great voices and Edge has absolutely tons.</p>
             <p>&nbsp;</p>
             <p>Note: Disabling and enabling the speech will clear the queue.</p>
@@ -331,7 +331,7 @@
                     <label class="label">Global cooldown seconds</label>
                     <div class="field">
                       <div class="control">
-                        <input class="input number-input-5 form-save" type="number" id="globalcooldown" min="0" max="12000" value="10" data-toint="TTSVars.chatCooldownGlobal">
+                        <input class="input number-input-5 form-save" type="number" id="globalcooldown" min="0" max="12000" value="0" data-toint="TTSVars.chatCooldownGlobal">
                       </div>
                     </div>
                   </div>
@@ -339,7 +339,7 @@
                     <label class="label">User cooldown seconds</label>
                     <div class="field">
                       <div class="control">
-                        <input class="input number-input-4 form-save" type="number" id="usercooldown" min="0" max="12000" value="60" data-toint="TTSVars.chatCooldownUser">
+                        <input class="input number-input-4 form-save" type="number" id="usercooldown" min="0" max="12000" value="0" data-toint="TTSVars.chatCooldownUser">
                       </div>
                     </div>
                   </div>
