@@ -204,6 +204,10 @@ html {
 .number-input-5 {
 	width: 5.5rem;
 }
+
+.scenecmd-input {
+	width: 8rem;
+}
 	/* pre full alert warning */
 #alertnotification {
 	cursor: grab;

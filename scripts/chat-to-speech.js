@@ -114,6 +114,7 @@ try {   // scope starts ( in case I can demodularise this )
 
         TT.forms_init_common();
 
+        TT.add_events_common();
         TT.add_event_listeners(TTS_EVENTS);
             // main listener
         add_chat_to_speech_tmi_listener();

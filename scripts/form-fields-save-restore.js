@@ -58,8 +58,22 @@ TT.inputs_to_uri_string = function inputs_to_uri_string(selectors = '.form-save'
 	 * @param {bool} localStorageFallback use localStorage if paramString fail
 	 */
 
- TT.restore_form_values = function restore_form_values(selector = '.form-save', paramString = window.location.search, idIfNoName = true, localStorageFallback = true) {
-//function restore_form_values({selector = '.form-save', paramString = window.location.search, idIfNoName = true, localStorageFallback = true}) {
+let restore_opts_default = {
+	paramString: window.location.search,
+	idIfNoName: true,
+	localStorageFallback: true,
+	useCached: false	// use already parsed values
+}
+
+ //TT.restore_form_values = function restore_form_values(selector = '.form-save', opts = restore_opts_default) {
+TT.restore_form_values = function restore_form_values(selector = '.form-save', opts)
+{
+	let optsGroup = {...restore_opts_default, ...opts}
+
+	let { paramString, idIfNoName, localStorageFallback, useCached } = optsGroup;
+	//console.log("Got Opts", optsGroup);
+
+										//function restore_form_values({selector = '.form-save', paramString = window.location.search, idIfNoName = true, localStorageFallback = true}) {
 	let inputs = document.querySelectorAll(selector);
 
 	if (!paramString && localStorageFallback) {
@@ -67,6 +81,13 @@ TT.inputs_to_uri_string = function inputs_to_uri_string(selectors = '.form-save'
 	}
 
 	let getVars = TT.param_string_to_array(paramString);
+
+	console.log("used cached:", useCached, "restored length", Object.keys(TMIConfig.restoredParams).length);
+
+	if (useCached && Object.keys(TMIConfig.restoredParams).length) {
+		console.log("*********************** USING CACHED VARS OK ***************************", TMIConfig.restoredParams);
+		getVars = TMIConfig.restoredParams;
+	}
 
 	inputs.forEach( field => {
 		const name = field.name ? field.name : (idIfNoName && field.id ? field.id : null);
@@ -103,8 +124,8 @@ TT.inputs_to_uri_string = function inputs_to_uri_string(selectors = '.form-save'
 					field.checked = false;
 				}
 				break;
-			default:
-				//console.log(`getVars[${name}] = ${getVars[name]} : decoded = `, decodeURIComponent(getVars[name]));
+			default:	// works for selects
+											//console.log(`Setting ${field.id} to ${getVars[name]}`);
 				field.value = decodeURIComponent(getVars[name]);
 				if (field.classList.contains('form-filter-spaces-to-commas')) {
 					field.value = TT.form_filter_commas_to_spaces(field.value);

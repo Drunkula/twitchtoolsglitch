@@ -33,6 +33,7 @@ window.addEventListener('load', (event) => {
     gid('clearmainout').addEventListener('click', () => o('', true) );
 
     TT.forms_init_common(); // channels populates form fields from url string
+    TT.add_events_common();
 
     MUTEDVars.alertSound = gid('ding');
         // main listener

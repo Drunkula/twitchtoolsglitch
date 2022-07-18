@@ -17,7 +17,7 @@
           <div class="navbar-menu" id="nav-links-component">
             <div class="navbar-start"><a class="navbar-item" href="/">Home.</a>
               <div class="navbar-item has-dropdown is-hoverable"><a class="navbar-link">Tools List</a>
-                <div class="navbar-dropdown is-boxed"><a class="navbar-item" href="chat-to-speech.html">Speech from chat</a><a class="navbar-item" href="new-chatter.html">New Chatters alert (say hello to new chatters easily)</a><a class="navbar-item" href="muted-alert.html">You're Muted alert</a><a class="navbar-item" href="chat-alert.html">New Message alert - don't miss chat messages (good for small channels)</a><a class="navbar-item" href="chat-to-speech-tabs.html">Speech from chat REDUX - just more commands, really</a><a class="navbar-item" href="subs-gifts-cheers.html">Subs, gifts, cheers - it doesn't work yet (well it does, but it doesn't)</a><a class="navbar-item" href="localstorage.html">localstorage killer</a><a class="navbar-item" href="#"><b>There'll be more...</b></a><a class="navbar-item" href="#">VIPs / Named chatters or WRONG 'UNS join</a><a class="navbar-item" href="#">OBS scene and mic control mod chat commands (!unmute, !brb, !game)</a><a class="navbar-item" href="#">OBS web control panel for your mods</a><a class="navbar-item" href="#">And your suggestions.</a>
+                <div class="navbar-dropdown is-boxed"><a class="navbar-item" href="chat-to-speech.html">Speech from chat</a><a class="navbar-item" href="scene-switcher.html">Scene change from chat commands - !brb, !game, !etc</a><a class="navbar-item" href="new-chatter.html">New Chatters alert (say hello to new chatters easily)</a><a class="navbar-item" href="muted-alert.html">You're Muted alert</a><a class="navbar-item" href="chat-alert.html">New Message alert - don't miss chat messages (good for small channels)</a><a class="navbar-item" href="chat-to-speech-tabs.html">Speech from chat REDUX - just more commands, really</a><a class="navbar-item" href="subs-gifts-cheers.html">Subs, gifts, cheers - it doesn't work yet (well it does, but it doesn't)</a><a class="navbar-item" href="localstorage.html">localstorage killer (just for my debuggin)</a><a class="navbar-item" href="#"><b>There'll be more...</b></a><a class="navbar-item" href="#">VIPs / Named chatters or WRONG 'UNS join</a><a class="navbar-item" href="#">OBS scene and mic control mod chat commands (!unmute, !brb, !game)</a><a class="navbar-item" href="#">OBS web control panel for your mods</a><a class="navbar-item" href="#">And your suggestions.</a>
                   <hr class="navbar-divider is-hidden-desktop">
                 </div>
               </div>
@@ -54,7 +54,6 @@
       <script src="/scripts/form-fields-save-restore.js" defer></script>
       <script src="/scripts/Speecher.class.js" defer></script>
       <script src="/scripts/Cooldowns.class.js" defer></script>
-      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js" defer></script>
       <script src="/scripts/Emoter.class.js" defer></script>
       <script src="/scripts/chat-to-speech.js" defer></script>
       <script src="/scripts/chat-to-speech-queue.js" defer></script>
@@ -104,7 +103,6 @@
           </div>
           <div class="block tab-content" id="voicepanels">
             <div class="tab-pane is-active">
-              <p>Speech Commands</p>
               <div class="columns is-vcentered">
                 <div class="column">
                   <div class="control">
@@ -128,7 +126,6 @@
                   </div>
                 </div>
               </div>
-              <p>Speech Commands</p>
               <div class="columns is-vcentered">
                 <div class="column">
                   <div class="control">
@@ -152,7 +149,6 @@
                   </div>
                 </div>
               </div>
-              <p>Speech Commands</p>
               <div class="columns is-vcentered">
                 <div class="column">
                   <div class="control">
@@ -178,7 +174,6 @@
               </div>
             </div>
             <div class="tab-pane">
-              <p>Speech Commands</p>
               <div class="columns is-vcentered">
                 <div class="column">
                   <div class="control">
@@ -202,7 +197,6 @@
                   </div>
                 </div>
               </div>
-              <p>Speech Commands</p>
               <div class="columns is-vcentered">
                 <div class="column">
                   <div class="control">
@@ -226,7 +220,6 @@
                   </div>
                 </div>
               </div>
-              <p>Speech Commands</p>
               <div class="columns is-vcentered">
                 <div class="column">
                   <div class="control">
@@ -252,7 +245,6 @@
               </div>
             </div>
             <div class="tab-pane">
-              <p>Speech Commands</p>
               <div class="columns is-vcentered">
                 <div class="column">
                   <div class="control">
@@ -276,7 +268,6 @@
                   </div>
                 </div>
               </div>
-              <p>Speech Commands</p>
               <div class="columns is-vcentered">
                 <div class="column">
                   <div class="control">
@@ -300,7 +291,6 @@
                   </div>
                 </div>
               </div>
-              <p>Speech Commands</p>
               <div class="columns is-vcentered">
                 <div class="column">
                   <div class="control">
@@ -326,7 +316,6 @@
               </div>
             </div>
             <div class="tab-pane">
-              <p>Speech Commands</p>
               <div class="columns is-vcentered">
                 <div class="column">
                   <div class="control">
@@ -350,7 +339,6 @@
                   </div>
                 </div>
               </div>
-              <p>Speech Commands</p>
               <div class="columns is-vcentered">
                 <div class="column">
                   <div class="control">
@@ -374,7 +362,6 @@
                   </div>
                 </div>
               </div>
-              <p>Speech Commands</p>
               <div class="columns is-vcentered">
                 <div class="column">
                   <div class="control">
@@ -400,7 +387,6 @@
               </div>
             </div>
             <div class="tab-pane">
-              <p>Speech Commands</p>
               <div class="columns is-vcentered">
                 <div class="column">
                   <div class="control">
@@ -424,7 +410,6 @@
                   </div>
                 </div>
               </div>
-              <p>Speech Commands</p>
               <div class="columns is-vcentered">
                 <div class="column">
                   <div class="control">
@@ -448,7 +433,6 @@
                   </div>
                 </div>
               </div>
-              <p>Speech Commands</p>
               <div class="columns is-vcentered">
                 <div class="column">
                   <div class="control">
@@ -529,7 +513,7 @@
             <p><strong>Permissions:</strong> limit to mods, vips, everyone and/or named users you trust</p>
             <p><strong>Always allowed:</strong> no matter what.  You like these people.</p>
             <p><strong>Ignore:</strong> always ignored.  <em>Get outta here wid ya garbage</em> as <b><a href="https://www.twitch.tv/sockcop" target="_blank">Sockcop</a></b> would say.  Good time to hide chatbots.</p>
-            <p><strong>Emotes:</strong> can be removed from the text (recommended).  Most unicode emotes and Twitch, BTTV and Franker are gone. 7TV to come.</p>
+            <p><strong>Emotes:</strong> can be removed from the text (recommended).  Most unicode emotes, Twitch, BTTV, FFZ and 7TV are gone.  I was annoying to code.</p>
             <p><strong>Digits in names:</strong> can be removed.</p>
             <p><strong>!Commands:</strong> can be ignored - no more !giveaway x 1000 or !roflcopter annoyances</p>
             <p><strong>Cooldowns:</strong> global and user cooldowns will stop you being spammed.  They still apply in read All Chat mode.</p>

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Scene Change Remotely</title>
+    <meta name="description">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <script defer="" src="https://use.fontawesome.com/releases/v6.1.1/js/all.js"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+  </head>
+  <body>
+        <nav class="navbar is-dark cadbury">
+          <div class="navbar-brand"><a class="navbar-item" href="/"><img src="/assets/tt-nav.svg"></a>
+            <!-- burger needs to be inside the brand--><a class="navbar-burger" id="burger-component"><span></span><span></span><span></span></a>
+          </div>
+          <div class="navbar-menu" id="nav-links-component">
+            <div class="navbar-start"><a class="navbar-item" href="/">Home.</a>
+              <div class="navbar-item has-dropdown is-hoverable"><a class="navbar-link">Tools List</a>
+                <div class="navbar-dropdown is-boxed"><a class="navbar-item" href="chat-to-speech.html">Speech from chat</a><a class="navbar-item" href="scene-switcher.html">Scene change from chat commands - !brb, !game, !etc</a><a class="navbar-item" href="new-chatter.html">New Chatters alert (say hello to new chatters easily)</a><a class="navbar-item" href="muted-alert.html">You're Muted alert</a><a class="navbar-item" href="chat-alert.html">New Message alert - don't miss chat messages (good for small channels)</a><a class="navbar-item" href="chat-to-speech-tabs.html">Speech from chat REDUX - just more commands, really</a><a class="navbar-item" href="subs-gifts-cheers.html">Subs, gifts, cheers - it doesn't work yet (well it does, but it doesn't)</a><a class="navbar-item" href="localstorage.html">localstorage killer (just for my debuggin)</a><a class="navbar-item" href="#"><b>There'll be more...</b></a><a class="navbar-item" href="#">VIPs / Named chatters or WRONG 'UNS join</a><a class="navbar-item" href="#">OBS scene and mic control mod chat commands (!unmute, !brb, !game)</a><a class="navbar-item" href="#">OBS web control panel for your mods</a><a class="navbar-item" href="#">And your suggestions.</a>
+                  <hr class="navbar-divider is-hidden-desktop">
+                </div>
+              </div>
+            </div>
+            <div class="navbar-end">
+              <div class="navbar-item has-dropdown is-hoverable is-hidden-touch"><a class="navbar-link">Bulma Bits</a>
+                <div class="navbar-dropdown"><a class="navbar-item" href="https://bulma.io/documentation/components/" target="_blank">Components</a><a class="navbar-item" href="https://bulma.io/documentation/elements/" target="_blank">Elements</a>
+                  <hr class="navbar-divider"><a class="navbar-item" href="https://bulma.io/documentation/layout/" target="_blank">Layout</a><a class="navbar-item" href="https://bulma.io/documentation/form/" target="_blank">Forms</a>
+                </div>
+              </div>
+              <div class="navbar-item has-dropdown is-hoverable is-hidden-touch"><a class="navbar-link">Assets</a>
+                <div class="navbar-dropdown is-right"><a class="navbar-item" href="https://fontawesome.com/search?m=free&amp;s=solid" target="_blank">Fontawesome Solid Free</a><a class="navbar-item" href="https://fontawesome.com/search?m=free&amp;s=regular" target="_blank">Fontawesome Regular Free</a><a class="navbar-item" href="https://fontawesome.com/docs/web/style/animate#customization" target="_blank">Fontawesome Animations</a>
+                  <hr class="navbar-divider"><a class="navbar-item" href="https://fonts.google.com/" target="_blank">Google Fonts</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <script>
+          document.addEventListener("DOMContentLoaded", () => {
+          	// for this specific nav list
+          	const burger = document.querySelector('#burger-component');
+          	const navlist = document.querySelector('#nav-links-component');
+          	burger.addEventListener('click', () => {navlist.classList.toggle('is-active'); burger.classList.toggle('is-active')})
+          });
+          
+        </script>
+    <div class="block mx-5 my-3 main-container">
+      <script src="/scripts/backbone-common.js" defer></script>
+      <script src="/scripts/twitch-tools-init.js" defer></script>
+      <script src="/scripts/tmi.min.js" defer></script>
+      <script src="/scripts/tmi-code-common.js" defer></script>
+      <script src="/scripts/event-listeners.js" defer></script>
+      <script src="/scripts/form-fields-save-restore.js" defer></script>
+      <script src="/scripts/obs-websocket.v4.min.js" defer></script>
+      <script src="/scripts/scene-switcher-obs.js" defer></script>
+      <script src="/scripts/scene-switcher.js" defer></script>
+      <div class="box mb-2 py-1">
+        <form class="not-mobile-view mb-2" id="mainform">
+          <label class="label is-hidden-mobile">Your Channel</label>
+          <div class="field has-addons not-mobile-view">
+            <div class="control is-expanded">
+              <input class="input is-fullwidth form-save form-filter-spaces-to-commas" id="channels" type="text" size="50" placeholder="Channel names space or comma separated">
+            </div>
+            <div class="control">
+              <button class="button is-link urlpopulate" id="join">Join</button>
+            </div>
+          </div>
+        </form>
+        <div class="field is-grouped is-grouped-centered mb-0">
+          <div class="control">
+            <label class="checkbox button is-link is-size-7-mobile is-small">
+              <input id="enablespeech" type="checkbox" checked data-tocheckbox="SceneSwitcherVars.commandsEnabled"> enabled
+            </label>
+          </div>
+          <div class="control">
+            <button class="button is-small is-primary mobile-view-btn">Mini View</button>
+          </div>
+          <div class="control">
+            <button class="button is-small is-primary modal-trigger" data-target="configModal"><i class="fas fa-gear"></i></button>
+          </div>
+        </div>
+        <!--.field.is-grouped-centered.is-grouped.not-mobile-view-->
+        <div class="not-mobile-view" id="saycmds">
+          <div class="tabs is-fullwidth is-toggle is-small mt-2" data-target="#scenepanels">
+            <ul>
+              <li class="is-active"><a>Scenes 1</a></li>
+              <li><a>Scenes 2</a></li>
+            </ul>
+          </div>
+          <div class="block tab-content" id="scenepanels">
+            <div class="tab-pane is-active">
+              <div class="columns">
+                <div class="column">
+                  <div class="columns is-vcentered my-0">
+                    <div class="column is-narrow">
+                      <div class="control">
+                        <input class="input is-small form-save scenecmd-input" type="text" id="scenecmd-1" placeholder="!scene command 1">
+                      </div>
+                    </div>
+                    <div class="column">
+                      <div class="is-flex is-align-items-center">
+                        <div class="select is-small">
+                          <select class="form-save scene-select" id="sceneid-1" data-tostr="SceneSwitcherVars.sceneSelects.sceneid-1">
+                            <option value="choose scene">choose scene 1</option>
+                          </select>
+                        </div>
+                        <div class="field-body">
+                          <button class="tag button is-small is-info ml-1" data-index="1">test</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="columns is-vcentered my-0">
+                    <div class="column is-narrow">
+                      <div class="control">
+                        <input class="input is-small form-save scenecmd-input" type="text" id="scenecmd-2" placeholder="!scene command 2">
+                      </div>
+                    </div>
+                    <div class="column">
+                      <div class="is-flex is-align-items-center">
+                        <div class="select is-small">
+                          <select class="form-save scene-select" id="sceneid-2" data-tostr="SceneSwitcherVars.sceneSelects.sceneid-2">
+                            <option value="choose scene">choose scene 2</option>
+                          </select>
+                        </div>
+                        <div class="field-body">
+                          <button class="tag button is-small is-info ml-1" data-index="2">test</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="columns is-vcentered my-0">
+                    <div class="column is-narrow">
+                      <div class="control">
+                        <input class="input is-small form-save scenecmd-input" type="text" id="scenecmd-3" placeholder="!scene command 3">
+                      </div>
+                    </div>
+                    <div class="column">
+                      <div class="is-flex is-align-items-center">
+                        <div class="select is-small">
+                          <select class="form-save scene-select" id="sceneid-3" data-tostr="SceneSwitcherVars.sceneSelects.sceneid-3">
+                            <option value="choose scene">choose scene 3</option>
+                          </select>
+                        </div>
+                        <div class="field-body">
+                          <button class="tag button is-small is-info ml-1" data-index="3">test</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="column">
+                  <div class="columns is-vcentered my-0">
+                    <div class="column is-narrow">
+                      <div class="control">
+                        <input class="input is-small form-save scenecmd-input" type="text" id="scenecmd-4" placeholder="!scene command 4">
+                      </div>
+                    </div>
+                    <div class="column">
+                      <div class="is-flex is-align-items-center">
+                        <div class="select is-small">
+                          <select class="form-save scene-select" id="sceneid-4" data-tostr="SceneSwitcherVars.sceneSelects.sceneid-4">
+                            <option value="choose scene">choose scene 4</option>
+                          </select>
+                        </div>
+                        <div class="field-body">
+                          <button class="tag button is-small is-info ml-1" data-index="4">test</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="columns is-vcentered my-0">
+                    <div class="column is-narrow">
+                      <div class="control">
+                        <input class="input is-small form-save scenecmd-input" type="text" id="scenecmd-5" placeholder="!scene command 5">
+                      </div>
+                    </div>
+                    <div class="column">
+                      <div class="is-flex is-align-items-center">
+                        <div class="select is-small">
+                          <select class="form-save scene-select" id="sceneid-5" data-tostr="SceneSwitcherVars.sceneSelects.sceneid-5">
+                            <option value="choose scene">choose scene 5</option>
+                          </select>
+                        </div>
+                        <div class="field-body">
+                          <button class="tag button is-small is-info ml-1" data-index="5">test</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="columns is-vcentered my-0">
+                    <div class="column is-narrow">
+                      <div class="control">
+                        <input class="input is-small form-save scenecmd-input" type="text" id="scenecmd-6" placeholder="!scene command 6">
+                      </div>
+                    </div>
+                    <div class="column">
+                      <div class="is-flex is-align-items-center">
+                        <div class="select is-small">
+                          <select class="form-save scene-select" id="sceneid-6" data-tostr="SceneSwitcherVars.sceneSelects.sceneid-6">
+                            <option value="choose scene">choose scene 6</option>
+                          </select>
+                        </div>
+                        <div class="field-body">
+                          <button class="tag button is-small is-info ml-1" data-index="6">test</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane">
+              <div class="columns">
+                <div class="column">
+                  <div class="columns is-vcentered my-0">
+                    <div class="column is-narrow">
+                      <div class="control">
+                        <input class="input is-small form-save scenecmd-input" type="text" id="scenecmd-7" placeholder="!scene command 7">
+                      </div>
+                    </div>
+                    <div class="column">
+                      <div class="is-flex is-align-items-center">
+                        <div class="select is-small">
+                          <select class="form-save scene-select" id="sceneid-7" data-tostr="SceneSwitcherVars.sceneSelects.sceneid-7">
+                            <option value="choose scene">choose scene 7</option>
+                          </select>
+                        </div>
+                        <div class="field-body">
+                          <button class="tag button is-small is-info ml-1" data-index="7">test</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="columns is-vcentered my-0">
+                    <div class="column is-narrow">
+                      <div class="control">
+                        <input class="input is-small form-save scenecmd-input" type="text" id="scenecmd-8" placeholder="!scene command 8">
+                      </div>
+                    </div>
+                    <div class="column">
+                      <div class="is-flex is-align-items-center">
+                        <div class="select is-small">
+                          <select class="form-save scene-select" id="sceneid-8" data-tostr="SceneSwitcherVars.sceneSelects.sceneid-8">
+                            <option value="choose scene">choose scene 8</option>
+                          </select>
+                        </div>
+                        <div class="field-body">
+                          <button class="tag button is-small is-info ml-1" data-index="8">test</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="columns is-vcentered my-0">
+                    <div class="column is-narrow">
+                      <div class="control">
+                        <input class="input is-small form-save scenecmd-input" type="text" id="scenecmd-9" placeholder="!scene command 9">
+                      </div>
+                    </div>
+                    <div class="column">
+                      <div class="is-flex is-align-items-center">
+                        <div class="select is-small">
+                          <select class="form-save scene-select" id="sceneid-9" data-tostr="SceneSwitcherVars.sceneSelects.sceneid-9">
+                            <option value="choose scene">choose scene 9</option>
+                          </select>
+                        </div>
+                        <div class="field-body">
+                          <button class="tag button is-small is-info ml-1" data-index="9">test</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="column">
+                  <div class="columns is-vcentered my-0">
+                    <div class="column is-narrow">
+                      <div class="control">
+                        <input class="input is-small form-save scenecmd-input" type="text" id="scenecmd-10" placeholder="!scene command 10">
+                      </div>
+                    </div>
+                    <div class="column">
+                      <div class="is-flex is-align-items-center">
+                        <div class="select is-small">
+                          <select class="form-save scene-select" id="sceneid-10" data-tostr="SceneSwitcherVars.sceneSelects.sceneid-10">
+                            <option value="choose scene">choose scene 10</option>
+                          </select>
+                        </div>
+                        <div class="field-body">
+                          <button class="tag button is-small is-info ml-1" data-index="10">test</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="columns is-vcentered my-0">
+                    <div class="column is-narrow">
+                      <div class="control">
+                        <input class="input is-small form-save scenecmd-input" type="text" id="scenecmd-11" placeholder="!scene command 11">
+                      </div>
+                    </div>
+                    <div class="column">
+                      <div class="is-flex is-align-items-center">
+                        <div class="select is-small">
+                          <select class="form-save scene-select" id="sceneid-11" data-tostr="SceneSwitcherVars.sceneSelects.sceneid-11">
+                            <option value="choose scene">choose scene 11</option>
+                          </select>
+                        </div>
+                        <div class="field-body">
+                          <button class="tag button is-small is-info ml-1" data-index="11">test</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="columns is-vcentered my-0">
+                    <div class="column is-narrow">
+                      <div class="control">
+                        <input class="input is-small form-save scenecmd-input" type="text" id="scenecmd-12" placeholder="!scene command 12">
+                      </div>
+                    </div>
+                    <div class="column">
+                      <div class="is-flex is-align-items-center">
+                        <div class="select is-small">
+                          <select class="form-save scene-select" id="sceneid-12" data-tostr="SceneSwitcherVars.sceneSelects.sceneid-12">
+                            <option value="choose scene">choose scene 12</option>
+                          </select>
+                        </div>
+                        <div class="field-body">
+                          <button class="tag button is-small is-info ml-1" data-index="12">test</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <hr class="not-mobile-view">
+      </div>
+      <div class="box">
+        <div id="mainoutput"></div>
+        <p>Sent Commands.</p>
+        <div id="commandqueue"></div>
+      </div>
+      <div class="not-mobile-view mb-2" id="logbox">
+        <div class="box">
+          <button class="delete is-pulled-right" data-target="#logbox"></button>
+          <h3 class="subtitle mb-1" id="loglabel">Log:</h3>
+          <div id="log"></div>
+        </div>
+      </div>
+      <div class="container not-mobile-view">
+        <div class="message is-link" id="mbnc">
+          <div class="message-header">Scene switcher from chat
+            <button class="delete" data-target="#mbnc"></button>
+          </div>
+          <div class="message-body">
+            <p>No more game playing while viewers go "YOU'RE STILL ON BE RIGHT BACK!!!!"</p>
+            <p>Create commands like !game, !brb, !camera to let your scenes be changed through chat.</p>
+            <p>Limit commands to MODS, VIPS and named users, or if you're mad everyone.</p>
+            <p>&nbsp;</p>
+            <div class="block"><strong>Bookmark</strong> the page to keep the settings once you've got it setup how you like.  Copy the URL to an OBS custom dock and it'll automatically start working each time you use OBS.  Remember if you change any scenes / audio settings to come back to the tool, change any settings and update the dock's URL.</div>
+            <div class="block">The <span class="tag is-primary">Mini View</span> button toggles screen clutter.  Make sure you've joined a channel first.</div>
+            <p><strong>Config</strong>
+              <button class="button is-small is-primary modal-trigger p-1" data-target="configModal"><i class="fas fa-gear"></i></button> :
+            </p>
+            <p><strong>Permissions:</strong> limit to mods, vips, everyone and/or named users you trust</p>
+            <p><strong>Always allowed:</strong> no matter what.  You like these people.</p>
+            <p><strong>Ignore:</strong> always ignored.  <em>Get outta here wid ya garbage</em> as <b><a href="https://www.twitch.tv/sockcop" target="_blank">Sockcop</a></b> would say.  Good time to hide chatbots.</p>
+            <div class="block"></div>
+            <div class="block">To keep the banned userlist copy the url to update your link, the the settings will be temporarily saved.</div>
+            <div class="block"></div>
+            <div class="block"><strong>Tips:</strong> "Done" on the config page, joining channels and "Get Url" saves values to the current url letting you bookmark the page without having to type in everything again.  You can easily save bookmarks with different settings.</div>
+            <div class="field has-addons">
+              <div class="control is-expanded">
+                <input class="input is-small" id="linkurl" placeholder="Url to bookmark">
+              </div>
+              <div class="control">
+                <button class="button is-danger is-small is-responsive urlpopulate">Get Url</button>
+              </div>
+            </div>
+            <div class="block"><strong>Todo:</strong> Audio Sources</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal" id="configModal">
+        <div class="modal-background modal-dismiss"></div>
+        <div class="modal-card">
+          <section class="modal-card-body">
+            <div class="tabs is-fullwidth is-toggle is-toggle-rounded is-small" data-target="#configpanels">
+              <ul>
+                <li class="is-active"><a>Permissions</a></li>
+                <li id="obssettings"><a>OBS Websocket Settings</a></li>
+              </ul>
+            </div>
+            <div class="block tab-content" id="configpanels">
+              <div class="tab-pane is-active">
+                <p class="label has-text-centered">Allow Scene Switching:</p>
+                <div class="field is-grouped-centered is-grouped permissions">
+                  <div class="control">
+                    <label class="checkbox button is-info">
+                      <input class="form-save" id="everyone" type="checkbox" data-tocheckbox="perms.allowEveryone"> everyone
+                    </label>
+                  </div>
+                  <div class="control">
+                    <label class="checkbox button is-info">
+                      <input class="form-save" id="mods" type="checkbox" checked data-tocheckbox="perms.allowMods"> mods
+                    </label>
+                  </div>
+                  <div class="control">
+                    <label class="checkbox button is-info">
+                      <input class="form-save" id="vips" type="checkbox" checked data-tocheckbox="perms.allowVips"> vips
+                    </label>
+                  </div>
+                </div>
+                <label class="label">Users always allowed (even if not mods)</label>
+                <div class="field">
+                  <div class="control">
+                    <input class="input form-save form-filter-spaces-to-commas" type="text" name="allownamed" id="allownamed" placeholder="allow named users" data-toarraylc="perms.allowNamed">
+                  </div>
+                </div>
+                <label class="label">Ignored users</label>
+                <div class="field">
+                  <div class="control">
+                    <textarea class="textarea form-save form-filter-spaces-to-commas" id="ignoredusers" rows="2" placeholder="ignored users" data-toarraylc="perms.ignoredUsers"></textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="tab-pane">
+                <label class="label">OBS Address e.g. 127.0.0.1</label>
+                <div class="field">
+                  <div class="control">
+                    <input class="input form-save" type="text" id="obsaddress" placeholder="OBS address e.g. localhost" data-tostr="SceneSwitcherVars.obsAddress" value="localhost">
+                  </div>
+                </div>
+                <div class="columns is-mobile">
+                  <div class="column">
+                    <label class="label">OBS Port e.g. 4444</label>
+                    <div class="field">
+                      <div class="control">
+                        <input class="input form-save" type="number" id="obsport" placeholder="OBS port e.g. 4444" data-tostr="SceneSwitcherVars.obsPort" value="4444">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="column">
+                    <label class="label">OBS Password</label>
+                    <div class="field">
+                      <div class="control">
+                        <input class="input form-save" type="text" id="obspassword" placeholder="OBS password (if authentication enabled)" data-tostr="SceneSwitcherVars.obsPassword">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="is-flex is-align-items-center">
+                  <div class="mr-3">
+                    <button class="button is-info is-responsive" id="obsconnect">Connect</button>
+                  </div>
+                  <div id="connectresult"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+          <footer class="modal-card-foot">
+            <button class="button modal-dismiss is-success urlpopulate is-responsive">Done</button>
+          </footer>
+        </div>
+        <button class="modal-close is-large">button</button>
+      </div>
+    </div>
+  </body>
+</html>

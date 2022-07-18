@@ -15,6 +15,9 @@
 
 	const TT_EVENT_ITEMS = [
 		{selector: '#mainform', event: 'submit', function: join_chans_submit_handler, params: {}},
+
+		{selector: '#loglabel', event: 'click', function: () => log('', true), params: {}},
+
 //		{selector: '#channels', event: 'change', function: url_populate_onchange, params: {}},
 
 		{selector: '[data-toarray]', event: 'change', function: set_conf_array, params: {}},

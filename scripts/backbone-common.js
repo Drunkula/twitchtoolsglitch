@@ -60,20 +60,15 @@ TT.forms_init_common = function forms_init_common() {
 		// form values will overwrite defaults
 	TT.restore_form_values(TT.MAGIC_CLASS_FORM_SAVE);
 
-	TT.add_event_listeners();
-
-		// log label onclick clears - should split out as this is clunk
-	let ll = gid('loglabel');
-	if (ll) {
-		ll.onclick = () => { log('', true); }
-	}
-
 		// autojoin check
 	if (TMIConfig.restoredParams['autojoin'] === "true") {
 		TMIConfig.autojoin = true;
 	}
-
 	//trigger_onchange_on('input, select');
+}
+
+TT.add_events_common = function() {
+	TT.add_event_listeners();
 }
 
 	// if permissions are used you'll have allownamed, everyone, mods, vips
@@ -166,18 +161,6 @@ TT.localstore_load = function page_params_get() {
     return JSON.parse( localStorage.getItem(namePath) );
 	//return TT.local_store_get('urlParams');
 }
-/*
-	// sets a value in localStorage tied to the current page
-TT.local_store_set = function local_store_set(name, data) {
-    let namePath = name + window.location.pathname;
-    localStorage.setItem(namePath, JSON.stringify(data));
-}
-    // gets value tied to current page
-TT.local_store_get = function local_store_get (name) {
-    let namePath = name + window.location.pathname;
-    return JSON.parse( localStorage.getItem(namePath) );
-}
- */
 
 	// selects get or localStorage for form repopulation
 
@@ -284,7 +267,7 @@ function docReady(fn) {
   * @returns
   */
 
-  function o(str, clearIt, after="<br/>", divId = 'mainoutput') {
+function o(str, clearIt, after="<br/>", divId = 'mainoutput') {
 	if (clearIt)
 		document.getElementById(divId).innerHTML = '';
 
@@ -294,6 +277,16 @@ function docReady(fn) {
 		// https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
 	document.getElementById(divId).insertAdjacentHTML('afterbegin', ndiv);
 }
+
+	// as above but multi args and in order
+
+function o2(...strs) {
+	if (!strs) return;
+	var ndiv = `<div onclick="this.remove()">${strs.join(' ')}</div>`;
+
+	gid('mainoutput').insertAdjacentHTML('beforeend', ndiv);
+}
+
 
 /**
   * Output to that div top first

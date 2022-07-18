@@ -49,6 +49,7 @@
 
         TT.forms_init_common(); // channels populates form fields from url string
             // after init as defaults changed
+        TT.add_events_common();
         TT.add_event_listeners(NCMEvents);
 
             // adds functions to buttons with confirm countdown

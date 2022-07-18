@@ -16,6 +16,8 @@
 
 (() => {	// keep the main bulma stuff out of the mainspace
 	const TT_DEBUGGING = true;
+	const html = document.getElementsByTagName('html')[0];
+	TT.show_modal = show_modal;	// add as a "global" function
 
 	let tt_log = TT_DEBUGGING ? console.log : () => {};	// logging function
 
@@ -54,13 +56,12 @@
 		let triggers = document.querySelectorAll('.modal-trigger');
 		let modals = [...document.getElementsByClassName('modal')];	// and arrays allow forEach, too.
 
-		let h = document.getElementsByTagName('html')[0];
 			// get modal ids from the data-target of buttons
 		triggers.forEach( btn => {
-			let modal = document.getElementById(btn.dataset.target);
+			//let modal = document.getElementById(btn.dataset.target);
+			let modal = btn.dataset.target;
 			btn.addEventListener('click', () => {
-				modal.classList.add('is-active');
-				h.classList.add('is-clipped');	// stops background scrolling with mouse
+				show_modal(modal)
 			})
 		})
 			// attach close events to all the kids
@@ -68,9 +69,15 @@
 			let addClose = modal.querySelectorAll('.modal-dismiss, .modal-close, .modal-card-head .delete');
 
 			addClose.forEach(closeMe => {
-				closeMe.addEventListener('click', () => {modal.classList.remove('is-active'); h.classList.remove('is-clipped');})
+				closeMe.addEventListener('click', () => {modal.classList.remove('is-active'); html.classList.remove('is-clipped');})
 			})
 		});
+	}
+
+	function show_modal(id) {
+		let modal = gid(id);
+		modal.classList.add('is-active');
+		html.classList.add('is-clipped');	// stops background scrolling with mouse
 	}
 
 

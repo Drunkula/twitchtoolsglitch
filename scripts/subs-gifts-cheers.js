@@ -18,6 +18,7 @@ docReady( () => {
 	log('LOADED');
 
 	TT.forms_init_common();
+	TT.add_events_common();
 
 	let clearChatters = () => { o('', true); };
 	let resetChatters = () => { NCNChatterSet.clear(); o('', true); }
