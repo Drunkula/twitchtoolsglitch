@@ -208,6 +208,13 @@ html {
 .scenecmd-input {
 	width: 8rem;
 }
+
+.audiocmd-input {
+	width: 8rem;
+}
+
+
+
 	/* pre full alert warning */
 #alertnotification {
 	cursor: grab;

@@ -84,8 +84,8 @@
         <div class="not-mobile-view" id="saycmds">
           <div class="tabs is-fullwidth is-toggle is-small mt-2" data-target="#scenepanels">
             <ul>
-              <li class="is-active"><a>Scenes 1</a></li>
-              <li><a>Scenes 2</a></li>
+              <li class="is-active"><a>Scenes</a></li>
+              <li><a>Audio</a></li>
             </ul>
           </div>
           <div class="block tab-content" id="scenepanels">
@@ -106,7 +106,7 @@
                           </select>
                         </div>
                         <div class="field-body">
-                          <button class="tag button is-small is-info ml-1" data-index="1">test</button>
+                          <button class="tag button is-small is-info ml-1 scene-test" data-index="1">test</button>
                         </div>
                       </div>
                     </div>
@@ -125,7 +125,7 @@
                           </select>
                         </div>
                         <div class="field-body">
-                          <button class="tag button is-small is-info ml-1" data-index="2">test</button>
+                          <button class="tag button is-small is-info ml-1 scene-test" data-index="2">test</button>
                         </div>
                       </div>
                     </div>
@@ -144,7 +144,7 @@
                           </select>
                         </div>
                         <div class="field-body">
-                          <button class="tag button is-small is-info ml-1" data-index="3">test</button>
+                          <button class="tag button is-small is-info ml-1 scene-test" data-index="3">test</button>
                         </div>
                       </div>
                     </div>
@@ -165,7 +165,7 @@
                           </select>
                         </div>
                         <div class="field-body">
-                          <button class="tag button is-small is-info ml-1" data-index="4">test</button>
+                          <button class="tag button is-small is-info ml-1 scene-test" data-index="4">test</button>
                         </div>
                       </div>
                     </div>
@@ -184,7 +184,7 @@
                           </select>
                         </div>
                         <div class="field-body">
-                          <button class="tag button is-small is-info ml-1" data-index="5">test</button>
+                          <button class="tag button is-small is-info ml-1 scene-test" data-index="5">test</button>
                         </div>
                       </div>
                     </div>
@@ -203,7 +203,7 @@
                           </select>
                         </div>
                         <div class="field-body">
-                          <button class="tag button is-small is-info ml-1" data-index="6">test</button>
+                          <button class="tag button is-small is-info ml-1 scene-test" data-index="6">test</button>
                         </div>
                       </div>
                     </div>
@@ -217,18 +217,24 @@
                   <div class="columns is-vcentered my-0">
                     <div class="column is-narrow">
                       <div class="control">
-                        <input class="input is-small form-save scenecmd-input" type="text" id="scenecmd-7" placeholder="!scene command 7">
+                        <input class="input is-small form-save audiocmd-input" type="text" id="audiocmd-1" placeholder="!audio command 1">
                       </div>
                     </div>
                     <div class="column">
                       <div class="is-flex is-align-items-center">
-                        <div class="select is-small">
-                          <select class="form-save scene-select" id="sceneid-7" data-tostr="SceneSwitcherVars.sceneSelects.sceneid-7">
-                            <option value="choose scene">choose scene 7</option>
+                        <div class="select is-small mr-2">
+                          <select class="form-save audio-select" id="audioid-1" data-tostr="SceneSwitcherVars.audioSelects.1">
+                            <option value="">choose audio source </option>
+                          </select>
+                        </div><br>
+                        <div class="select is-small mr-2">
+                          <select class="form-save" id="audioaction-1" data-tostr="SceneSwitcherVars.audioAction.1">
+                            <option value="unmute">unmute</option>
+                            <option value="mute">mute</option>
                           </select>
                         </div>
                         <div class="field-body">
-                          <button class="tag button is-small is-info ml-1" data-index="7">test</button>
+                          <button class="tag button is-small is-info audio-test" data-index="1">test</button>
                         </div>
                       </div>
                     </div>
@@ -236,18 +242,24 @@
                   <div class="columns is-vcentered my-0">
                     <div class="column is-narrow">
                       <div class="control">
-                        <input class="input is-small form-save scenecmd-input" type="text" id="scenecmd-8" placeholder="!scene command 8">
+                        <input class="input is-small form-save audiocmd-input" type="text" id="audiocmd-2" placeholder="!audio command 2">
                       </div>
                     </div>
                     <div class="column">
                       <div class="is-flex is-align-items-center">
-                        <div class="select is-small">
-                          <select class="form-save scene-select" id="sceneid-8" data-tostr="SceneSwitcherVars.sceneSelects.sceneid-8">
-                            <option value="choose scene">choose scene 8</option>
+                        <div class="select is-small mr-2">
+                          <select class="form-save audio-select" id="audioid-2" data-tostr="SceneSwitcherVars.audioSelects.2">
+                            <option value="">choose audio source </option>
+                          </select>
+                        </div><br>
+                        <div class="select is-small mr-2">
+                          <select class="form-save" id="audioaction-2" data-tostr="SceneSwitcherVars.audioAction.2">
+                            <option value="unmute">unmute</option>
+                            <option value="mute">mute</option>
                           </select>
                         </div>
                         <div class="field-body">
-                          <button class="tag button is-small is-info ml-1" data-index="8">test</button>
+                          <button class="tag button is-small is-info audio-test" data-index="2">test</button>
                         </div>
                       </div>
                     </div>
@@ -255,18 +267,24 @@
                   <div class="columns is-vcentered my-0">
                     <div class="column is-narrow">
                       <div class="control">
-                        <input class="input is-small form-save scenecmd-input" type="text" id="scenecmd-9" placeholder="!scene command 9">
+                        <input class="input is-small form-save audiocmd-input" type="text" id="audiocmd-3" placeholder="!audio command 3">
                       </div>
                     </div>
                     <div class="column">
                       <div class="is-flex is-align-items-center">
-                        <div class="select is-small">
-                          <select class="form-save scene-select" id="sceneid-9" data-tostr="SceneSwitcherVars.sceneSelects.sceneid-9">
-                            <option value="choose scene">choose scene 9</option>
+                        <div class="select is-small mr-2">
+                          <select class="form-save audio-select" id="audioid-3" data-tostr="SceneSwitcherVars.audioSelects.3">
+                            <option value="">choose audio source </option>
+                          </select>
+                        </div><br>
+                        <div class="select is-small mr-2">
+                          <select class="form-save" id="audioaction-3" data-tostr="SceneSwitcherVars.audioAction.3">
+                            <option value="unmute">unmute</option>
+                            <option value="mute">mute</option>
                           </select>
                         </div>
                         <div class="field-body">
-                          <button class="tag button is-small is-info ml-1" data-index="9">test</button>
+                          <button class="tag button is-small is-info audio-test" data-index="3">test</button>
                         </div>
                       </div>
                     </div>
@@ -276,18 +294,24 @@
                   <div class="columns is-vcentered my-0">
                     <div class="column is-narrow">
                       <div class="control">
-                        <input class="input is-small form-save scenecmd-input" type="text" id="scenecmd-10" placeholder="!scene command 10">
+                        <input class="input is-small form-save audiocmd-input" type="text" id="audiocmd-4" placeholder="!audio command 4">
                       </div>
                     </div>
                     <div class="column">
                       <div class="is-flex is-align-items-center">
-                        <div class="select is-small">
-                          <select class="form-save scene-select" id="sceneid-10" data-tostr="SceneSwitcherVars.sceneSelects.sceneid-10">
-                            <option value="choose scene">choose scene 10</option>
+                        <div class="select is-small mr-2">
+                          <select class="form-save audio-select" id="audioid-4" data-tostr="SceneSwitcherVars.audioSelects.4">
+                            <option value="">choose audio source </option>
+                          </select>
+                        </div><br>
+                        <div class="select is-small mr-2">
+                          <select class="form-save" id="audioaction-4" data-tostr="SceneSwitcherVars.audioAction.4">
+                            <option value="unmute">unmute</option>
+                            <option value="mute">mute</option>
                           </select>
                         </div>
                         <div class="field-body">
-                          <button class="tag button is-small is-info ml-1" data-index="10">test</button>
+                          <button class="tag button is-small is-info audio-test" data-index="4">test</button>
                         </div>
                       </div>
                     </div>
@@ -295,18 +319,24 @@
                   <div class="columns is-vcentered my-0">
                     <div class="column is-narrow">
                       <div class="control">
-                        <input class="input is-small form-save scenecmd-input" type="text" id="scenecmd-11" placeholder="!scene command 11">
+                        <input class="input is-small form-save audiocmd-input" type="text" id="audiocmd-5" placeholder="!audio command 5">
                       </div>
                     </div>
                     <div class="column">
                       <div class="is-flex is-align-items-center">
-                        <div class="select is-small">
-                          <select class="form-save scene-select" id="sceneid-11" data-tostr="SceneSwitcherVars.sceneSelects.sceneid-11">
-                            <option value="choose scene">choose scene 11</option>
+                        <div class="select is-small mr-2">
+                          <select class="form-save audio-select" id="audioid-5" data-tostr="SceneSwitcherVars.audioSelects.5">
+                            <option value="">choose audio source </option>
+                          </select>
+                        </div><br>
+                        <div class="select is-small mr-2">
+                          <select class="form-save" id="audioaction-5" data-tostr="SceneSwitcherVars.audioAction.5">
+                            <option value="unmute">unmute</option>
+                            <option value="mute">mute</option>
                           </select>
                         </div>
                         <div class="field-body">
-                          <button class="tag button is-small is-info ml-1" data-index="11">test</button>
+                          <button class="tag button is-small is-info audio-test" data-index="5">test</button>
                         </div>
                       </div>
                     </div>
@@ -314,18 +344,24 @@
                   <div class="columns is-vcentered my-0">
                     <div class="column is-narrow">
                       <div class="control">
-                        <input class="input is-small form-save scenecmd-input" type="text" id="scenecmd-12" placeholder="!scene command 12">
+                        <input class="input is-small form-save audiocmd-input" type="text" id="audiocmd-6" placeholder="!audio command 6">
                       </div>
                     </div>
                     <div class="column">
                       <div class="is-flex is-align-items-center">
-                        <div class="select is-small">
-                          <select class="form-save scene-select" id="sceneid-12" data-tostr="SceneSwitcherVars.sceneSelects.sceneid-12">
-                            <option value="choose scene">choose scene 12</option>
+                        <div class="select is-small mr-2">
+                          <select class="form-save audio-select" id="audioid-6" data-tostr="SceneSwitcherVars.audioSelects.6">
+                            <option value="">choose audio source </option>
+                          </select>
+                        </div><br>
+                        <div class="select is-small mr-2">
+                          <select class="form-save" id="audioaction-6" data-tostr="SceneSwitcherVars.audioAction.6">
+                            <option value="unmute">unmute</option>
+                            <option value="mute">mute</option>
                           </select>
                         </div>
                         <div class="field-body">
-                          <button class="tag button is-small is-info ml-1" data-index="12">test</button>
+                          <button class="tag button is-small is-info audio-test" data-index="6">test</button>
                         </div>
                       </div>
                     </div>
@@ -379,7 +415,6 @@
                 <button class="button is-danger is-small is-responsive urlpopulate">Get Url</button>
               </div>
             </div>
-            <div class="block"><strong>Todo:</strong> Audio Sources</div>
           </div>
         </div>
       </div>

@@ -56,12 +56,11 @@ WO Mic (global) : wasapi_input_capture
 
 
 */
-
-
 TMIConfig.SceneSwitcherVars = {
 	obs: new OBSWebSocket(),
 	connected: false,
 	sceneCommands: [],	// updated by onchange of command list - starts 1
+	audioCommands: [],
 
 	connectPromptShown: false
 }
@@ -69,15 +68,13 @@ TMIConfig.SceneSwitcherVars = {
 {	// scope
 	const SS = TMIConfig.SceneSwitcherVars;
 
-	/** Gets params from form, attempts login */
+		/** Gets params from form, attempts login */
 
 	SS.obs_connect = function obs_connect() {
 		const obs = SS.obs;
 		const opts = SS.get_obs_login_form_data();
 
-		console.log("avail events", obs.availableEvents);
-		console.log("avail requests", obs.availableRequests);
-
+			// modal info text
 		gid("connectresult").textContent = '...please wait';
 		log("Address: " + opts.address)
 
@@ -102,56 +99,16 @@ TMIConfig.SceneSwitcherVars = {
 		SS.scenes = await SS.obs_get_scenes();
 		SS.populate_scene_selects(SS.scenes);
 
-		TT.restore_form_values(".scene-select");
+		SS.audios = await obs_get_audio_sources();
+		SS.populate_audio_selects(SS.audios);
+
+		TT.restore_form_values(".scene-select, .audio-select");
 		TT.add_events_common();
 
-		let gas = await obs_get_audio_sources();
-		let gss = await obs_get_special_sources();
-		console.log("GAS", gas, "GSS", gss);
+		//let gas = await obs_get_audio_sources();
+		//let gss = await obs_get_special_sources();
+		//console.log("GAS", gas, "GSS", gss);
 	}
-
-		// GetMediaSourcesList GetAudioActive(source) ListOutputs?
-		// GetSourcesList <- good have found browser_source dshow_input
-		// GetSpecialSources sounds interesting
-
-	async function obs_get_audio_sources() {	// {name: 'WO Mic (global)', type: 'input', typeId: 'wasapi_input_capture'}
-		let req = "GetSourcesList";
-		let sources = await SS.obs.send(req);
-
-		let unfiltered = sources.sources.map(a => a.name + ' : ' + a.typeId);
-		log('<b>Sources Unfiltered:</b><br>' + unfiltered.join('<br>'))
-
-		let sourcesA = sources.sources.filter(s => s.typeId === 'wasapi_input_capture' || s.typeId === 'wasapi_output_capture').map(a => a.name);
-				log("<b>Sources Audio Filtered:</b><br> " + sourcesA.join('<br>'));
-				console.log("audio", sources);
-
-		return sourcesA;
-	}
-
-		// GetSpecialSources sounds interesting
-		// https://github.com/obsproject/obs-websocket/blob/4.x-current/docs/generated/protocol.md#getspecialsources
-		// returns optionally desktop-1 desktop-2 mic-1 mic-2 mic-3
-
-	async function obs_get_special_sources() {	// {name: 'WO Mic (global)', type: 'input', typeId: 'wasapi_input_capture'}
-		let req = "GetSpecialSources";
-		let sources = await SS.obs.send(req);
-console.log("SPECIAL SOURCES:", sources);
-		let wanted = ["desktop-1", "desktop-2", "mic-1", "mic-2", "mic-3"]
-		let filtered = [], info = [];
-		for (let p in sources) {
-			console.log(p);
-			if ( wanted.includes(p) ) {
-				info.push(`${p} : ${sources[p]}`)
-				filtered.push(sources[p])
-			}
-		}
-
-		log("<b>Special Sources:</b><br>" + info.join('<br>'));
-
-		return filtered;
-	}
-
-
 
 		/*  */
 
@@ -178,6 +135,58 @@ console.log("SPECIAL SOURCES:", sources);
 		SS.show_obs_setup_modal()
 	}
 
+		// GetSceneList request
+
+	SS.obs_get_scenes = async function obs_get_scenes() {
+		let scenes = await SS.obs.send('GetSceneList');
+		let sceneA = scenes.scenes.map(a => a.name);
+										log("<b>Scenes:</b> " + sceneA.join(', ')); console.log("Scenes", scenes);
+		return sceneA;
+	}
+
+		// GetMediaSourcesList GetAudioActive(source) ListOutputs?
+		// GetSourcesList <- good have found browser_source dshow_input
+		// returns array of source names
+
+	async function obs_get_audio_sources() {	// {name: 'WO Mic (global)', type: 'input', typeId: 'wasapi_input_capture'}
+		let req = "GetSourcesList";
+		let sources = await SS.obs.send(req);
+
+		let unfiltered = sources.sources.map(a => a.name + ' : ' + a.typeId);
+		log('<b>Sources Unfiltered:</b><br>' + unfiltered.join('<br>'))
+
+		let sourcesA = sources.sources.filter(s => s.typeId === 'wasapi_input_capture' || s.typeId === 'wasapi_output_capture').map(a => a.name);
+				log("<b>Sources Audio Filtered:</b><br> " + sourcesA.join('<br>'));
+				console.log("audio", sources);
+
+		return sourcesA;
+	}
+
+		// GetSpecialSources sounds interesting
+		// https://github.com/obsproject/obs-websocket/blob/4.x-current/docs/generated/protocol.md#getspecialsources
+		// returns array of source names
+
+	async function obs_get_special_sources() {	// {name: 'WO Mic (global)', type: 'input', typeId: 'wasapi_input_capture'}
+		let req = "GetSpecialSources";
+		let sources = await SS.obs.send(req);
+								console.log("SPECIAL SOURCES:", sources);
+		let wanted = ["desktop-1", "desktop-2", "mic-1", "mic-2", "mic-3"]
+		let filtered = [], info = [];
+		for (let p in sources) {
+			console.log(p);
+			if ( wanted.includes(p) ) {
+				info.push(`${p} : ${sources[p]}`)
+				filtered.push(sources[p])
+			}
+		}
+
+		log("<b>Special Sources:</b><br>" + info.join('<br>'));
+
+		return filtered;
+	}
+
+
+
 		// some generic handlers
 
 	SS.obs_add_listeners = function obs_add_listeners() {
@@ -202,15 +211,6 @@ console.log("SPECIAL SOURCES:", sources);
 		SS.obs.on('ConnectionClosed', (data) => callback(data, 'connection closed (ConnectionClosed)'));
 		SS.obs.on('AuthenticationSuccess', (data) => callback(data, 'authenticated (AuthenticationSuccess)'));
 		SS.obs.on('AuthenticationFailure', (data) => callback(data, 'auth fail (AuthentificationFail)'));
-	}
-
-		// GetSceneList request
-
-	SS.obs_get_scenes = async function obs_get_scenes() {
-		let scenes = await SS.obs.send('GetSceneList');
-		let sceneA = scenes.scenes.map(a => a.name);
-										log("<b>Scenes:</b> " + sceneA.join(', ')); console.log("Scenes", scenes);
-		return sceneA;
 	}
 
 

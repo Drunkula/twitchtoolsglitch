@@ -36,9 +36,11 @@ docReady( () => init_scene_switcher() )
 
 
 const SS_EVENTS = [
-	{selector: 'button[data-index]', event: 'click', function: scene_test_button_handler, params: {}},	// test button
+	{selector: '.scene-test', event: 'click', function: scene_test_button_handler, params: {}},	// test button
+	{selector: '.audio-test', event: 'click', function: audio_test_button_handler, params: {}},	// test button
 	{selector: '#obsconnect', event: 'click', function: SS.obs_connect, params: {}},	// test button
-	{selector: '.scenecmd-input', event: 'change', function: scene_command_onchange, params: {}}	// scene command to !dfioowe
+	{selector: '.scenecmd-input', event: 'change', function: scene_command_onchange, params: {}},	// scene command to !dfioowe and store in SS vars
+	{selector: '.audiocmd-input', event: 'change', function: audio_command_onchange, params: {}}	// as above for audio
 ];
 
 
@@ -74,6 +76,7 @@ SS.get_obs_login_form_data = function get_obs_form_login () {
 	return {address, password}
 }
 
+	// fill them scene dropdowns
 
 SS.populate_scene_selects = function populate_scene_selects (scenes) {
 	let selects = qsa('.scene-select');
@@ -92,6 +95,24 @@ SS.populate_scene_selects = function populate_scene_selects (scenes) {
 }
 
 
+	// fill them scene dropdowns
+
+SS.populate_audio_selects = function populate_audio_selects(audioSources) {
+	let selects = qsa('.audio-select');
+						console.log("Number of audio selects:", selects.length);
+	let frag = document.createDocumentFragment();
+		// fragments EMPTY on append/replace so can't do once and I'm not grabbing the select
+	selects.forEach( s => {
+		for (let scene of audioSources) {
+			let ul = document.createElement('option');
+			ul.value = ul.textContent = scene;
+			frag.appendChild(ul);
+		}
+
+		s.replaceChildren(frag);
+	} );
+}
+
 SS.show_obs_setup_modal = function() {
 	TT.show_modal('configModal');
 	let click = new Event('click');
@@ -102,17 +123,29 @@ SS.show_obs_setup_modal = function() {
 	// turns " something LIKE thIS" into "!somethinglikethis"
 	// STORES into SS.sceneCommands
 
-function scene_command_onchange(e) {
-	let cmd = e.target.value.trim().toLowerCase();
-	cmd = cmd.split(' ').filter(e => e).join('');
+function reduce_command(cmd) {
+	cmd = cmd.split(' ').filter(e => e).join('').toLowerCase();
 	if ( cmd[0] !== '!') cmd = "!" + cmd;
+	return cmd.length ===1 ? '' : cmd;
+}
+
+function scene_command_onchange(e) {
+	let cmd = reduce_command(e.target.value)
 
 	let [,index] = e.target.id.split('-');
 	index = parseInt(index)
 
-	if (cmd.length === 1) cmd = '';
-
 	SS.sceneCommands[index] = cmd;
+	e.target.value = cmd;
+}
+
+function audio_command_onchange(e) {
+	let cmd = reduce_command(e.target.value)
+
+	let [,index] = e.target.id.split('-');
+	index = parseInt(index)
+
+	SS.audioCommands[index] = cmd;
 	e.target.value = cmd;
 }
 
@@ -155,10 +188,51 @@ function obs_display_error(e, ...more) {
 	log(out.join('<br>'));
 }
 
+	///////////// SCENE HELPERS /////////////////
 
 function scene_test_button_handler(e) {
 	obs_scene_change(e.target.dataset.index);
 }
+
+function scene_command_to_index (str) {
+	let words = str.split(' ');
+	let inCmd = words[0].toLowerCase();
+	let index = SS.sceneCommands.indexOf(inCmd);
+	return index === -1 ? false : index;
+}
+
+function get_scene_from_index(index) {
+	let prop = 'sceneid-' + parseInt(index).toString();
+	return SS.sceneSelects[prop];
+}
+
+	///////////// AUDIO HELPERS /////////////////
+
+function audio_test_button_handler(e) {
+	audio_mute_by_index(e.target.dataset.index);
+}
+
+function audio_mute_by_index(idx) {
+	let source = SS.audioSelects[idx]
+	let mute = SS.audioAction[idx] === 'mute' ? true : false
+	obs_mute_source(source, mute);
+}
+
+function obs_mute_source(source, mute = true) {
+	let opts = {source, mute};
+
+	SS.obs.send('SetMute', opts)
+		.then( r => console.log("obs mute source result:", r) )
+		.catch( a => console.error(a) )
+}
+
+function audio_command_to_index(str) {
+	let words = str.split(' ');
+	let inCmd = words[0].toLowerCase();
+	let index = SS.audioCommands.indexOf(inCmd);
+	return index === -1 ? false : index;
+}
+
 
 	// TMI Message checker - the heart of the program
 
@@ -167,7 +241,7 @@ SS.tmi_listener_init = function() {
 	let lastMsgId = null;   // after a reconnect TMI sometimes sents repeats
 
 	TT.cclient.on('message', (channel, userstate, message, self) => {
-		if (self || SS.commandsEnabled === false || SS.connected === false) return;   // Don't listen to my own messages..
+		if (self || SS.commandsEnabled === false || SS.connected === false || message[0] !== '!') return;   // Don't listen to my own messages..
 
 		if (lastMsgId === userstate['id']) {  // had a case of double messaging
 			return;
@@ -184,11 +258,16 @@ SS.tmi_listener_init = function() {
 			case "action": case "chat": case "whisper":
 				let sceneIndex = scene_command_to_index(message);  // returns !command / false
 
-				if (sceneIndex === false) {
-					return;
+				if (sceneIndex !== false) {
+					obs_scene_change(sceneIndex);
 				}
 
-				obs_scene_change(sceneIndex);
+				let audioIndex = audio_command_to_index(message);
+
+				if (audioIndex !== false) {
+					audio_mute_by_index(audioIndex);
+				}
+
 				break;
 			default:
 				break;
@@ -197,21 +276,7 @@ SS.tmi_listener_init = function() {
 }
 
 
-function scene_command_to_index (str) {
-	if (str[0] === '!') {	// get the first word with ! lowercased
-		let words = str.split(' ');//.filter(e => e);
-		let inCmd = words[0].toLowerCase();
-		let index = SS.sceneCommands.indexOf(inCmd);
-		return index === -1 ? false : index;
-	}
 
-	return false;
-}
-
-function get_scene_from_index(index) {
-	let prop = 'sceneid-' + parseInt(index).toString();
-	return SS.sceneSelects[prop];
-}
 
 
 
