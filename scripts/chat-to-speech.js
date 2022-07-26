@@ -33,6 +33,9 @@
  * https://kunszg.com/commands/code/emotes
  * 7TV ${api[2]}/users/${userId[0].userId}/emotes
  * https://api.7tv.app/users/125387632/emotes
+ *
+ * PROBLEM - with the NEW HASH on first load these aren't working, you can press refresh and they will work from
+ * the same url - looks like I'm going to have to delay doing the voice onchanges until after they're populated
  */
 "use strict"
 
@@ -42,7 +45,8 @@ TMIConfig.TTSVars = {       // more props added from forms
     flashFunc: x => x,      // does nothing for now
         // updated by the speecher callbacks and speech parameter onchanges
     voices: [],
-    sayCmds: {}
+    sayCmds: {},
+    voiceHashToIndex: new Map()
 }
 
 
@@ -53,10 +57,14 @@ try {   // scope starts ( in case I can demodularise this )
 
     const emote_filter = new Emoter()
     TT.emote_filter = emote_filter;
+
     const cooldowns = new TT.Cooldowns();
+
     const speech = new TT.Speecher();
     speech.on({error: speech_error_callback});
     TTSVars.speecher = speech;
+        // quick hashing function
+    TT.quick_hash = str => str.split('').map(v=>v.charCodeAt(0)).reduce((a,v)=>a+((a<<7)+(a<<3))^v).toString(16);
 
     speech.addEventListener('voicessschanged', e => {
         console.debug("VOICES HAVE CHANGED in Speech", e);
@@ -106,16 +114,25 @@ try {   // scope starts ( in case I can demodularise this )
             {  // have to do it this way because of EDGE firing onvoiceschanged events willy nilly
                 console.debug(g("Number of voices has changed:"), voices.length);
                 TTSVars.voices = voices;
+
                 create_speech_selects_options();
+                TT.restore_form_values(".voice-select");
             }
         });
 
+        // SCENE SWITCHER restores form values for selects then adds common events
+
         speech.addEventListener('beforespeak', () => speech.utterance.volume = TTSVars.volumemaster)
 
-        TT.forms_init_common();
+        TT.forms_init_common(); // triggers ONCHANGE so empty voices will save to the URL if empty
 
-        TT.add_events_common();
+        if (TTSVars.voices.length) {
+            TT.restore_form_values(".voice-select");
+        }
+
+        TT.add_events_common();  // NOT until the SPEECH are populated
         TT.add_event_listeners(TTS_EVENTS);
+
             // main listener
         add_chat_to_speech_tmi_listener();
         init_flasher_tech();
@@ -135,6 +152,12 @@ try {   // scope starts ( in case I can demodularise this )
     })
 
 });// on load ends
+
+    // add the form things
+
+function tts_init_forms() {
+    TT.forms_init_common();
+}
 
 
         // async so we can await readyness
@@ -336,13 +359,12 @@ console.log("COMMAND PACK", sayCmdPack);
                 let voice = TTSVars.voices[voiceidx]
 
                 let opt = document.createElement('option');
-                opt.value = voiceidx;
                 opt.text =  voice.name;
-                opt.dataset['voiceindex'] = voiceidx;
+                opt.value = TT.quick_hash(voice.voiceURI)
 
                 frag.appendChild(opt);
             }
-            //s.appendChild(frag);
+
             s.replaceChildren(frag);
         }
     }
@@ -396,12 +418,14 @@ console.log("COMMAND PACK", sayCmdPack);
         speech.speak(params);
     }
 
+
         // grab parameters from the speech setting 1, not zero based
 
     function get_voice_settings(index) {
         let rate = +gid('rateval-'+index).value;
         let pitch = +gid('pitchval-'+index).value;
-        let vIdx = +gid('voiceid-'+index).value;
+            //let vIdx = +gid('voiceid-'+index).value;  // now gets the hash
+        let vIdx = +gid('voiceid-'+index).selectedIndex
         let voice = TTSVars.voices[vIdx];
 
         return {rate, pitch, voice}
