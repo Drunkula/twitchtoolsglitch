@@ -36,7 +36,7 @@
     const NCMEvents = [
         {selector: '#defaultcooldown', event: 'change', function: ncm_default_cooldown_input_onchange, params: {}},
         {selector: '.cooldown-set', event: 'click',     function: ncm_cooldown_time_btn_handlers, params: {}},
-        {selector: '#flashtestbtn', event: 'click',     function: NCMVars.flasher.start_flash, params: {}},
+        {selector: '#flashtestbtn', event: 'click',     function: () => NCMVars.flasher.start_flash(), params: {}},
     ];
 
         // on window load

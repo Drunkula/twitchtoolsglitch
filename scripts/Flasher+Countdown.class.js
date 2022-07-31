@@ -175,9 +175,12 @@ class Countdown extends EventEmitter {
 class Flasher {
 	FLASH_DURATION = 2500;
 	FLASHER_DIV_ID = 'flasher'
+	flashDiv = null;	// the div reference
+
 
 	flashActive = false;
 	flashSetTimeout = null;
+	initialised = false;
 
 	constructor(params = { secs: 2.5, div: 'flasher' }) {
 		if ("secs" in params)
@@ -193,20 +196,25 @@ class Flasher {
 		let flasherDiv = gid(this.FLASHER_DIV_ID);
 
 		if (flasherDiv) { console.log('FLASHER ASSIGNED');
-			flasherDiv.onclick = this.stop_flash;  // allow a click to cancel
-		} else console.warn("Flasher couldn't find a div with id", FLASHER_DIV_ID)
+			this.initialised = true;
+			this.flashDiv = flasherDiv;
+			this.flashDiv.onclick = this.stop_flash.bind(this);  // allow a click to cancel
+		} else
+			console.warn("Flasher couldn't find a div with id", this.FLASHER_DIV_ID)
 	}
 
-	start_flash() {
-		clearTimeout(this.flashSetTimeout);
-		gid(this.FLASHER_DIV_ID).classList.add('flasher');
+	start_flash() {	console.log("THIS FLASHER: ", this);
+		if (!this.initialised) { console.warn("Flasher not initilaised."); return; }
 
-		this.flashSetTimeout = setTimeout(this.stop_flash, this.FLASH_DURATION);
+		clearTimeout(this.flashSetTimeout);
+		this.flashDiv.classList.add('flasher');
+		this.flashSetTimeout = setTimeout( this.stop_flash.bind(this), this.FLASH_DURATION);
 	}
 
 	stop_flash() {
-		let flashBox = gid(this.FLASHER_DIV_ID);
-		flashBox.classList.remove('flasher');
+		if (!this.initialised) { console.warn("Flasher not initilaised."); return; }
+
+		this.flashDiv.classList.remove('flasher');
 		clearTimeout(this.flashSetTimeout);
 	}
 
