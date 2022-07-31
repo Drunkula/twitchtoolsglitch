@@ -167,7 +167,8 @@ class Countdown extends EventEmitter {
 
 
 	/**
-	 * params in object secs and div which is the id of the flasher div
+	 * params in object secs: float and div which is the id of the flasher div
+	 * No safety checks as it's just for me.
 	 */
 
 
@@ -198,20 +199,23 @@ class Flasher {
 
 	start_flash() {
 		clearTimeout(this.flashSetTimeout);
-		gid('flasher').classList.add('flasher');
+		gid(this.FLASHER_DIV_ID).classList.add('flasher');
 
 		this.flashSetTimeout = setTimeout(this.stop_flash, this.FLASH_DURATION);
 	}
 
 	stop_flash() {
-		let flashBox = gid('flasher');
+		let flashBox = gid(this.FLASHER_DIV_ID);
 		flashBox.classList.remove('flasher');
 		clearTimeout(this.flashSetTimeout);
 	}
 
 }// flasher ends
 
-/*
+
+
+
+/*	css for the flasher  Just do #flasher: p NEW<br>CHAT<br>MESSAGE!
 
 #flasher {
 	display: none;
