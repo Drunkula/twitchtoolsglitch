@@ -104,10 +104,6 @@ TMIConfig.SceneSwitcherVars = {
 
 		TT.restore_form_values(".scene-select, .audio-select");
 		TT.add_events_common();
-
-		//let gas = await obs_get_audio_sources();
-		//let gss = await obs_get_special_sources();
-		//console.log("GAS", gas, "GSS", gss);
 	}
 
 		/*  */

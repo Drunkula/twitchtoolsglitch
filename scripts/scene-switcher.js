@@ -49,10 +49,9 @@ const SS_EVENTS = [
 	 */
 
 async function init_scene_switcher() {
-	TT.forms_init_common();	// no longer adds common events
-	TT.add_event_listeners(SS_EVENTS);	// connect test
-				// TT.add_events_common(); no yet
-
+	TT.forms_init_common();	// common permissions, restores forms, no longer adds common events
+	TT.add_event_listeners(SS_EVENTS);	// will add onchange on forms but no common events yet means URL won't be updated
+				 //TT.add_events_common(); // DON'T add here as it'll clear scenes in the url.  Added in obs_connect_success
 	SS.obs_add_listeners();
 	SS.obs_connect();
 

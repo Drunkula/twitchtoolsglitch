@@ -124,13 +124,13 @@ try {   // scope starts ( in case I can demodularise this )
 
         speech.addEventListener('beforespeak', () => speech.utterance.volume = TTSVars.volumemaster)
 
-        TT.forms_init_common(); // triggers ONCHANGE so empty voices will save to the URL if empty
+        TT.forms_init_common(); // restores forms and sets up common permissions doesn't triggers ONCHANGE
 
         if (TTSVars.voices.length) {
             TT.restore_form_values(".voice-select");
         }
 
-        TT.add_events_common();  // NOT until the SPEECH are populated
+        TT.add_events_common();  // Should I wait until AFTER the SPEECH are populated? triggers onchange on .form-save
         TT.add_event_listeners(TTS_EVENTS);
 
             // main listener
