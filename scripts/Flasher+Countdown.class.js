@@ -169,6 +169,8 @@ class Countdown extends EventEmitter {
 	/**
 	 * params in object secs: float and div which is the id of the flasher div
 	 * No safety checks as it's just for me.
+	 * constructor params obv secs: float, div: id of flasher
+	 * possibles: add start / end flash events
 	 */
 
 

@@ -189,6 +189,15 @@ function tts_init_forms() {
     {       // https://dev.twitch.tv/docs/irc/tags#globaluserstate-twitch-tags
         let lastMsgId = null;   // after a reconnect TMI sometimes sents repeats
 
+        let entry_deque = function(e) {
+            try {
+                TTSVars.speech_queue_remove_entry(e.target.queueid);
+            } catch (error) {
+                console.error(error)
+                console.error(`Error removing speech queue row # ${e.target.queueid} on utterance end event`)
+            }
+        }
+
         TT.cclient.on('message', (channel, userstate, message, self) => {
             if (self || TTSVars.chatEnabled === false) return;   // Don't listen to my own messages..
 
@@ -260,22 +269,29 @@ function tts_init_forms() {
 
                         // event handlers for utterance
 console.log("COMMAND PACK", sayCmdPack);
-                    sayCmdPack.params.end = e => {
-                        try {
-                            TTSVars.speech_queue_remove_entry(e.target.queueid);
+
+                    sayCmdPack.params.end = entry_deque;
+                    sayCmdPack.params.error = entry_deque;
+                        // can't resume chrome android - hmmm, and
+                        //*
+                    sayCmdPack.params.pause = e => {
+                        try {                            //TTSVars.speech_queue_remove_entry(e.target.queueid);
+                            log(`PAUSED: Paused: ${speech.ss.paused}, Pending: ${speech.ss.pending}, Speaking: ${speech.ss.speaking}`)
+                            //console.log(e);
+                            console.log( g("SPEECH PAUSE"), `Paused: ${speech.ss.paused}, Pending: ${speech.ss.pending}, Speaking: ${speech.ss.speaking}`);
                         } catch (error) {
                             console.error(error)
-                            console.error(`Error removing speech queue row # ${e.target.queueid} on utterance end event`)
                         }
                     };
-                    sayCmdPack.params.error = e => {
+                        // can't resume chrome android
+                    sayCmdPack.params.resume = e => {
                         try {
-                            TTSVars.speech_queue_remove_entry(e.target.queueid);
+                            log(`RESUME: Paused: ${speech.ss.paused}, Pending: ${speech.ss.pending}, Speaking: ${speech.ss.speaking}`);
+                            console.log( y("SPEECH RESUME"), `Paused: ${speech.ss.paused}, Pending: ${speech.ss.pending}, Speaking: ${speech.ss.speaking}`);
                         } catch (error) {
                             console.error(error)
-                            console.error(`Error removing speech queue row # ${e.target.queueid} on utterance error event`)
                         }
-                    };
+                    };//*/
 
                         // Display BEFORE calling say so errors automatically cull the row.
 
@@ -481,6 +497,9 @@ console.log("COMMAND PACK", sayCmdPack);
             speech.pause();
         }
         else {
+            if (!speech.ss.paused) {    // fix for Chrome android
+                speech.cancel();
+            }
             speech.resume();
         }
     }

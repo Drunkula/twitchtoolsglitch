@@ -359,7 +359,7 @@
 				SPEECHER_log("ERROR: speech pack is unknown", pack);
 				return false;
 			}
-
+				// add our two default handlers
 			this.utterance.addEventListener('end', () => {
 				this.#isSpeaking = false;//	console.log(m("UTTERANCE END EVENT"));
 				this.#sayQueueProcess()
