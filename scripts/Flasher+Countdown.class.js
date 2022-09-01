@@ -95,22 +95,49 @@ class Countdown extends EventEmitter {
 			this.secondsDefault = parseInt(secs);
 		}
 	}
-		// if active and no seconds do nothing
+
+		// start timer / continue if already active.  If active and no seconds do nothing
+		// seconds remaining, none specified, active - RETURN
+
 	start(seconds = null) {
 		if (seconds !== null) {
-			this.secondsDefault = parseInt(seconds)
+			this.secondsRemaining = parseInt(seconds);
+		} else if (this.secondsRemaining <= 0) {
+			this.secondsRemaining = this.secondsDefault;
 		}
 
-		this.secondsRemaining = this.secondsDefault;
-
-		if (this._active) {
+		if (this._active === true) {
 			return;
 		}
 
-		this.intervalTimer = setInterval( this.interval_callback.bind(this) , 1000);
-
+			// it's not running - start an interval
 		this._active = true;
+
+		this.intervalTimer = setInterval( this.interval_callback.bind(this) , 1000);
+			// should I call this immediately?
 		this.interval_callback();
+	}
+
+		// remember to binding
+	interval_callback() {	// this shoulnd't happen, but just in case
+		if (this._active === false) {	console.error("countdown interval timer WILL THIS EVER HAPPEN");
+			clearInterval(this.intervalTimer);
+			return;
+		}
+
+		this.emit('tick', this.secondsRemaining)
+		if (this.debug) console.debug("ticking", this.secondsRemaining);
+
+		if (this.secondsRemaining <= 0) {
+			this.stop();
+			//this._active = false;
+			//clearInterval(this.intervalTimer);
+			this.emit('finished')
+
+			return;
+		}
+
+		this.secondsRemaining--;
 	}
 
 	reset() {
@@ -139,27 +166,7 @@ class Countdown extends EventEmitter {
 
 	stop() {
 		clearInterval(this.intervalTimer);
-	}
-
-		// remember to binding
-	interval_callback() {
-		if (!this._active) {	console.error("countdown interval timer WILL THIS EVER HAPPEN");
-			clearInterval(this.intervalTimer);
-			return;
-		}
-
-		this.emit('tick', this.secondsRemaining)
-		if (this.debug) console.debug("ticking", this.secondsRemaining);
-
-		if (this.secondsRemaining <= 0) {
-			this._active = false;
-			clearInterval(this.intervalTimer);
-			this.emit('finished')
-
-			return;
-		}
-
-		this.secondsRemaining--;
+		this._active = false;
 	}
 }
 

@@ -35,7 +35,7 @@
 
 	const utteranceEvents = ['boundary', 'end', 'error', 'mark', 'pause', 'resume', 'start']
 
-	const SPEECHER_LOGGING = false;
+	const SPEECHER_LOGGING = true;
 
 	const SPEECHER_log = SPEECHER_LOGGING ? console.debug : l => l;	// if you don't want logging
 
@@ -312,11 +312,14 @@
 					continue;	// pack was bad
 				}
 
-//				SPEECHER_log("Queue ABOUT TO SAY:", this.utterance.text, this.utterance);
+//				this.utterance.lang = "en-GB";  // TEST for Android - wonder if this causes problems
+				this.utterance.lang = this.utterance.voice.lang ? this.utterance.voice.lang : 'en-GB';  // Android needs lang
+
+				SPEECHER_log("Queue ABOUT TO SAY:", this.utterance.text, this.utterance);
 //				SPEECHER_log("Speech Queue AFTER", this.speechQueueMap.size);
-				this.utterance.lang = "en-GB";  // TEST for Android
 
 				this.currentSpeakingID = id;
+				this.utterance.queueid = id;
 
 					// emit that we're about to speak and check for a cancel
 				this.#cancelNextSpeak = false;
@@ -326,7 +329,6 @@
 					continue;
 				}
 
-				this.utterance.queueid = id;
 				this.#isSpeaking = true;
 				this.ss.speak(this.utterance)
 				this.ss.resume();	// this has been necessary, I think

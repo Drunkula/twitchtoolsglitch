@@ -192,9 +192,9 @@
         if (addS === "clear") {            console.log("Clearing timeout");	// imagine their should be a function here
             NCMVars.countdown.set_time(0)
         }
-        else {            //console.log('adding mini', addS,'to', NCMVars.cooldownSecsRemaining);            //NCMVars.cooldownSecsRemaining += ~~addS;	// integerise, otherwise it acts as a string
+        else {            console.log('adding mini', addS,'to', NCMVars.countdown.secondsRemaining);            //NCMVars.cooldownSecsRemaining += ~~addS;	// integerise, otherwise it acts as a string
             NCMVars.countdown.add_secs(addS);
-            NCMVars.countdown.start();
+            NCMVars.countdown.start();  // this is what's fucking it up!
         }
     }
 

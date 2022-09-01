@@ -121,7 +121,7 @@ try {   // scope starts ( in case I can demodularise this )
         });
 
         // SCENE SWITCHER restores form values for selects then adds common events
-
+            // SHOULD ADD a check to make sure the utterance starts
         speech.addEventListener('beforespeak', () => speech.utterance.volume = TTSVars.volumemaster)
 
         TT.forms_init_common(); // restores forms and sets up common permissions doesn't triggers ONCHANGE
@@ -269,6 +269,9 @@ function tts_init_forms() {
 
                         // event handlers for utterance
 console.log("COMMAND PACK", sayCmdPack);
+                        // on "beforespeak" event I should start a timer to check that the voice does start
+                    // sayCmdPack.params.start = (e) => { console.debug ("UTTERANCE STARTED", e) }
+                    // luckily the speecher has a cancel_id(id) function
 
                     sayCmdPack.params.end = entry_deque;
                     sayCmdPack.params.error = entry_deque;
@@ -335,6 +338,8 @@ console.log("COMMAND PACK", sayCmdPack);
     function speech_error_callback(e) {
         if (e.error === "not-allowed") {
             TTSVars.flashFunc();
+        } else {
+            console.error("SPEECH ERROR:", e);
         }
     }
 

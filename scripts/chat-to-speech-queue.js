@@ -1,5 +1,5 @@
 /*
-	Add list to the visual queue
+	Add list to the visual queue - all html, no speech logic
 */
 "use strict"
 
@@ -61,6 +61,8 @@
 		frag.appendChild(speechQRow);
 		$speechQDiv.appendChild(frag)
 	}
+
+		// iteratively clear the html speech list
 
 	TTSVars.speech_list_clear = function speech_queue_clear() {
 		while ($speechQDiv.firstChild) {
