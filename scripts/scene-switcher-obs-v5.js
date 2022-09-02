@@ -1,59 +1,14 @@
 "use strict"
-/*	When obs isn't running
-obs-websocket.v4.min.js:8 WebSocket connection to 'ws://localhost:4444/' failed:
-scene-switcher-obs.js:55 OBS Websocket : Failed to connect:
-scene-switcher-obs.js:56 {status: 'error', description: 'Connection error.', code: 'CONNECTION_ERROR', error: 'Connection error.'}code: "CONNECTION_ERROR"description: "Connection error."error: "Connection error."status: "error"[[Prototype]]: Object
-obs_connect_fail @ scene-switcher-obs.js:56
-scene-switcher-obs.js:80 OBS Websocket : EVENT: connection closed
+/*
+V5 docs : https://github.com/obs-websocket-community-projects/obs-websocket-js
+send is now call, connect doesn't take an object (annoying)
 
-Above also when wrong address.
+Protocols like GetSceneList
+https://github.com/obsproject/obs-websocket/blob/master/docs/generated/protocol.md
 
-bad password issues auth failed event and
-
-{error: 'Authentication Failed.', message-id: '4', status: 'error', messageId: '4'}
-error: "Authentication Failed."
-message-id: "4"
-messageId: "4"
-status: "error"
-
-When wrong address
-code: "CONNECTION_ERROR"
-description: "Connection error."
-error: "Connection error."
-status: "error"
-
+When obs isn't running
 Events and commands
 https://github.com/obsproject/obs-websocket/blob/4.x-current/docs/generated/protocol.md
-
-When I tested  GetSourcesList and GetSpecialSources
-Special Sources:
-desktop-1 : Desktop Audio
-desktop-2 : Desktop Audio 2
-mic-1 : Mic/Aux
-mic-2 : Mic/Aux 2
-mic-3 : WO Mic (global)
-
-Sources Audio Filtered:
-Mic/Aux 2
-Mic/Aux
-Desktop Audio 2
-Desktop Audio
-Xbox (global)
-WO Mic (global)
-
-Sources Unfiltered:
-Mic/Aux 2 : wasapi_input_capture
-Mic/Aux : wasapi_input_capture
-Desktop Audio 2 : wasapi_output_capture
-Desktop Audio : wasapi_output_capture
-Video Capture Device : dshow_input
-Alert Tape : browser_source
-HDMI Box SOMEWHERE : dshow_input
-Chat of the D : browser_source
-Text (GDI+) : text_gdiplus_v2
-Xbox (global) : wasapi_input_capture
-WO Mic (global) : wasapi_input_capture
-
 
 */
 TMIConfig.SceneSwitcherVars = {
@@ -78,8 +33,8 @@ TMIConfig.SceneSwitcherVars = {
 		gid("connectresult").textContent = '...please wait';
 		log("Address: " + opts.address)
 
-		let result = obs.connect(opts)
-		//let result = obs.connect("ws://127.0.0.1:4444", "chicken")	// works in 5.0.1
+		//let result = obs.connect(opts)
+		let result = obs.connect('ws://' + opts.address, opts.password)	// works in 5.0.1
 			.then(r => {
 				SS.obs_connect_success( r );
 				return true; })
@@ -114,10 +69,10 @@ TMIConfig.SceneSwitcherVars = {
 
 		let message = 'Failed to connect'
 
-		if (e.error === 'Authentication Failed.')
+		if (e.toString() === 'Error: Authentication failed.')
 			message += ' - password is incorrect.'
-		else if (e.error === 'Connection error.')
-			message += ' - Possibly: <span  class="content"><ul><li>bad address</li><li>OBS not running</li><li>OBS Websocket not installed.</li></ul></span>'
+		else //if (e.error === 'Connection error.')
+			message += ' - Possibly: <span  class="content"><ul><li>bad address</li><li>OBS not running</li><li>OBS Websocket not configured or using an OBS version earlier than v28.</li></ul></span>'
 
 		gid("connectresult").innerHTML = message;
 
@@ -135,8 +90,8 @@ TMIConfig.SceneSwitcherVars = {
 		// GetSceneList request
 
 	SS.obs_get_scenes = async function obs_get_scenes() {
-		let scenes = await SS.obs.send('GetSceneList');
-		let sceneA = scenes.scenes.map(a => a.name);
+		let scenes = await SS.obs.call('GetSceneList');	// works
+		let sceneA = scenes.scenes.map(a => a.sceneName);	// change from v4 name to sceneName
 										log("<b>Scenes:</b> " + sceneA.join(', ')); console.log("Scenes", scenes);
 		return sceneA;
 	}
@@ -146,13 +101,16 @@ TMIConfig.SceneSwitcherVars = {
 		// returns array of source names
 
 	async function obs_get_audio_sources() {	// {name: 'WO Mic (global)', type: 'input', typeId: 'wasapi_input_capture'}
-		let req = "GetSourcesList";
-		let sources = await SS.obs.send(req);
+		//let req = "GetSourcesList";	// no longer works
+		let req = "GetInputList";	// sort of - some are wasapi_input_capture
+		let sources = await SS.obs.call(req);
+		console.log("RAW", sources);
 
-		let unfiltered = sources.sources.map(a => a.name + ' : ' + a.typeId);
+		//let unfiltered = sources.sources.map(a => a.name + ' : ' + a.typeId);
+		let unfiltered = sources.inputs.map(a => a.inputName + ' : ' + a.inputKind);
 		log('<b>Sources Unfiltered:</b><br>' + unfiltered.join('<br>'))
 
-		let sourcesA = sources.sources.filter(s => s.typeId === 'wasapi_input_capture' || s.typeId === 'wasapi_output_capture').map(a => a.name);
+		let sourcesA = sources.inputs.filter(s => s.inputKind === 'wasapi_input_capture' || s.inputKind === 'wasapi_output_capture').map(a => a.inputName);
 				log("<b>Sources Audio Filtered:</b><br> " + sourcesA.join('<br>'));
 				console.log("audio", sources);
 
@@ -165,7 +123,7 @@ TMIConfig.SceneSwitcherVars = {
 
 	async function obs_get_special_sources() {	// {name: 'WO Mic (global)', type: 'input', typeId: 'wasapi_input_capture'}
 		let req = "GetSpecialSources";
-		let sources = await SS.obs.send(req);
+		let sources = await SS.obs.call(req);
 								console.log("SPECIAL SOURCES:", sources);
 		let wanted = ["desktop-1", "desktop-2", "mic-1", "mic-2", "mic-3"]
 		let filtered = [], info = [];
@@ -209,38 +167,6 @@ TMIConfig.SceneSwitcherVars = {
 		SS.obs.on('AuthenticationSuccess', (data) => callback(data, 'authenticated (AuthenticationSuccess)'));
 		SS.obs.on('AuthenticationFailure', (data) => callback(data, 'auth fail (AuthentificationFail)'));
 	}
-
-
-
-	/* function connection_established(d) {
-		console.log(y('CONNECTION ESTABLISHED: '), d);
-	}
-
-	function connection_dropped() {
-		console.log( m('CONNECTION DROPPED EVENT') );
-	}
-
-	function obs_auth_good_cb() {
-		console.log( y('OBS auth successful EVENT: ') );
-		///*obs.send('Authenticate')	.then(d => console.log(d))	.catch(e => console.log(e))
-	}
-
-	function obs_auth_bad_cb(d) {
-		console.log( m('OBS auth failure : '), d );
-	}
-
-	function obs_test_connection(port, password) {
-		return true;
-	}
- 	*/
-
-
-
-
-
-
-
-
 
 
 }	// scope ENDS

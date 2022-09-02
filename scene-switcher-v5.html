@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Scene Change Remotely</title>
+    <title>Twitch Tools</title>
     <meta name="description">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
     <script defer="" src="https://use.fontawesome.com/releases/v6.1.1/js/all.js"></script>
@@ -52,9 +52,9 @@
       <script src="/scripts/tmi-code-common.js" defer></script>
       <script src="/scripts/event-listeners.js" defer></script>
       <script src="/scripts/form-fields-save-restore.js" defer></script>
-      <script src="/scripts/obs-websocket.v4.min.js" defer></script>
-      <script src="/scripts/scene-switcher-obs.js" defer></script>
-      <script src="/scripts/scene-switcher.js" defer></script>
+      <script src="/scripts/obs-ws.v5.min.js" defer></script>
+      <script src="/scripts/scene-switcher-obs-v5.js" defer></script>
+      <script src="/scripts/scene-switcher-v5.js" defer></script>
       <div class="box mb-2 py-1">
         <form class="not-mobile-view mb-2" id="mainform">
           <label class="label is-hidden-mobile">Your Channel</label>
@@ -397,8 +397,8 @@
               <p>Limit commands to MODS, VIPS and named users, or if you're mad everyone.</p>
             </div>
             <div class="block">
-              <p><strong>NOTE:</strong> This script is for <strong>OBS versions 27</strong> and earlier.</p>
-              <p>for versions 28 and above&nbsp;<a href="scene-switcher-v5.html">please go here.</a></p>
+              <p><strong>NOTE:</strong> This script is for <strong>OBS versions 28</strong> and above.</p>
+              <p>for versions 27 and earlier&nbsp;<a href="scene-switcher.html">please go here.</a></p>
             </div>
             <div class="block">
               <p>You'll be prompted for your OBS Websocket login details on first use but after that they'll be saved if you bookmark or reload the page.  Use the 'connect' button until you get the right details.  If you can't connect then this page is coded for OBS Websockets 4.  I'll create a separate page for version 5.</p>
@@ -483,10 +483,10 @@
                 </div>
                 <div class="columns is-mobile">
                   <div class="column">
-                    <label class="label">OBS Port e.g. 4444</label>
+                    <label class="label">OBS Port e.g. 4455</label>
                     <div class="field">
                       <div class="control">
-                        <input class="input form-save" type="number" id="obsport" placeholder="OBS port e.g. 4444" data-tostr="SceneSwitcherVars.obsPort" value="4444">
+                        <input class="input form-save" type="number" id="obsport" placeholder="OBS port e.g. 4455" data-tostr="SceneSwitcherVars.obsPort" value="4455">
                       </div>
                     </div>
                   </div>
