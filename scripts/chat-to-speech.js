@@ -1,5 +1,16 @@
 /** CHAT-TO-SPEECH.js
  *
+ *  THIS IS OFFICIALY A MESS as I'm not splitting into smaller files like you're really do.
+ *
+ *  The EDGE stalling problem with this might need a new strategy:
+ *      Start a shorter timeout that'll be cancelled on utterance start
+ *      Start a longer timeout that'll be cancelled on utterence end.  This must allow speaking time so maybe 20 seconds plus.
+ *
+ *  The timeouts don't come in the order you might expect, a new start can fire before the end of another so adding
+ *  timeouts on the start means they can be cancelled by the end event if you're not somehow doing 'tricks'
+ *
+ *  PAUSING FIRES END EVENTS for some browsers.
+ *
  *  **** EASYSPEECH.voices() CAN'T BE TRUSTED as it doesn't update itself onvoiceschanged a second time ****
  *  EASYSPEECH doesn't queue utterances unlike the real thing.  I get the feeling I could have done all
  *  this natively - it was only the getVoices thing I was worried about.
@@ -36,6 +47,9 @@
  *
  * PROBLEM - with the NEW HASH on first load these aren't working, you can press refresh and they will work from
  * the same url - looks like I'm going to have to delay doing the voice onchanges until after they're populated
+ *
+ *
+ * NOTE: Start events on an utterance are fired when they are unpaused
  */
 "use strict"
 
@@ -46,7 +60,7 @@ TMIConfig.TTSVars = {       // more props added from forms
         // updated by the speecher callbacks and speech parameter onchanges
     voices: [],
     sayCmds: {},
-    voiceHashToIndex: new Map()
+    voiceHashToIndex: new Map(),
 }
 
 
@@ -60,10 +74,14 @@ try {   // scope starts ( in case I can demodularise this )
 
     const cooldowns = new TT.Cooldowns();
 
+    const SPEECH_START_TIMEOUT_MS = 2000;     // seconds that speech has to start before it's cancelled
+    const SPEECH_END_TIMEOUT_MS = 20000;     // seconds that speech has to end before it's cancelled
+
     const speech = new TT.Speecher();
-    speech.on({error: speech_error_callback});
     TTSVars.speecher = speech;
-        // quick hashing function
+    add_speecher_global_utterance_events(speech);
+
+        // quick hashing for voice ids in the url
     TT.quick_hash = str => str.split('').map(v=>v.charCodeAt(0)).reduce((a,v)=>a+((a<<7)+(a<<3))^v).toString(16);
 
     speech.addEventListener('voicessschanged', e => {
@@ -103,7 +121,6 @@ try {   // scope starts ( in case I can demodularise this )
         console.log("FETCH FILTER FOR ", chan, results);
     })
 
-
     init_speecher().then(() => {
             // set up the voice selects
         create_speech_selects_options();  // must be done BEFORE init common
@@ -122,7 +139,6 @@ try {   // scope starts ( in case I can demodularise this )
 
         // SCENE SWITCHER restores form values for selects then adds common events
             // SHOULD ADD a check to make sure the utterance starts
-        speech.addEventListener('beforespeak', () => speech.utterance.volume = TTSVars.volumemaster)
 
         TT.forms_init_common(); // restores forms and sets up common permissions doesn't triggers ONCHANGE
 
@@ -153,7 +169,72 @@ try {   // scope starts ( in case I can demodularise this )
 
 });// on load ends
 
-    // add the form things
+
+        // add the form things
+
+    function add_speecher_global_utterance_events(speech) {
+
+        let entry_deque = function(e) {
+            try {
+                TTSVars.speech_queue_remove_entry(e.target.queueid);
+            } catch (error) {
+                console.error(error)
+                console.error(`Error removing speech queue row # ${e.target.queueid} on utterance end event`)
+            }
+        }
+
+        let pause_it = e => {
+            try {                            //TTSVars.speech_queue_remove_entry(e.target.queueid);
+                    log(`PAUSED: Paused: ${speech.ss.paused}, Pending: ${speech.ss.pending}, Speaking: ${speech.ss.speaking}`)
+                    //console.log(e);
+                    console.log( g("SPEECH PAUSE"), `Paused: ${speech.ss.paused}, Pending: ${speech.ss.pending}, Speaking: ${speech.ss.speaking}`);
+                } catch (error) {
+                    console.error(error)
+                }
+            }
+
+        let resume_it = e => {
+                try {
+                    log(`RESUME: Paused: ${speech.ss.paused}, Pending: ${speech.ss.pending}, Speaking: ${speech.ss.speaking}`);
+                    console.log( y("SPEECH RESUME"), `Paused: ${speech.ss.paused}, Pending: ${speech.ss.pending}, Speaking: ${speech.ss.speaking}`);
+                } catch (error) {
+                    console.error(error)
+                }
+            }
+
+        speech.on({ error: speech_error_callback });
+        speech.on({ error: entry_deque, end: entry_deque, pause: pause_it, resume: resume_it });
+        speech.on({ end: (e) => { console.log("END EVENT FIRED FOR", e.utterance.queueid);} })
+
+        speech.addEventListener('beforespeak', () => speech.utterance.volume = TTSVars.volumemaster)
+            // add timeouts for when things goes wrong - possibly should deque
+        speech.addEventListener('beforespeak', (data) => {
+            let qid = data.detail.id;
+            console.log("SETTING TIMEOUT FOR ID", qid);
+
+            let speech_end_TO =  () => {    //function speech_timeout(queueid) {
+                console.log(`EEEEEEEE speech_end_timeout EEEEEEE cancelling queueid: ${qid}`);
+                TTSVars.speecher.cancel_id(qid);    // might automatically deque
+                entry_deque( {target: {queueid: qid}} );// may be triggered by cancel_id triggering end
+            }
+
+            let end_TO  = setTimeout(speech_end_TO, SPEECH_END_TIMEOUT_MS);
+                // start timeout also clears end
+            let speech_start_TO = () => {    //function speech_timeout(queueid) {
+                console.log(`XXXXXXXXXXX speech_start_timeout XXXXXXXXXXXXX cancelling queueid: ${qid}`);
+                clearTimeout(speech_end_TO);
+                TTSVars.speecher.cancel_id(qid);
+                entry_deque( {target: {queueid: qid}} );
+            }
+
+            let start_TO = setTimeout(speech_start_TO, SPEECH_START_TIMEOUT_MS);
+
+                // add start end end events to the utterance.
+            data.detail.utterance.addEventListener( 'start', a => clearTimeout( start_TO ) );
+            data.detail.utterance.addEventListener( 'end', a => clearTimeout( end_TO ) );
+        });
+    }
+
 
 function tts_init_forms() {
     TT.forms_init_common();
@@ -188,15 +269,6 @@ function tts_init_forms() {
     function add_chat_to_speech_tmi_listener()
     {       // https://dev.twitch.tv/docs/irc/tags#globaluserstate-twitch-tags
         let lastMsgId = null;   // after a reconnect TMI sometimes sents repeats
-
-        let entry_deque = function(e) {
-            try {
-                TTSVars.speech_queue_remove_entry(e.target.queueid);
-            } catch (error) {
-                console.error(error)
-                console.error(`Error removing speech queue row # ${e.target.queueid} on utterance end event`)
-            }
-        }
 
         TT.cclient.on('message', (channel, userstate, message, self) => {
             if (self || TTSVars.chatEnabled === false) return;   // Don't listen to my own messages..
@@ -273,29 +345,6 @@ console.log("COMMAND PACK", sayCmdPack);
                     // sayCmdPack.params.start = (e) => { console.debug ("UTTERANCE STARTED", e) }
                     // luckily the speecher has a cancel_id(id) function
 
-                    sayCmdPack.params.end = entry_deque;
-                    sayCmdPack.params.error = entry_deque;
-                        // can't resume chrome android - hmmm, and
-                        //*
-                    sayCmdPack.params.pause = e => {
-                        try {                            //TTSVars.speech_queue_remove_entry(e.target.queueid);
-                            log(`PAUSED: Paused: ${speech.ss.paused}, Pending: ${speech.ss.pending}, Speaking: ${speech.ss.speaking}`)
-                            //console.log(e);
-                            console.log( g("SPEECH PAUSE"), `Paused: ${speech.ss.paused}, Pending: ${speech.ss.pending}, Speaking: ${speech.ss.speaking}`);
-                        } catch (error) {
-                            console.error(error)
-                        }
-                    };
-                        // can't resume chrome android
-                    sayCmdPack.params.resume = e => {
-                        try {
-                            log(`RESUME: Paused: ${speech.ss.paused}, Pending: ${speech.ss.pending}, Speaking: ${speech.ss.speaking}`);
-                            console.log( y("SPEECH RESUME"), `Paused: ${speech.ss.paused}, Pending: ${speech.ss.pending}, Speaking: ${speech.ss.speaking}`);
-                        } catch (error) {
-                            console.error(error)
-                        }
-                    };//*/
-
                         // Display BEFORE calling say so errors automatically cull the row.
 
                     let nid = speech.next_id();
@@ -336,7 +385,7 @@ console.log("COMMAND PACK", sayCmdPack);
         // if browser requires interaction before allowing speech then flash the screen
 
     function speech_error_callback(e) {
-        if (e.error === "not-allowed") {
+        if (e.error === "not-allowed") {console.log("speech_error_callback", e);
             TTSVars.flashFunc();
         } else {
             console.error("SPEECH ERROR:", e);

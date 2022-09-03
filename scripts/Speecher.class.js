@@ -173,12 +173,14 @@
 			this.emit('ready');
 		}
 
-			// add event handlers globally
+			// add event handlers globally takes object { event : fn , event2 : fn} so multiple calls for same event
 
 		on(evs) {
 			utteranceEvents.forEach( ev => {
 				if (evs[ev] && typeof evs[ev] === 'function') {
-					this.#utterance_handlers[ev] = evs[ev];
+					//this.#utterance_handlers[ev] = evs[ev];	// add an object with the handler type
+					console.log("PUSHING", ev);
+					this.#utterance_handlers.push( [ev, evs[ev]] )	;// = evs[ev];
 				}
 			})
 		}
@@ -255,7 +257,8 @@
 			// returns filtered voice, pitch, volume, rate and utterance handlers
 
 		#validate_params(pObj) {		//_validate_params({pitch, rate, volume, voice, ...handlers}) {
-			let filtered = { handlers: {} };
+			//let filtered = { handlers: {} };
+			let filtered = { handlers: [] };
 
 			let v = pObj.voice;
 			filtered.voice = this.#is_voice(v) ? v : this.voiceDefault;
@@ -277,6 +280,7 @@
 				}
 			}
 				// makes sure handlers are functions
+				// NOTE: this presumes that the passed events are in {event : function, ev:fn...} form while elsewhere they're not
 			for (const uev of utteranceEvents) {
 				if (uev in pObj && typeof pObj[uev] === 'function') {
 					filtered.handlers[uev] = pObj[uev];
@@ -320,7 +324,6 @@
 
 				this.currentSpeakingID = id;
 				this.utterance.queueid = id;
-
 					// emit that we're about to speak and check for a cancel
 				this.#cancelNextSpeak = false;
 				this.emit('beforespeak', { id });
@@ -349,7 +352,7 @@
 				SPEECHER_log("PACK IS utterance");
 				this.utterance = pack;
 			} else if (hasProperty(pack, 'text')) {	// obj I'm guessing
-				SPEECHER_log("PACK IS object");
+				SPEECHER_log("PACK IS object");	// NOTE here pack handlers are {event:function, event2:function} which I'm not too fussed on.
 				let u = new SpeechSynthesisUtterance(pack.text);
 				let p = this.#validate_params(pack);
 				this.#utterance_add_handlers(u, p.handlers);
@@ -372,6 +375,7 @@
 				this.#sayQueueProcess();	// CRITICAL
 			});
 
+			console.log("ADDING HANDLERS TO UTTERANCE", this.#utterance_handlers);
 			this.#utterance_add_handlers(this.utterance, this.#utterance_handlers);
 
 			return true;
@@ -379,9 +383,9 @@
 
 			// validate is a function?	No, it's done before
 		#utterance_add_handlers(u, handlers) {
-			for (const ev in handlers) {
-				if (utteranceEvents.includes(ev)) {
-					u.addEventListener(ev, handlers[ev]);
+			for (const [ev, fn] of handlers) {
+				if (utteranceEvents.includes(ev)) {					//u.addEventListener(ev, handlers[ev]);
+					u.addEventListener(ev, fn);
 				}
 			}
 		}
