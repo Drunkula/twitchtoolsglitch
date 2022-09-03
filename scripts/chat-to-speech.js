@@ -204,6 +204,7 @@ try {   // scope starts ( in case I can demodularise this )
 
         speech.on({ error: speech_error_callback });
         speech.on({ error: entry_deque, end: entry_deque, pause: pause_it, resume: resume_it });
+        speech.on({ start: (e) => { console.log("START EVENT FIRED FOR", e.utterance.queueid);} })
         speech.on({ end: (e) => { console.log("END EVENT FIRED FOR", e.utterance.queueid);} })
 
         speech.addEventListener('beforespeak', () => speech.utterance.volume = TTSVars.volumemaster)

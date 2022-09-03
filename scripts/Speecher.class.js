@@ -375,7 +375,6 @@
 				this.#sayQueueProcess();	// CRITICAL
 			});
 
-			console.log("ADDING HANDLERS TO UTTERANCE", this.#utterance_handlers);
 			this.#utterance_add_handlers(this.utterance, this.#utterance_handlers);
 
 			return true;
