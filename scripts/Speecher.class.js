@@ -47,7 +47,8 @@
 
 		currentSpeakingID = -1;		// so you can cancel the current uttance
 
-		utterance = new SpeechSynthesisUtterance();
+		utterance = null; 		// new SpeechSynthesisUtterance();
+		oldUtterance = null;	// to stop the old utterance being garbage collected before end event
 		voices = [];
 		voiceDefault = null;
 
@@ -344,6 +345,9 @@
 			// and adds any custom handlers as well as native end and error
 
 		#process_utterance(pack) {
+			this.oldUtterance = this.utterance;
+			window.TTS_UTTERANCE_TEST = this.utterance;
+
 				// is pack an utterance, object or string
 			if ( typeof pack === 'string' ) {
 				this.utterance = new SpeechSynthesisUtterance(pack);
@@ -353,22 +357,21 @@
 				this.utterance = pack;
 			} else if (hasProperty(pack, 'text')) {	// obj I'm guessing
 				SPEECHER_log("PACK IS object");	// NOTE here pack handlers are {event:function, event2:function} which I'm not too fussed on.
-				//let u = new SpeechSynthesisUtterance(pack.text);	// might be the garbage collection issue
-				this.utterance = new SpeechSynthesisUtterance(pack.text);
-				let u = this.utterance;
+				let u = new SpeechSynthesisUtterance(pack.text);	// might be the garbage collection issue
+
 				let p = this.#validate_params(pack);
 				this.#utterance_add_handlers(u, p.handlers);
 
 				u.pitch = p.pitch; u.rate = p.rate; u.volume = p.volume; u.voice = p.voice;
 
-				//this.utterance = u;
+				this.utterance = u;
 			} else {
 				SPEECHER_log("ERROR: speech pack is unknown", pack);
 				return false;
 			}
 				// add our two default handlers
-			this.utterance.addEventListener('end', () => {
-				this.#isSpeaking = false;//	console.log(m("UTTERANCE END EVENT"));
+			this.utterance.addEventListener('end', (e) => {
+				this.#isSpeaking = false;	console.log(m("UTTERANCE END EVENT") + ` for ${e.utterance.queueid} : ${e.utterance.text}`);
 				this.#sayQueueProcess()
 			});
 			this.utterance.addEventListener('error', e => {

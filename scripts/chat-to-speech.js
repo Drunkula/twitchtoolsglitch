@@ -11,6 +11,10 @@
  *
  *  PAUSING FIRES END EVENTS for some browsers.
  *  BUG: End events aren't fired on utterances as sometimes they're garbage collected early.
+ *  IDEA: Actually, why don't I have an oldUtterance property in the speecher then swap it out every time
+ *  a new one is created.
+ *
+ *  Aaaaand it still doesn't seem to save the day - and EDGE is the only platform I'm having trouble with - which is what I've chosen
  *
  *  **** EASYSPEECH.voices() CAN'T BE TRUSTED as it doesn't update itself onvoiceschanged a second time ****
  *  EASYSPEECH doesn't queue utterances unlike the real thing.  I get the feeling I could have done all
@@ -203,20 +207,24 @@ try {   // scope starts ( in case I can demodularise this )
                 }
             }
 
-        speech.on({ end: (e) => { console.log("END EVENT FIRED FOR", e.utterance.queueid);} })
-        speech.on({ start: (e) => { console.log("START EVENT FIRED FOR", e.utterance.queueid);} })
+        speech.on({ end: (e) => { console.log("END EVENT FIRED FOR", e.utterance.queueid, e.utterance.text);} })
+        speech.on({ start: (e) => { console.log("START EVENT FIRED FOR", e.utterance.queueid, e.utterance.text);} })
 
         speech.on({ error: speech_error_callback });
         speech.on({ error: entry_deque, end: entry_deque, pause: pause_it, resume: resume_it });
 
         speech.addEventListener('beforespeak', () => speech.utterance.volume = TTSVars.volumemaster)
+
             // add timeouts for when things goes wrong - possibly should deque
+            // it's possible these might no longer be needed if the garbage collection issue is solved by oldUtterance in the speecher class
+
         speech.addEventListener('beforespeak', (data) => {
             let qid = data.detail.id;
             console.log("SETTING TIMEOUT FOR ID", qid);
-
+//console.log("BEFORE SPEAK DATA", data);
             let speech_end_TO =  () => {    //function speech_timeout(queueid) {
-                console.log(`EEEEEEEE speech_end_timeout EEEEEEE cancelling queueid: ${qid}`);
+                console.log(`EEEEEEEE speech_end_timeout EEEEEEE cancelling queueid: ${qid} with text ${data.detail.utterance.text}`);
+                console.log("Speecher state: ",  TTSVars.speecher);
                 TTSVars.speecher.cancel_id(qid);    // might automatically deque
                 entry_deque( {target: {queueid: qid}} );// may be triggered by cancel_id triggering end
             }
@@ -224,7 +232,8 @@ try {   // scope starts ( in case I can demodularise this )
             let end_TO  = setTimeout(speech_end_TO, SPEECH_END_TIMEOUT_MS);
                 // start timeout also clears end
             let speech_start_TO = () => {    //function speech_timeout(queueid) {
-                console.log(`XXXXXXXXXXX speech_start_timeout XXXXXXXXXXXXX cancelling queueid: ${qid}`);
+                console.log(`XXXXXXXXXXX speech_start_timeout XXXXXXXXXXXXX cancelling queueid: ${qid} with text ${data.detail.utterance.text}`);
+                console.log("Speecher state: ",  TTSVars.speecher);
                 clearTimeout(speech_end_TO);
                 TTSVars.speecher.cancel_id(qid);
                 entry_deque( {target: {queueid: qid}} );
