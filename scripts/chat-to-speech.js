@@ -10,6 +10,7 @@
  *  timeouts on the start means they can be cancelled by the end event if you're not somehow doing 'tricks'
  *
  *  PAUSING FIRES END EVENTS for some browsers.
+ *  BUG: End events aren't fired on utterances as sometimes they're garbage collected early.
  *
  *  **** EASYSPEECH.voices() CAN'T BE TRUSTED as it doesn't update itself onvoiceschanged a second time ****
  *  EASYSPEECH doesn't queue utterances unlike the real thing.  I get the feeling I could have done all
@@ -202,10 +203,11 @@ try {   // scope starts ( in case I can demodularise this )
                 }
             }
 
+        speech.on({ end: (e) => { console.log("END EVENT FIRED FOR", e.utterance.queueid);} })
+        speech.on({ start: (e) => { console.log("START EVENT FIRED FOR", e.utterance.queueid);} })
+
         speech.on({ error: speech_error_callback });
         speech.on({ error: entry_deque, end: entry_deque, pause: pause_it, resume: resume_it });
-        speech.on({ start: (e) => { console.log("START EVENT FIRED FOR", e.utterance.queueid);} })
-        speech.on({ end: (e) => { console.log("END EVENT FIRED FOR", e.utterance.queueid);} })
 
         speech.addEventListener('beforespeak', () => speech.utterance.volume = TTSVars.volumemaster)
             // add timeouts for when things goes wrong - possibly should deque

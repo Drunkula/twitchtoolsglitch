@@ -353,13 +353,15 @@
 				this.utterance = pack;
 			} else if (hasProperty(pack, 'text')) {	// obj I'm guessing
 				SPEECHER_log("PACK IS object");	// NOTE here pack handlers are {event:function, event2:function} which I'm not too fussed on.
-				let u = new SpeechSynthesisUtterance(pack.text);
+				//let u = new SpeechSynthesisUtterance(pack.text);	// might be the garbage collection issue
+				this.utterance = new SpeechSynthesisUtterance(pack.text);
+				let u = this.utterance;
 				let p = this.#validate_params(pack);
 				this.#utterance_add_handlers(u, p.handlers);
 
 				u.pitch = p.pitch; u.rate = p.rate; u.volume = p.volume; u.voice = p.voice;
 
-				this.utterance = u;
+				//this.utterance = u;
 			} else {
 				SPEECHER_log("ERROR: speech pack is unknown", pack);
 				return false;
