@@ -315,7 +315,7 @@ function tts_init_forms() {
                         message = emote_filter.filter(message, userstate);
                     }
                         // if we're here
-                    message = message.slice(commandSliceOffset);
+                    message = message.slice(commandSliceOffset).trim();
                     if (message.length === 0) return;
 
                     sayCmdPack.message = message;
