@@ -1,6 +1,8 @@
 /**
  * @module EasySpeech
  * @typicalname EasySpeech
+ * https://www.npmjs.com/package/easy-speech
+ * https://github.com/jankapunkt/easy-speech/blob/HEAD/API.md
  */
 
 /**

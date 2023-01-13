@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Speak My Chat : Twitch Tools</title>
+    <title>Twitch Tools</title>
     <meta name="description">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
     <script defer="" src="https://use.fontawesome.com/releases/v6.1.1/js/all.js"></script>
@@ -52,10 +52,10 @@
       <script src="/scripts/tmi-code-common.js" defer></script>
       <script src="/scripts/event-listeners.js" defer></script>
       <script src="/scripts/form-fields-save-restore.js" defer></script>
-      <script src="/scripts/Speecher.class.js" defer></script>
+      <script src="/scripts/SpeecherES.class.js" type="module"></script>
       <script src="/scripts/Cooldowns.class.js" defer></script>
       <script src="/scripts/Emoter.class.js" defer></script>
-      <script src="/scripts/chat-to-speech.js" defer></script>
+      <script src="/scripts/chat-to-speech-easyspeek.js" defer></script>
       <script src="/scripts/chat-to-speech-queue.js" defer></script>
       <div id="flasher">
         <p>CLICK<br>THE<br>PAGE!</p>
@@ -94,14 +94,14 @@
         <div class="not-mobile-view" id="saycmds">
           <div class="tabs is-fullwidth is-toggle is-small mt-2" data-target="#voicepanels">
             <ul>
-              <li class="is-active"><a>1</a></li>
-              <li><a>2</a></li>
-              <li><a>3</a></li>
-              <li><a>4</a></li>
-              <li><a>5</a></li>
-              <li><a>6</a></li>
-              <li><a>7</a></li>
-              <li><a>8</a></li>
+              <li class="is-active"><a>Voices 1</a></li>
+              <li><a>Voices 2</a></li>
+              <li><a>Voices 3</a></li>
+              <li><a>Voices 4</a></li>
+              <li><a>Voices 5</a></li>
+              <li><a>Voices 6</a></li>
+              <li><a>Voices 7</a></li>
+              <li><a>Voices 8</a></li>
             </ul>
           </div>
           <div class="block tab-content" id="voicepanels">
@@ -806,6 +806,12 @@
                     </label>
                   </div>
                 </div>
+                <label class="label">Users always allowed (even if not mods)</label>
+                <div class="field">
+                  <div class="control">
+                    <input class="input form-save form-filter-spaces-to-commas" type="text" name="allownamed" id="allownamed" placeholder="allow named users" data-toarraylc="perms.allowNamed">
+                  </div>
+                </div>
                 <label class="label">Speech queue limit (0 = unlimited)</label>
                 <div class="field">
                   <div class="control">
@@ -846,16 +852,10 @@
                 </div>
               </div>
               <div class="tab-pane">
-                <label class="label">Users always allowed (even if not mods)</label>
-                <div class="field">
-                  <div class="control">
-                    <textarea class="textarea form-save form-filter-spaces-to-commas" id="allownamed" rows="3" placeholder="allow named users" data-toarraylc="perms.allowNamed"></textarea>
-                  </div>
-                </div>
                 <label class="label">Ignored users</label>
                 <div class="field">
                   <div class="control">
-                    <textarea class="textarea form-save form-filter-spaces-to-commas" id="ignoredusers" rows="3" placeholder="ignored users" data-toarraylc="perms.ignoredUsers"></textarea>
+                    <textarea class="textarea form-save form-filter-spaces-to-commas" id="ignoredusers" rows="10" placeholder="ignored users" data-toarraylc="perms.ignoredUsers"></textarea>
                   </div>
                 </div>
               </div>

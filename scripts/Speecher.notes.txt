@@ -1,0 +1,29 @@
+
+PAUSING FIRES END EVENTS for some browsers.
+
+
+NOTE: easyspeech says long texts stall in some browsers and calls pause() resume() every 5 seconds
+
+EDGE has random onvoiceschanged that's causing my selects to repopulate, check the number of voices has actually changed
+
+
+EDGE STALLING - due to a non triggering of the end event:
+	might need a new strategy:
+		Start a shorter timeout that'll be cancelled on utterance start
+		Start a longer timeout that'll be cancelled on utterence end.  This must allow speaking time so maybe 20 seconds plus.
+
+	BUG: End events aren't fired on utterances as sometimes they're garbage collected early.
+	IDEA: Actually, why don't I have an oldUtterance property in the speecher then swap it out every time
+	a new one is created.
+
+	Aaaaand it still doesn't seem to save the day - and EDGE is the only platform I'm having trouble with - which is what I've chosen
+
+	Detecting edge can be done with window.navigator.userAgentData brands possibly or Edg/ in userAgentData.brands
+
+	The timeouts don't come in the order you might expect, a new start can fire before the end of another so adding
+	timeouts on the start means they can be cancelled by the end event if you're not somehow doing 'tricks'
+
+	I have had Chrome and Vivaldi fire the lack of end event timer but they never seem to stall even without it.
+
+In the other browsers start timeouts happen but they seem not to be needed and solve themselves.  sometimes
+an actual error event will happen and they're not automatically cleared by that.

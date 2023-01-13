@@ -1,69 +1,17 @@
-/** CHAT-TO-SPEECH.js
+/**	https://www.npmjs.com/package/easy-speech
+ * https://github.com/jankapunkt/easy-speech/blob/HEAD/API.md
+ * If I changed this to Easyspeek how would it work?
  *
- *  THIS IS OFFICIALY A MESS as I'm not splitting into smaller files like you're really do.
- *
- *  The EDGE stalling problem with this might need a new strategy:
- *      Start a shorter timeout that'll be cancelled on utterance start
- *      Start a longer timeout that'll be cancelled on utterence end.  This must allow speaking time so maybe 20 seconds plus.
- *
- *  The timeouts don't come in the order you might expect, a new start can fire before the end of another so adding
- *  timeouts on the start means they can be cancelled by the end event if you're not somehow doing 'tricks'
- *
- *  PAUSING FIRES END EVENTS for some browsers.
- *  BUG: End events aren't fired on utterances as sometimes they're garbage collected early.
- *  IDEA: Actually, why don't I have an oldUtterance property in the speecher then swap it out every time
- *  a new one is created.
- *
- *  Aaaaand it still doesn't seem to save the day - and EDGE is the only platform I'm having trouble with - which is what I've chosen
- *
- *  Detecting edge can be done with window.navigator.userAgentData brands possibly or Edg/ in userAgent
+ * I don't have direct contact to the utterance to add the queueid so I'd have
+ * to pass in closures for start and end
  *
  *
- *  **** EASYSPEECH.voices() CAN'T BE TRUSTED as it doesn't update itself onvoiceschanged a second time ****
- *  EASYSPEECH doesn't queue utterances unlike the real thing.  I get the feeling I could have done all
- *  this natively - it was only the getVoices thing I was worried about.
- *
- *  ACTUALLY: I could have used EasySpeech and attached my own listener to native voicesChanged
- *
- *  OH - EasySpeech's strategy is that if onvoiceschanged isn't supported to keep checking every
- *  250ms to see if SpeechSynthesis.getVoices() returns an array - look for const voicesLoaded
- *  I SO should have checked and re-rolled this - which I should do so this doesn't have to be a module
- *
- *  https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis
- *  https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisUtterance
- *
- *  speechSynthesis has properties speaking pending and paused
- *  speaking and pending can be used with the queue BUT - they're slow to update on some browsers - use own
- *
- * ss.paused isn't enough with queue processing so use a property
- *
- * TO DO
- *   POSSIBLE - follower only
- *      add a delay before adding to the speech queue so they can be nixed
- *      check for mod message deletions
- *          https://github.com/tmijs/docs/blob/gh-pages/_posts/v1.4.2/2019-03-03-Events.md#messagedeleted
- *          https://github.com/tmijs/docs/blob/gh-pages/_posts/v1.4.2/2019-03-03-Events.md#ban
- *
- *  Speecher.ready() returns promise, true when good, false when bad
- *
- * https://gist.github.com/AlcaDesign/6213ff17d3981c861adf BTTV emote possible
- *
- * https://kunszg.com/emotes?search=amouranth
- *
- * https://api.7tv.app/v2/cosmetics/avatars
- *
- * https://kunszg.com/commands/code/emotes
- * 7TV ${api[2]}/users/${userId[0].userId}/emotes
- * https://api.7tv.app/users/125387632/emotes
- *
- * PROBLEM - with the NEW HASH on first load these aren't working, you can press refresh and they will work from
- * the same url - looks like I'm going to have to delay doing the voice onchanges until after they're populated
  *
  *
- * NOTE: Start events on an utterance are fired when they are unpaused
  */
 "use strict"
-
+// no, need to do this in a new speecher class
+//import EasySpeech from "./easyspeech.module.js";
 
 TMIConfig.TTSVars = {       // more props added from forms
     flashSetTimeout: null,
@@ -98,7 +46,7 @@ try {   // scope starts ( in case I can demodularise this )
     const isChrome = window.navigator.userAgent.toLowerCase().includes('chrome');
 
     TTSVars.speecher = speech;
-    add_speecher_global_utterance_events(speech);
+    add_speecher_global_utterance_events(speech);	// can still work
 
         // quick hashing for voice ids in the url
     TT.quick_hash = str => str.split('').map(v=>v.charCodeAt(0)).reduce((a,v)=>a+((a<<7)+(a<<3))^v).toString(16);
@@ -106,6 +54,7 @@ try {   // scope starts ( in case I can demodularise this )
     speech.addEventListener('voicessschanged', e => {
         console.debug("VOICES HAVE CHANGED in Speech", e);
     })
+
 
     let TTS_EVENTS = [
         {selector: '#saycmds [id^="saycmd-"], #saycmds input[type="range"], #saycmds select',
@@ -142,9 +91,11 @@ try {   // scope starts ( in case I can demodularise this )
 
         init_speecher().then(() => {
                 // set up the voice selects
+            TTSVars.voices = speech.getVoices();
             create_speech_selects_options();  // must be done BEFORE init common
 
             speech.addEventListener('voiceschanged', () => {
+                console.log("VOICES HAVE CHANGED AND I AM LISTENING!!!");
                 let voices = speechSynthesis.getVoices();
                 if (voices.length !== TTSVars.voices.length)
                 {  // have to do it this way because of EDGE firing onvoiceschanged events willy nilly
@@ -206,7 +157,6 @@ try {   // scope starts ( in case I can demodularise this )
         // add the form things
 
     function add_speecher_global_utterance_events(speech) {
-
         let pause_it = e => {
             try {                            //TTSVars.speech_queue_remove_entry(e.target.queueid);
                     console.debug(`PAUSED: Paused: ${speech.ss.paused}, Pending: ${speech.ss.pending}, Speaking: ${speech.ss.speaking}`)
@@ -224,12 +174,15 @@ try {   // scope starts ( in case I can demodularise this )
             }
 
         speech.on({ end: (e) => { console.log("END EVENT FIRED FOR", e.utterance.queueid, e.utterance.text);} })
-        speech.on({ start: (e) => { console.log("START EVENT FIRED FOR", e.utterance.queueid, e.utterance.text);} })
+        speech.on({ start: (e) => { console.log("START EVENT FIRED FOR", e, e.utterance.queueid, e.utterance.text);} })
 
         speech.on({ error: speech_error_callback });
         speech.on({ error: entry_deque, end: entry_deque, pause: pause_it, resume: resume_it });
 
-        speech.addEventListener('beforespeak', () => speech.utterance.volume = TTSVars.volumemaster)
+        speech.addEventListener('beforespeak', (data) => {
+//            console.log("BEFORE SPEAK DATA:", data);
+            data.detail.pack.volume = TTSVars.volumemaster;
+        })
 
             // add timeouts for when things goes wrong
 
@@ -253,7 +206,7 @@ try {   // scope starts ( in case I can demodularise this )
             //console.debug("SETTING TIMEOUT FOR ID", qid);
                                             // NOTE: this WILL kill any paused speeches if you leave it
             let speech_end_TO_callback =  () => {    //function speech_timeout(queueid) {
-                console.error(`EEEEEEEE speech_end_timeout error EEEEEEE cancelling queueid: ${qid} with text "${data.detail.utterance.text}" voice: ${data.detail.utterance.voice.voiceURI}`);
+                console.error(`EEEEEEEE speech_end_timeout error EEEEEEE cancelling queueid: ${qid} with text "${data.detail.pack.text}" voice: ${data.detail.pack.voice.voiceURI}`);
                 console.debug("Detail", data.detail);
                 //console.debug("Speecher state: ",  TTSVars.speecher);
                 TTSVars.speecher.cancel_id(qid);    // might automatically deque
@@ -263,7 +216,7 @@ try {   // scope starts ( in case I can demodularise this )
             let end_TO  = setTimeout(speech_end_TO_callback, SPEECH_END_TIMEOUT_MS);
                 // start timeout also clears end
             let speech_start_TO_callback = () => {    //function speech_timeout(queueid) {
-                console.error(`XXXXXXXXXXX speech_start_timeout error XXXXXXXXXXXXX cancelling queueid: ${qid} with text "${data.detail.utterance.text}" voice: ${data.detail.utterance.voice.voiceURI}`);
+                console.error(`XXXXXXXXXXX speech_start_timeout error XXXXXXXXXXXXX cancelling queueid: ${qid} with text "${data.detail.pack.text}" voice: ${data.detail.pack.voice.voiceURI}`);
                 //console.debug("Speecher state: ",  TTSVars.speecher);
                 clearTimeout(end_TO);
                 TTSVars.speecher.cancel_id(qid);
@@ -273,8 +226,7 @@ try {   // scope starts ( in case I can demodularise this )
             let start_TO = setTimeout(speech_start_TO_callback, SPEECH_START_TIMEOUT_MS);
 
                 // add start end end events to the utterance.
-            data.detail.utterance.addEventListener( 'start', a => clearTimeout( start_TO ) );
-            data.detail.utterance.addEventListener( 'end', a => clearTimeout( end_TO ) );
+            speech.onOnce( {start: e => clearTimeout( start_TO ), end: clearTimeout( end_TO) });
         });
     }
 
@@ -349,7 +301,7 @@ try {   // scope starts ( in case I can demodularise this )
                         if (ALL_CHAT_RANDOM_VOICE)
                         {
                             let vIdx = Math.floor(Math.random() * TTSVars.voices.length);
-                            let voice = TTSVars.voices[vIdx];console.log("RAND VOICE", voice.name);
+                            let voice = TTSVars.voices[vIdx]; console.log("RAND VOICE", voice.name);
                             sayCmdPack.params = { rate: 1.3, pitch: 1.0, voice }
                         } else {
                             sayCmdPack.params = get_voice_settings( voiceIndex );

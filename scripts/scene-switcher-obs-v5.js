@@ -72,7 +72,7 @@ TMIConfig.SceneSwitcherVars = {
 		if (e.toString() === 'Error: Authentication failed.')
 			message += ' - password is incorrect.'
 		else //if (e.error === 'Connection error.')
-			message += ' - Possibly: <span  class="content"><ul><li>bad address</li><li>OBS not running</li><li>OBS Websocket not configured or using an OBS version earlier than v28.</li></ul></span>'
+			message += ' - Possibly: <span  class="content"><ul><li>bad address</li><li>OBS not running</li><li>OBS Websocket not configured or <a href="scene-switcher.html">using an OBS version earlier than v28.</a></li></ul></span>'
 
 		gid("connectresult").innerHTML = message;
 

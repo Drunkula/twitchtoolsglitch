@@ -25,11 +25,8 @@
  * NOTE queueid is added to each utterance
  */
 "use strict"
-	// these are an attempt to fix the failed end events with Edge does it fix it?  No.
-var TTS_GLOBAL_UTTERANCE;
-var TTS_GLOBAL_UTTERANCE_OLD
-var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 
+import EasySpeech from "./easyspeech.module.js";
 
 {	// scope
 	const hasProperty = (target = {}, prop) => prop in target || Object.hasOwn(target, prop) || !!target[prop]
@@ -38,13 +35,13 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 	const GETVOICES_MAX_TIMEOUT = 3000;
 	const GETVOICES_CHECK_PERIOD = 250;
 
-	const utteranceEvents = ['boundary', 'end', 'error', 'mark', 'pause', 'resume', 'start']
+	const utteranceEventList = ['boundary', 'end', 'error', 'mark', 'pause', 'resume', 'start']
 
 	const SPEECHER_LOGGING = true;
 
 	const SPEECHER_log = SPEECHER_LOGGING ? console.debug : l => l;	// if you don't want logging
 
-	class Speecher {
+	class SpeecherES {
 		ss = SS;
 
 		speechQueueID = 0;	// incremented every time speak() is called
@@ -52,13 +49,13 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 
 		currentSpeakingID = -1;		// so you can cancel the current uttance
 
-		utterance = null; 		// new SpeechSynthesisUtterance();
-		oldUtterance = null;	// to stop the old utterance being garbage collected before end event
 		voices = [];
 		voiceDefault = null;
 
 		#isSpeaking = false;
 		#isPaused = false;
+			// can set true in something like beforespeak - it really should go
+		stopNow = false;
 
 		initialised = false;
 		gotVoicesDebug = [];	// set with a string about how the voices were found
@@ -72,19 +69,30 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 		#amIReady = null;
 			// for adding events listeners
 		#eventDummy = document.createElement('SpeecherEvents');
-		#utterance_handlers = [];	// on events for utterances
-		#cancelNextSpeak = false;	// can be changed during a beforespeak event
+			// events called every time
+		#utteranceHandlersGlobal = { };
+			// events called once
+		#utteranceHandlersOnce = { };		// added before speak and
+			// default events global
+		#utterenceHandlersDefaultGlobalLast = {
+			end: [() => {this.#isSpeaking = false; this.#sayQueueProcess()}],
+			error: [() => {this.#isSpeaking = false; this.#sayQueueProcess()}]
+		}
 
+		#cancelNextSpeak = false;	// can be changed during a beforespeak event
 
 			// set up
 
 		constructor(args = {maxTimeout: GETVOICES_MAX_TIMEOUT, period: GETVOICES_CHECK_PERIOD}) {
-			this.ss.cancel();	// necessary if paused before reloading page
-			//this.ss.resume();
-			this.#amIReady = new Promise( (res, rej) => {
+			// easyspeech init
+
+			this.#amIReady = EasySpeech.init()
+				.then( () => { this.#imReady(); });
+
+			/* this.#amIReady = new Promise( (res, rej) => {
 				this.#readyResolve = res;
 				this.#readyReject = rej;
-			});
+			}); */
 
 			this.#set_onvoices_changed_handler()
 			this.#voicesInitOnTimer(args)
@@ -127,7 +135,7 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 				const _timerIntervalHandler = () => {
 					let voices = this.ss.getVoices();
 
-					SPEECHER_log("- IN INTERVAL TIMER period", iTmrMSecs, "voices: ", voices.length, "current", this.voices.length);
+					SPEECHER_log("- SpeecherES TIMER period", iTmrMSecs, "voices: ", voices.length, "current", this.voices.length);
 						// actually let's keep the timer running
 					if (voices.length !== this.voices.length) {
 						let msg = `VoiceGetTimer change on period ${iTmrMSecs}ms found ${voices.length}, previously : ${this.voices.length}`
@@ -173,44 +181,55 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 			this.#find_default_voice();
 			this.initialised = true;
 
-			this.#readyResolve(true);
+			//this.#readyResolve(true);
 			this.#voicesPromiseResolve(this.voices);
 
 			this.emit('ready');
 		}
 
-			// add event handlers globally takes object { event : fn , event2 : fn} so multiple calls for same event
+			// add event handlers globally takes object
+			// { event : fn , event2 : fn} so multiple calls for same event
 
-		on(evs) {
-			utteranceEvents.forEach( ev => {
+		on(evs, once) {
+			let evList = once ? this.#utteranceHandlersOnce : this.#utteranceHandlersGlobal;
+
+			utteranceEventList.forEach( ev => {
 				if (evs[ev] && typeof evs[ev] === 'function') {
-					//this.#utterance_handlers[ev] = evs[ev];	// add an object with the handler type
-					console.log("PUSHING", ev);
-					this.#utterance_handlers.push( [ev, evs[ev]] )	;// = evs[ev];
+					console.log("event pushing:", ev);
+
+					if (Array.isArray( evList[ev] ) ) {
+						evList[ev].push( evs[ev] );
+					} else {
+						evList[ev] = [ evs[ev] ]
+					}
 				}
 			})
+		}
+			// lazy way of adding events once
+		onOnce(evs) {
+			this.on(evs, true);
 		}
 
 		stop() {
 			this.#isSpeaking = false;
 			this.stopNow = true;
-			this.ss.cancel();
+			EasySpeech.cancel();
 		}
 
 		pause() {			//this.stopNow = true;
 			//this.isSpeaking = false;	// UNSURE
 			this.#isPaused = true;
-			this.ss.pause();
+			EasySpeech.pause();
 		}
 
 		resume() {			//this.stopNow = false;
-			this.ss.resume();
+			EasySpeech.resume();
 			this.#isPaused = false;
 			this.#sayQueueProcess();
 		}
 			// cancels the current speaking voice - end event will trigger
 		cancel() {
-			this.ss.cancel();
+			EasySpeech.cancel();
 		}
 			//
 		reset() {
@@ -222,8 +241,9 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 			this.speechQueueMap.clear();
 		}
 
-			// pack = {text, pitch, rate, voice, volume}, string or utterance
+			// pack = {text, pitch, rate, voice, volume, handlers}, string or utterance
 			// Returns ID of speech queue entry
+			// pack can now contain handlers
 
 		speak(pack)
 		{
@@ -232,16 +252,17 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 				// if it's immediate put an earlier ID into the queue
 			this.speechQueueID++;
 
+			pack.queueid = this.speechQueueID;
+
 				// immediate puts to the front of the map
 
 			if (pack.immediate) {
-				this.ss.cancel();	// stop the current voice
+				EasySpeech.cancel();
 				pack.saynext = true;
 			}
 
 			if (pack.saynext) {
 				this.speechQueueMap = new Map( [ [this.speechQueueID, pack], ...this.speechQueueMap ] );
-
 			} else {
 				this.speechQueueMap.set(this.speechQueueID, pack);
 			}
@@ -262,12 +283,10 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 
 			// returns filtered voice, pitch, volume, rate and utterance handlers
 
-		#validate_params(pObj) {		//_validate_params({pitch, rate, volume, voice, ...handlers}) {
-			//let filtered = { handlers: {} };
-			let filtered = { handlers: [] };
-
-			let v = pObj.voice;
-			filtered.voice = this.#is_voice(v) ? v : this.voiceDefault;
+		#clamp_voice_params(pack) {		//_validate_params({pitch, rate, volume, voice, ...handlers}) {
+			if ( !this.#is_voice(pack.voice) ) {
+				pack.voice =  this.voiceDefault;
+			}
 
 			const maxMins = {
 				pitch: {min: 0.5, max: 2.0, default: 1.0},
@@ -277,129 +296,135 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 
 			for (const key in maxMins) {
 				const test = maxMins[key];
-				filtered[key] = test.default;
-				if (key in pObj) {
-					let p = parseFloat( pObj[key] );
-				 	if (p >= test.min && p <= test.max) {
-						filtered[key] = p;
+
+				if (key in pack) {
+					let p = parseFloat( pack[key] );
+					if (p < test.min || p > test.max) {
+						pack[key] = test.default;
 					}
 				}
 			}
-				// makes sure handlers are functions
-				// NOTE: this presumes that the passed events are in {event : function, ev:fn...} form while elsewhere they're not
-			for (const uev of utteranceEvents) {
-				if (uev in pObj && typeof pObj[uev] === 'function') {
-					filtered.handlers[uev] = pObj[uev];
-				}
-			}
 
-			return filtered;
+			return pack;
 		}
 
 			// immediate ignores speaking and paused and throws it into the queue
 
 		#sayQueueProcess(immediate = false) {
-			if ( !immediate && (this.ss.speaking || this.#isPaused || this.#isSpeaking) ) {
-				//SPEECHER_log("Speaking, returning");
+			//if ( !immediate && (this.ss.speaking || this.#isPaused || this.#isSpeaking) ) {
+			if ( !immediate && (this.#isPaused || this.#isSpeaking) ) {
+				SPEECHER_log("Speaking, returning");
 				return;
 			}
 
 			if (this.stopNow) {
-				this.ss.cancel();
+				EasySpeech.cancel();
 				this.#isSpeaking = false;
 				return;
 			}
 
 			this.#isSpeaking = false;
 				// I hate doing a while
-			for ( const [id, pack] of this.speechQueueMap.entries() ) {
+			for ( let [id, pack] of this.speechQueueMap.entries() ) {
 				if (!pack) {
 					continue;
 				}
 				this.speechQueueMap.delete(id);
 
-				if ( !this.#process_utterance(pack) ) {
+				pack = this.#process_pack(pack);
+
+				if ( !pack ) {
 					continue;	// pack was bad
 				}
-//console.log("THIS UTTERANCE", this.utterance);
-				this.utterance.lang = this.utterance.voice?.lang ? this.utterance.voice.lang : 'en-GB';  // Android needs lang
 
-//				SPEECHER_log("Queue ABOUT TO SAY:", this.utterance.text, this.utterance);
 //				SPEECHER_log("Speech Queue AFTER", this.speechQueueMap.size);
-
 				this.currentSpeakingID = id;
-				this.utterance.queueid = id;
+
 					// emit that we're about to speak and check for a cancel
 				this.#cancelNextSpeak = false;
-				this.emit('beforespeak', { id });
-					// they can call this.cancel_next() to stop this utterance
+				this.emit('beforespeak', { id, pack });
+					// they can call this.cancel_next() to stop this utterance or add events
 				if (this.#cancelNextSpeak) {
 					continue;
 				}
 
 				this.#isSpeaking = true;
-				this.ss.speak(this.utterance)
-				this.ss.resume();	// this has been necessary, I think
+
+				pack = this.#pack_add_handlers(pack);
+
+					// we need to add our local handlers to the pack and take out the ones passed
+console.log("PACK BEFORE SPEECH", pack);
+				EasySpeech.speak(pack);
+
+				//this.ss.resume();	// this has been necessary, I think
 
 				break;
 			}
 		}
 
-			// turns a string, object or utterance into this.utterance
-			// and adds any custom handlers as well as native end and error
+			// turns a string or object into just the params for an utterance
+			// and handlers are added to the #utteranceHandlersNext
 
-		#process_utterance(pack) {
-			this.oldUtterance = this.utterance;
-			TTS_GLOBAL_UTTERANCE_OLD = this.utterance;
-
+		#process_pack(pack) {
 				// is pack an utterance, object or string
 			if ( typeof pack === 'string' ) {
-				this.utterance = new SpeechSynthesisUtterance(pack);
-				SPEECHER_log("PACK IS STRING");
-			} else if (pack instanceof SpeechSynthesisUtterance) {
-				SPEECHER_log("PACK IS utterance");
-				this.utterance = pack;
+				pack = {text: pack}
+				//SPEECHER_log("PACK IS STRING");
 			} else if (hasProperty(pack, 'text')) {	// obj I'm guessing
-				SPEECHER_log("PACK IS object");	// NOTE here pack handlers are {event:function, event2:function} which I'm not too fussed on.
-				let u = new SpeechSynthesisUtterance(pack.text);	// might be the garbage collection issue
-
-				let p = this.#validate_params(pack);
-				this.#utterance_add_handlers(u, p.handlers);
-
-				u.pitch = p.pitch; u.rate = p.rate; u.volume = p.volume; u.voice = p.voice;
-
-				this.utterance = u;
+				//SPEECHER_log("PACK IS object");	// NOTE here pack handlers are {event:function, event2:function} which I'm not too fussed on.
 			} else {
 				SPEECHER_log("ERROR: speech pack is unknown", pack);
-				return false;
+				console.error("ERROR: speech pack is unknown", pack)
+				return {text: ''};
 			}
 
-				// workaround for garbage collection?
-			TTS_GLOBAL_UTTERANCE = this.utterance;
+			pack = this.#clamp_voice_params(pack);
 
-				// add our two default handlers
-			this.utterance.addEventListener('end', (e) => {
-				this.#isSpeaking = false;	console.log(m("UTTERANCE END EVENT") + ` for ${e.utterance.queueid} : ${e.utterance.text}`);
-				this.#sayQueueProcess()
-			});
-			this.utterance.addEventListener('error', e => {
-				SPEECHER_log("UTTERANCE ERROR ", e);
-				this.#isSpeaking = false;
-				this.#sayQueueProcess();	// CRITICAL
-			});
-
-			this.#utterance_add_handlers(this.utterance, this.#utterance_handlers);
-
-			return true;
+			return pack;
 		}
 
 			// validate is a function?	No, it's done before
-		#utterance_add_handlers(u, handlers) {
-			for (const [ev, fn] of handlers) {
-				if (utteranceEvents.includes(ev)) {					//u.addEventListener(ev, handlers[ev]);
-					u.addEventListener(ev, fn);
+		#pack_add_handlers(pack) {	// u, handlers) {
+			// create an uber object to be processed by events
+			for (let event of utteranceEventList) {
+				let eventPack = [];
+						// crucial to be FIRST in the handler queue
+				if (event === 'start' || event === 'error') {
+					eventPack = [e => e.target.queueid = pack.queueid];
+				}
+
+				if ( typeof pack[event] === 'function' )
+					eventPack.push(pack[event]);
+
+				if ( !Array.isArray(this.#utteranceHandlersGlobal[event]) )
+					this.#utteranceHandlersGlobal[event] = [];
+
+				if ( !Array.isArray(this.#utteranceHandlersOnce[event]) )
+					this.#utteranceHandlersOnce[event] = [];
+
+				eventPack = [...eventPack, ...this.#utteranceHandlersOnce[event], ...this.#utteranceHandlersGlobal[event] ]
+
+				if (this.#utterenceHandlersDefaultGlobalLast[event]) {
+					eventPack = [...eventPack, ...this.#utterenceHandlersDefaultGlobalLast[event]];
+				}
+
+					// call each event from one callback
+				if (eventPack.length) {
+					pack[event] = (e) => {
+//						console.log("Event.type", e.type, "handlers: ", eventPack.length);
+						for(let handler of eventPack) {
+							handler(e);
+						}
+					}
+				} else {
+					delete pack[event];
 				}
 			}
+
+			delete pack.handlers;
+			this.#utteranceHandlersOnce = [];
+
+			return pack;
 		}
 
 		#find_default_voice() {
@@ -428,8 +453,8 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 			id = parseInt(id);
 			this.speechQueueMap.delete( id );
 			if ( this.currentSpeakingID === id ) {
-				this.ss.cancel();			// cancel calls end handler? it seems to
 				this.#isSpeaking = false;
+				EasySpeech.cancel();
 				//this._sayQueueProcess();	// don't know if I need this, does cancel fire the end event?
 			}
 		}
@@ -444,7 +469,6 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 			let e = new CustomEvent(event, { detail: {
 				...data,
 				target: this,
-				utterance: this.utterance,
 				queue: this.speechQueueMap,
 				voices: this.voices }
 			});
@@ -463,6 +487,6 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 
 
 	//globalThis.Speecher = Speecher;
-	TT.Speecher = Speecher;
+	TT.Speecher = SpeecherES;
 }	// scope end
 
