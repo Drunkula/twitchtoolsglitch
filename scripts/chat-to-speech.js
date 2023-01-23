@@ -108,7 +108,7 @@ try {   // scope starts ( in case I can demodularise this )
     })
 
     let TTS_EVENTS = [
-        {selector: '#saycmds [id^="saycmd-"], #saycmds input[type="range"], #saycmds select',
+        {selector: '#saycmds [id^="sc-"], #saycmds input[type="range"], #saycmds select',
             event: 'change', function: update_say_commands, params: {}},
         {selector: '#speechtestbtn', event: 'click', function: speech_test, params: {}},
 
@@ -508,7 +508,7 @@ console.debug("COMMAND PACK", sayCmdPack);
         // sets TTSVars.sayCmds for easy access, triggered by onchange of any command params
 
     function update_say_commands() {
-        let cmds = qsa('[id^="saycmd-"]')
+        let cmds = qsa('[id^="sc-"]')
         let commands = {};
 
         cmds.forEach(s => {
