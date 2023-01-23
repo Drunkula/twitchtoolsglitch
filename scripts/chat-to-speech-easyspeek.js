@@ -460,7 +460,7 @@ console.debug("COMMAND PACK", sayCmdPack);
         // sets TTSVars.sayCmds for easy access, triggered by onchange of any command params
 
     function update_say_commands() {
-        let cmds = qsa('[id^="saycmd-"]')
+        let cmds = qsa('[id^="sc-"]')
         let commands = {};
 
         cmds.forEach(s => {
@@ -499,10 +499,10 @@ console.debug("COMMAND PACK", sayCmdPack);
         // grab parameters from the speech setting 1, not zero based
 
     function get_voice_settings(index) {
-        let rate = +gid('rateval-'+index).value;
-        let pitch = +gid('pitchval-'+index).value;
+        let rate = +gid('rv-'+index).value;
+        let pitch = +gid('pv-'+index).value;
             //let vIdx = +gid('voiceid-'+index).value;  // now gets the hash
-        let vIdx = +gid('voiceid-'+index).selectedIndex
+        let vIdx = +gid('v-'+index).selectedIndex
         let voice = TTSVars.voices[vIdx];
 
         return {rate, pitch, voice}
