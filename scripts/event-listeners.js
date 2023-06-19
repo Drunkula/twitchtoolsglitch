@@ -23,6 +23,8 @@
 		{selector: '[data-toarray]', event: 'change', function: set_conf_array, params: {}},
 		{selector: '[data-toarraylc]', event: 'change', function: set_conf_array_lc, params: {}},
 
+		{selector: '[data-toequalpairslc]', event: 'change', function: set_conf_array_equal_pairs_lc, params: {}},
+
 		{selector: '[data-toint]', event: 'change', function: set_conf_int, params: {}},
 		{selector: '[data-tofloat]', event: 'change', function: set_conf_float, params: {}},
 		{selector: '[data-tostr]', event: 'change', function: set_conf_string, params: {}},
@@ -155,6 +157,53 @@
 	}
 
 
+		// turns foo=bar into an associative array using regex
+
+	function set_conf_array_equal_pairs_lc(e) {
+		// could split the entire thing on equals so foo=I'm foo bar=I'm bar would split to
+		// foo | I'm foo bar | I'm bar then you'd have to split by spaces and use
+		// [0] = var name, then split the next thing on spaces
+		// words = [1].split(" "); // do that filter thing that removes multiples
+		// if [2] exists then the last word is the new variable
+
+		let str = e.target.value.toLowerCase().replace(/\s*=\s*/gm, "=").split(/\s+/).filter(x => x);
+		console.log("Array from pairs:", str);
+		// HA!  This has made it easier.  You split zero and if it contains an equal then start building your value
+
+		let index = 0, pairs={};
+		let varname = "", value="";
+		while (index < str.length) {
+			// split by equals
+			let sbe = str[index].split('=');
+
+			while(sbe[0] === '') sbe.shift();
+			// what if there are multiple equals because of errors = pfffft
+			// console.log("SPLIT on =", sbe);
+			if (sbe.length > 2) {
+				sbe = [sbe[0], sbe.slice(1).join(" ")];
+			}
+
+			if (sbe.length == 2) {
+				value = sbe[1];
+				varname=sbe[0];
+				if (value!==" ") {
+					pairs[varname] = value;
+				}
+			} else if (sbe.length == 1 && varname && sbe[0]) {
+				if (pairs[varname].length) pairs[varname] += " ";
+				pairs[varname] += sbe[0];
+			}
+
+			index++;
+		}
+
+		console.log("Processed pairs:", pairs);
+
+		TT.set_conf(e.target.dataset.toequalpairslc, pairs);
+		return pairs;
+	}
+
+
 		// populates the url but on a slight delay - lets other onchange processing happen first
 
 	function url_populate_onchange() {
@@ -163,6 +212,7 @@
 		clearTimeout(setIval)
 		this.si = setTimeout(() => ns.url_populate(), ONCHANGE_URL_UPDATE_DELAY_MS);
 	}
+
 
 		// changes the url link and populates the thingy
 

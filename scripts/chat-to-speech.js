@@ -338,25 +338,31 @@ try {   // scope starts ( in case I can demodularise this )
                     let sayCommand = is_say_command(message);  // returns !command / false
                     let sayCmdPack = {};
                     let commandSliceOffset = 0   // amount to strip from message
+                    let voiceIndex = 1; // I START AT ONE
 
                     if (sayCommand === false) {
                         if ( !TTSVars.chatReadAll || ('!' === message[0]) && TTSVars.chatReadOtherCommands !== true) {
                             return;
                         }
                             // create an all-chat say command
-                        sayCommand = '!all-chat'
+                            // do they have a personalised user command?
+                        sayCommand = is_say_command("!" + TTSVars.usercommands[userstate['username']]);
 
-                        if (ALL_CHAT_RANDOM_VOICE)
-                        {
+                        if (sayCommand) {
+                            sayCmdPack.params = TTSVars.sayCmds[sayCommand]
+                        } else if (TTSVars.randomVoices) {
                             let vIdx = Math.floor(Math.random() * TTSVars.voices.length);
-                            let voice = TTSVars.voices[vIdx];console.log("RAND VOICE", voice.name);
+                            let voice = TTSVars.voices[vIdx]; console.log("RAND VOICE", voice.name);
                             sayCmdPack.params = { rate: 1.3, pitch: 1.0, voice }
                         } else {
                             sayCmdPack.params = get_voice_settings( voiceIndex );
                         }
+
+                        sayCommand = '!all-chat';
                     } else {
                         commandSliceOffset = sayCommand.length + 1;
-                        sayCmdPack.params = TTSVars.sayCmds[sayCommand]
+                        message = message.slice(commandSliceOffset).trim();
+                        sayCmdPack.params = TTSVars.sayCmds[sayCommand];
                     }
 
                     sayCmdPack.command = sayCommand;
@@ -365,7 +371,7 @@ try {   // scope starts ( in case I can demodularise this )
                         message = emote_filter.filter(message, userstate);
                     }
                         // if we're here
-                    message = message.slice(commandSliceOffset).trim();
+                    //message = message.slice(commandSliceOffset).trim();
                     console.log(userstate['display-name'], "message length:", message.length);
                     if (message.length === 0) { console.log("message zero returning");
                         return;
@@ -402,6 +408,8 @@ try {   // scope starts ( in case I can demodularise this )
 
 console.debug("COMMAND PACK", sayCmdPack);
 
+                        // nickname needs to be added here
+
                     let nid = speech.next_id();
                     TTSVars.speech_queue_list_add({user: userstate["display-name"], text: message, id: nid})
 
@@ -420,7 +428,10 @@ console.debug("COMMAND PACK", sayCmdPack);
 
     function add_speech_before_after(msg, state, channel) {
         if (TTSVars.chatSayBefore || TTSVars.chatSayAfter) {
-            let name = state['display-name'].replace(/_/g, ' ');
+            // TODO: NICKNAME check needs to be made here
+            let name = state['username'];
+            console.log( "name", name, TTSVars.nicknames[name] );
+            name = TTSVars.nicknames[name] ?? state['display-name'].replace(/_/g, ' ');
 
             // if no digits in username
             if ( !TTSVars.chatReadNameDigits ) {

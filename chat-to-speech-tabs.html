@@ -762,6 +762,7 @@
                 <li class="is-active"><a>Settings 1</a></li>
                 <li><a>Settings 2</a></li>
                 <li><a>Ignored</a></li>
+                <li><a>Nicknames</a></li>
               </ul>
             </div>
             <div class="block tab-content" id="configpanels">
@@ -770,6 +771,11 @@
                   <div class="control">
                     <label class="checkbox button is-link is-size-7-mobile is-responsive">
                       <input class="form-save" type="checkbox" data-tocheckbox="TTSVars.chatReadAll" id="readallchat"> All chat
+                    </label>
+                  </div>
+                  <div class="control">
+                    <label class="checkbox button is-link is-size-7-mobile is-responsive">
+                      <input class="form-save" type="checkbox" data-tocheckbox="TTSVars.randomVoices" id="randomvoices"> Rand Voices
                     </label>
                   </div>
                   <div class="control">
@@ -856,6 +862,20 @@
                 <div class="field">
                   <div class="control">
                     <textarea class="textarea form-save form-filter-spaces-to-commas" id="ignoredusers" rows="3" placeholder="ignored users" data-toarraylc="perms.ignoredUsers"></textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="tab-pane">
+                <label class="label">Nicknames.  Use user=command e.g. tiki_riot=tiki</label>
+                <div class="field">
+                  <div class="control">
+                    <textarea class="textarea form-save Xform-filter-spaces-to-commas" id="nicknames" rows="3" placeholder="user nicknames" data-toequalpairslc="TTSVars.nicknames"></textarea>
+                  </div>
+                </div>
+                <label class="label">Auto use command e.g tiki_riot=tr</label>
+                <div class="field">
+                  <div class="control">
+                    <textarea class="textarea form-save Xform-filter-spaces-to-commas" id="autocommands" rows="3" placeholder="username=voice command, e.g. tiki_riot=tr" data-toequalpairslc="TTSVars.usercommands"></textarea>
                   </div>
                 </div>
               </div>

@@ -6,6 +6,7 @@ NOTE: easyspeech says long texts stall in some browsers and calls pause() resume
 
 EDGE has random onvoiceschanged that's causing my selects to repopulate, check the number of voices has actually changed
 
+EDGE has tab sleeping, make sure you add the domain in the settings/performance to exclude the site.
 
 EDGE STALLING - due to a non triggering of the end event:
 	might need a new strategy:
