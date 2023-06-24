@@ -51,7 +51,7 @@
 					// for the future, but for now lazy below
 				}
  */					// LAZY, dangerous, might change this to params having triggers
-				if (ev.event === 'change') {
+				if (ev.event === 'change' && ev.params?.noAutoChange !== true) {
 					f.dispatchEvent(chEv);
 				} else
 				if (ev.event === 'input') {

@@ -759,9 +759,9 @@
           <section class="modal-card-body">
             <div class="tabs is-fullwidth is-toggle is-toggle-rounded is-small" data-target="#configpanels">
               <ul>
-                <li class="is-active"><a>Settings 1</a></li>
-                <li><a>Settings 2</a></li>
-                <li><a>Ignored</a></li>
+                <li class="is-active"><a>Settings</a></li>
+                <!-- li: a Settings 2-->
+                <li><a>Allow / Ignore</a></li>
                 <li><a>Nicknames</a></li>
               </ul>
             </div>
@@ -775,7 +775,7 @@
                   </div>
                   <div class="control">
                     <label class="checkbox button is-link is-size-7-mobile is-responsive">
-                      <input class="form-save" type="checkbox" data-tocheckbox="TTSVars.randomVoices" id="randomvoices"> Rand Voices
+                      <input class="form-save" type="checkbox" data-tocheckbox="TTSVars.randomVoices" id="randomvoices"> Rand Voice
                     </label>
                   </div>
                   <div class="control">
@@ -818,8 +818,6 @@
                     <input class="input number-input-4 form-save" type="number" id="chatqueuelimit" min="0" max="200" value="10" data-toint="TTSVars.chatQueueLimit">
                   </div>
                 </div>
-              </div>
-              <div class="tab-pane">
                 <label class="label">Say before message - tags: {user} {channel}</label>
                 <div class="field">
                   <div class="control">
@@ -855,27 +853,27 @@
                 <label class="label">Users always allowed (even if not mods)</label>
                 <div class="field">
                   <div class="control">
-                    <textarea class="textarea form-save form-filter-spaces-to-commas" id="allownamed" rows="3" placeholder="allow named users" data-toarraylc="perms.allowNamed"></textarea>
+                    <textarea class="textarea form-save form-filter-spaces-to-commas" id="allownamed" rows="6" placeholder="allow named users" data-toarraylc="perms.allowNamed"></textarea>
                   </div>
                 </div>
                 <label class="label">Ignored users</label>
                 <div class="field">
                   <div class="control">
-                    <textarea class="textarea form-save form-filter-spaces-to-commas" id="ignoredusers" rows="3" placeholder="ignored users" data-toarraylc="perms.ignoredUsers"></textarea>
+                    <textarea class="textarea form-save form-filter-spaces-to-commas" id="ignoredusers" rows="8" placeholder="ignored users" data-toarraylc="perms.ignoredUsers"></textarea>
                   </div>
                 </div>
               </div>
               <div class="tab-pane">
-                <label class="label">Nicknames.  Use user=command e.g. tiki_riot=tiki</label>
+                <label class="label">Nicknames.  Use user=command e.g. jonathan_bun=Jonny Cakes</label>
                 <div class="field">
                   <div class="control">
-                    <textarea class="textarea form-save Xform-filter-spaces-to-commas" id="nicknames" rows="3" placeholder="user nicknames" data-toequalpairslc="TTSVars.nicknames"></textarea>
+                    <textarea class="textarea form-save Xform-filter-spaces-to-commas" id="nicknames" rows="9" placeholder="user nicknames" data-toequalpairslc="TTSVars.nicknames"></textarea>
                   </div>
                 </div>
-                <label class="label">Auto use command e.g tiki_riot=tr</label>
+                <label class="label">Auto use command e.g jonathan_Bun=bun</label>
                 <div class="field">
                   <div class="control">
-                    <textarea class="textarea form-save Xform-filter-spaces-to-commas" id="autocommands" rows="3" placeholder="username=voice command, e.g. tiki_riot=tr" data-toequalpairslc="TTSVars.usercommands"></textarea>
+                    <textarea class="textarea form-save Xform-filter-spaces-to-commas" id="autocommands" rows="5" placeholder="username=voice command, e.g. tiki_riot=tr" data-toequalpairslc="TTSVars.usercommands"></textarea>
                   </div>
                 </div>
               </div>

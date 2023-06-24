@@ -108,8 +108,12 @@ try {   // scope starts ( in case I can demodularise this )
     })
 
     let TTS_EVENTS = [
-        {selector: '#saycmds [id^="sc-"], #saycmds input[type="range"], #saycmds select',
-            event: 'change', function: update_say_commands, params: {}},
+        {selector: '#saycmds [id^="sc-"], #saycmds input[type="range"], #saycmds select', event: 'change', 
+            function: update_say_commands, params: {}},
+
+            // want this it happen AFTER update_say_commands
+        {selector: ".voice-select", event: 'change', function: say_command_auto_test, params: {noAutoChange: true,}},
+
         {selector: '#speechtestbtn', event: 'click', function: speech_test, params: {}},
 
         {selector: '#cancelbtn', event: 'click', function: () => speech.cancel(), params: {}},
@@ -430,12 +434,13 @@ console.debug("COMMAND PACK", sayCmdPack);
         if (TTSVars.chatSayBefore || TTSVars.chatSayAfter) {
             // TODO: NICKNAME check needs to be made here
             let name = state['username'];
-            console.log( "name", name, TTSVars.nicknames[name] );
-            name = TTSVars.nicknames[name] ?? state['display-name'].replace(/_/g, ' ');
 
             // if no digits in username
-            if ( !TTSVars.chatReadNameDigits ) {
-                name = name.replace(/\d/g, ' ')
+            if (TTSVars.nicknames[name]) {
+                name = TTSVars.nicknames[name];
+            }
+            else if ( !TTSVars.chatReadNameDigits ) {
+                name = name.replace(/\d/g, ' ');
             }
 
             channel = channel.slice(1); // get rid of #
@@ -484,6 +489,9 @@ console.debug("COMMAND PACK", sayCmdPack);
      */
 
     function create_speech_selects_options () {
+        let voice_name_filter = (v => v.replace(/Microsoft\s*|Google\s*/, ''))
+
+
         let selects = qsa(".voice-select")
 
         log("Number of voices : " + TTSVars.voices.length)
@@ -495,7 +503,7 @@ console.debug("COMMAND PACK", sayCmdPack);
                 let voice = TTSVars.voices[voiceidx]
 
                 let opt = document.createElement('option');
-                opt.text =  voice.name;
+                opt.text =  voice_name_filter( voice.name );
                 opt.value = TT.quick_hash(voice.voiceURI)
 
                 frag.appendChild(opt);
@@ -539,11 +547,25 @@ console.debug("COMMAND PACK", sayCmdPack);
         TTSVars.sayCmds = commands;
     }
 
+        // select for voice onchange event
+
+    function say_command_auto_test(e) {
+        let vIdx = e.target.id.split("-")[1];
+        //console.log(e.target.selectedIndex, e.target.selectedIndex + 1);
+        //console.log(e.target.selectedIndex);
+        //e.options[e.selectedIndex].text;
+            // test voice uses the index + 1 of the select, not its option.
+        test_voice(vIdx);
+    }
+
+
         // test voice settings button
 
     function test_voice_onclick (e) {
         test_voice(e.target.dataset['index'])
     }
+
+        // index is of the select's id, which is 1 based, not zero.  I should have used the selected index
 
     function test_voice(index) {
         let params = get_voice_settings(index);
@@ -555,7 +577,8 @@ console.debug("COMMAND PACK", sayCmdPack);
     }
 
 
-        // grab parameters from the speech setting 1, not zero based
+        // grab parameters from the speech select which is 1, not zero based
+        // the select's selectedIndex is used which I should have used throughout
 
     function get_voice_settings(index) {
         let rate = +gid('rv-'+index).value;
