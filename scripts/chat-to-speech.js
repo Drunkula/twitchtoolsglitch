@@ -247,6 +247,8 @@ try {   // scope starts ( in case I can demodularise this )
          * Timeouts for each speech entry in case the end event fails to fire - only needed on Edge so far.
          * edge sometimes garbage collects the utterance which causes no end event
          * it's possible these might no longer be needed if the garbage collection issue is solved by oldUtterance in the speecher class
+         * 
+         * MAYBE I should still add the start timeout, just not the end one
          */
 
     function add_edge_end_workaround () {
@@ -261,7 +263,7 @@ try {   // scope starts ( in case I can demodularise this )
             let qid = data.detail.id;
                 // NOTE: this WILL kill any paused speeches if you leave it
             let speech_end_TO_callback =  () => {    //function speech_timeout(queueid) {
-                console.error(`EEEEEEEE EDGE speech_end_timeout error EEEEEEE cancelling queueid: ${qid} with text "${data.detail.utterance.text}" voice: ${data.detail.utterance.voice.voiceURI}`);
+                console.error(`END ERROR EDGE speech_end_timeout error : cancelling queueid: ${qid} with text "${data.detail.utterance.text}" voice: ${data.detail.utterance.voice.voiceURI}`);
                 console.debug("Detail", data.detail);
                 //console.debug("Speecher state: ",  TTSVars.speecher);
                 TTSVars.speecher.cancel_id(qid);    // might automatically deque
@@ -270,10 +272,10 @@ try {   // scope starts ( in case I can demodularise this )
 
             let voiceEndTimeout = TTSVars.edgeVoiceTimeout * 1000;
 
-            let end_TO  = setTimeout(speech_end_TO_callback, edgeVoiceTimeout);
+            let end_TO  = setTimeout(speech_end_TO_callback, voiceEndTimeout);
                 // start timeout also clears end
             let speech_start_TO_callback = () => {    //function speech_timeout(queueid) {
-                console.error(`XXXXXXXXXXX EDGE speech_start_timeout error XXXXXXXXXXXXX cancelling queueid: ${qid} with text "${data.detail.utterance.text}" voice: ${data.detail.utterance.voice.voiceURI}`);
+                console.error(`START ERROR EDGE speech_start_timeout error : cancelling queueid: ${qid} with text "${data.detail.utterance.text}" voice: ${data.detail.utterance.voice.voiceURI}`);
                 clearTimeout(end_TO);
                 TTSVars.speecher.cancel_id(qid);
                 entry_deque( {target: {queueid: qid}} );
@@ -325,7 +327,7 @@ try {   // scope starts ( in case I can demodularise this )
         TT.cclient.on('message', (channel, userstate, message, self) => {
             if (self || TTSVars.chatEnabled === false) return;   // Don't listen to my own messages..
 
-            if (lastMsgId === userstate['id']) {  // had a case of double messaging
+            if (lastMsgId === userstate['id']) {  // had a case of double repeating messaging
                 return;
             }
             lastMsgId = userstate['id'];    // unique to every message
