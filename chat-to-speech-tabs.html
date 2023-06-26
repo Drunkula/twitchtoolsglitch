@@ -763,6 +763,7 @@
                 <!-- li: a Settings 2-->
                 <li><a>Allow / Ignore</a></li>
                 <li><a>Nicknames</a></li>
+                <li><a>Tweaks</a></li>
               </ul>
             </div>
             <div class="block tab-content" id="configpanels">
@@ -864,16 +865,24 @@
                 </div>
               </div>
               <div class="tab-pane">
-                <label class="label">Nicknames.  Use user=command e.g. jonathan_bun=Jonny Cakes</label>
+                <label class="label">Nicknames.  Use user=nickname e.g. jonathan_bun=Jonny Cakes </label>
                 <div class="field">
                   <div class="control">
-                    <textarea class="textarea form-save Xform-filter-spaces-to-commas" id="nicknames" rows="9" placeholder="user nicknames" data-toequalpairslc="TTSVars.nicknames"></textarea>
+                    <textarea class="textarea form-save Xform-filter-spaces-to-commas" id="nicknames" rows="9" placeholder="e.g. jo_king=Crazy Jo d_wolf=Dean Wolf" data-toequalpairslc="TTSVars.nicknames"></textarea>
                   </div>
                 </div>
-                <label class="label">Auto use command e.g jonathan_Bun=bun</label>
+                <label class="label">Auto use voice command e.g jonathan_Bun=bun</label>
                 <div class="field">
                   <div class="control">
-                    <textarea class="textarea form-save Xform-filter-spaces-to-commas" id="autocommands" rows="5" placeholder="username=voice command, e.g. tiki_riot=tr" data-toequalpairslc="TTSVars.usercommands"></textarea>
+                    <textarea class="textarea form-save Xform-filter-spaces-to-commas" id="autocommands" rows="5" placeholder="username=voice command, e.g. jon_bun=jb timmo=tm" data-toequalpairslc="TTSVars.usercommands"></textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="tab-pane">
+                <label class="label">Edge only stalling fix.  Max seconds before stopping a message, zero to disable which might cause stalling in Edge.</label>
+                <div class="field">
+                  <div class="control">
+                    <input class="input number-input-3 form-save" type="number" id="edgevoicetimeout" min="0" max="180" value="30" data-toint="TTSVars.edgeVoiceTimeout">
                   </div>
                 </div>
               </div>

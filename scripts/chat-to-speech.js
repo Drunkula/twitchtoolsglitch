@@ -253,22 +253,27 @@ try {   // scope starts ( in case I can demodularise this )
         console.log( y("********* ADDING EDGE no end event workaround ***********") );
 
         speech.addEventListener('beforespeak', (data) => {
+
+            if (TTSVars.edgeVoiceTimeout <= 0) {
+                return;
+            }
+
             let qid = data.detail.id;
-            //console.debug("SETTING TIMEOUT FOR ID", qid);
-                                            // NOTE: this WILL kill any paused speeches if you leave it
+                // NOTE: this WILL kill any paused speeches if you leave it
             let speech_end_TO_callback =  () => {    //function speech_timeout(queueid) {
-                console.error(`EEEEEEEE speech_end_timeout error EEEEEEE cancelling queueid: ${qid} with text "${data.detail.utterance.text}" voice: ${data.detail.utterance.voice.voiceURI}`);
+                console.error(`EEEEEEEE EDGE speech_end_timeout error EEEEEEE cancelling queueid: ${qid} with text "${data.detail.utterance.text}" voice: ${data.detail.utterance.voice.voiceURI}`);
                 console.debug("Detail", data.detail);
                 //console.debug("Speecher state: ",  TTSVars.speecher);
                 TTSVars.speecher.cancel_id(qid);    // might automatically deque
                 entry_deque( {target: {queueid: qid}} );// may be triggered by cancel_id triggering end
             }
 
-            let end_TO  = setTimeout(speech_end_TO_callback, SPEECH_END_TIMEOUT_MS);
+            let voiceEndTimeout = TTSVars.edgeVoiceTimeout * 1000;
+
+            let end_TO  = setTimeout(speech_end_TO_callback, edgeVoiceTimeout);
                 // start timeout also clears end
             let speech_start_TO_callback = () => {    //function speech_timeout(queueid) {
-                console.error(`XXXXXXXXXXX speech_start_timeout error XXXXXXXXXXXXX cancelling queueid: ${qid} with text "${data.detail.utterance.text}" voice: ${data.detail.utterance.voice.voiceURI}`);
-                //console.debug("Speecher state: ",  TTSVars.speecher);
+                console.error(`XXXXXXXXXXX EDGE speech_start_timeout error XXXXXXXXXXXXX cancelling queueid: ${qid} with text "${data.detail.utterance.text}" voice: ${data.detail.utterance.voice.voiceURI}`);
                 clearTimeout(end_TO);
                 TTSVars.speecher.cancel_id(qid);
                 entry_deque( {target: {queueid: qid}} );
@@ -345,7 +350,7 @@ try {   // scope starts ( in case I can demodularise this )
                     let voiceIndex = 1; // I START AT ONE
 
                     if (sayCommand === false) {
-                        if ( !TTSVars.chatReadAll || ('!' === message[0]) && TTSVars.chatReadOtherCommands !== true) {
+                        if ( !TTSVars.chatReadAll || ('!' === message[0] && TTSVars.chatReadOtherCommands !== true) ) {
                             return;
                         }
                             // create an all-chat say command

@@ -1,10 +1,22 @@
-//const MAGIC_CLASS_IGNORED_USERS = '';
-//const MAGIC_CLASS_JOIN = '';
-//const MAGIC_CLASS_ARRAY_LC = '.toarraylc';	// add to TTVars as an array of lower case
 "use strict";
-	// doesn't trigger an event
 	// Common events
 	// ADDS TT.add_event_listeners
+
+/*
+	NOTE:  Currently when events are added then the event that would cause them is artificially triggered
+	change and input are implemented.
+
+	Really I should specify in the parameters that I want the event triggered so
+	triggers: {change:true} or {autoChange: true}
+
+	The only thing I've hacked in so far is in the params doing noAutoChange:true
+
+	This was done to make the url automatically update on load so the events are being fired loads of times when
+	the page first loads.  I should call an update to the the url repopulate manually after adding events but this
+	wouldn't trigger things where the change on a field also causes it to be filtered.
+*/
+
+
 
 (function(ns) {	// SCOPE using jQuery methodology
 

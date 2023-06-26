@@ -172,11 +172,11 @@ TT.get_restore_params = function get_restore_params() {
 		return getU;
 	}
 		// local storage?
-	let lParams = TT.param_string_to_array( TT.localstore_load() )
+	let lsParams = TT.param_string_to_array( TT.localstore_load() )
 
-	if (Object.keys(lParams).length) {
+	if (Object.keys(lsParams).length) {
 		console.info('get_restore_params using ' + g('localStorage'));
-		return lParams;
+		return lsParams;
 	}
 
 	return false;
