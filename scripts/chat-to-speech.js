@@ -319,22 +319,34 @@ try {   // scope starts ( in case I can demodularise this )
         // I should of course include the channel, cclient is global
         // tmi code is re-adding event listeners on disconnects
         // MAIN Twitch listener
-
+// ***** PROBLEMS WITH REPEATS / SKIP - found out that there's a global value out there that gets written to - let's fix that
     function add_chat_to_speech_tmi_listener()
     {       // https://dev.twitch.tv/docs/irc/tags#globaluserstate-twitch-tags
-        let lastMsgId = null;   // after a reconnect TMI sometimes sents repeats
+        //let lastMsgId = null;   // after a reconnect TMI sometimes sents repeats
+        //let lastUserId = null;
+        //let lastMsgTime = null; // messages have tmi-sent-ts and a room id
+        // it also has client-nonce which I've never seen before
+        let lastNonce = null;
 
         TT.cclient.on('message', (channel, userstate, message, self) => {
+
+            console.log("userstate", userstate)
+
             if (self || TTSVars.chatEnabled === false) return;   // Don't listen to my own messages..
 
-            if (lastMsgId === userstate['id']) {  // had a case of double repeating messaging
-                return;
+            //if ( lastMsgId === userstate['id'] || ( userstate['tmi-sent-ts'] == lastMsgTime && userstate['user-id'] == lastUserId) ) {  // had a case of double repeating messaging
+            if ( lastNonce === userstate['client-nonce'] ) {
+                    console.log("REPEAT MESSAGE: userstate", userstate);
+                return false;
             }
-            lastMsgId = userstate['id'];    // unique to every message
+            lastNonce = userstate['client-nonce'];
+            //lastMsgId = userstate['id'];    // unique to every message so it should be enough but I get repeats
+            //lastUserId = userstate['user-id'];
+            //lastMsgTime = userstate['tmi-sent-ts'];
 
-            if (TTSVars.chatQueueLimit && speech.queue_length() >= TTSVars.chatQueueLimit) {
+            if ( TTSVars.chatQueueLimit && speech.queue_length() >= TTSVars.chatQueueLimit ) {
                 // emit(queuetoolong)
-                return;
+                return false;
             }
 
                 // are they permitted ?
@@ -349,28 +361,31 @@ try {   // scope starts ( in case I can demodularise this )
                     let sayCommand = is_say_command(message);  // returns !command / false
                     let sayCmdPack = {};
                     let commandSliceOffset = 0   // amount to strip from message
-                    let voiceIndex = 1; // I START AT ONE
+                    let voiceIndexDefault = 1; // I START AT ONE
+
+                        // if sayCommand is false create one if all chat is on
 
                     if (sayCommand === false) {
                         if ( !TTSVars.chatReadAll || ('!' === message[0] && TTSVars.chatReadOtherCommands !== true) ) {
                             return;
                         }
                             // create an all-chat say command
-                            // do they have a personalised user command?
+                            // if personalised user command use that
+                            // if random pick one
                         sayCommand = is_say_command("!" + TTSVars.usercommands[userstate['username']]);
 
-                        if (sayCommand) {
+                        if (sayCommand) {   // their auto assigned voice
                             sayCmdPack.params = TTSVars.sayCmds[sayCommand]
                         } else if (TTSVars.randomVoices) {
                             let vIdx = Math.floor(Math.random() * TTSVars.voices.length);
                             let voice = TTSVars.voices[vIdx]; console.log("RAND VOICE", voice.name);
                             sayCmdPack.params = { rate: 1.3, pitch: 1.0, voice }
-                        } else {
-                            sayCmdPack.params = get_voice_settings( voiceIndex );
+                        } else { // use voice 1
+                            sayCmdPack.params = get_voice_settings( voiceIndexDefault );
                         }
 
                         sayCommand = '!all-chat';
-                    } else {
+                    } else { // remove the voice command from the message
                         commandSliceOffset = sayCommand.length + 1;
                         message = message.slice(commandSliceOffset).trim();
                         sayCmdPack.params = TTSVars.sayCmds[sayCommand];
@@ -419,12 +434,11 @@ try {   // scope starts ( in case I can demodularise this )
 
 console.debug("COMMAND PACK", sayCmdPack);
 
-                        // nickname needs to be added here
-
                     let nid = speech.next_id();
                     TTSVars.speech_queue_list_add({user: userstate["display-name"], text: message, id: nid})
 
-                        // this actually writes to the global params
+                        // this actually writes to the global params WHICH MIGHT LEAD TO PROBLEMS
+                        // ************ THINK THIS WILL BE OUR PROBLEM **************
                     sayCmdPack.params.text = add_speech_before_after(message, userstate, channel);
                     speech.say(sayCmdPack.params);
 
@@ -435,7 +449,7 @@ console.debug("COMMAND PACK", sayCmdPack);
         });
     }
 
-        // adds tagged strings before and after the message
+        // adds tagged strings before and after the message and names to nicknames
 
     function add_speech_before_after(msg, state, channel) {
         if (TTSVars.chatSayBefore || TTSVars.chatSayAfter) {
