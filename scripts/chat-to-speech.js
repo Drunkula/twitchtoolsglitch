@@ -322,27 +322,36 @@ try {   // scope starts ( in case I can demodularise this )
 // ***** PROBLEMS WITH REPEATS / SKIP - found out that there's a global value out there that gets written to - let's fix that
     function add_chat_to_speech_tmi_listener()
     {       // https://dev.twitch.tv/docs/irc/tags#globaluserstate-twitch-tags
-        //let lastMsgId = null;   // after a reconnect TMI sometimes sents repeats
+        let lastMsgId = null;   // after a reconnect TMI sometimes sents repeats
         //let lastUserId = null;
-        //let lastMsgTime = null; // messages have tmi-sent-ts and a room id
+        let lastMsgTime = null; // messages have tmi-sent-ts and a room id
         // it also has client-nonce which I've never seen before
-        let lastNonce = null;
+        let lastNonce = null;   // NOT EVERY MESSAGE HAS A NONCE so can't use
+        let lastUser = null;
+        let lastUserId = null;
+        let lastMessage = null;
+
 
         TT.cclient.on('message', (channel, userstate, message, self) => {
 
-            console.log("userstate", userstate)
+            //console.log("userstate", userstate)
+            console.log(y("Received: ") + g(userstate["display-name"]), message);
 
             if (self || TTSVars.chatEnabled === false) return;   // Don't listen to my own messages..
 
-            //if ( lastMsgId === userstate['id'] || ( userstate['tmi-sent-ts'] == lastMsgTime && userstate['user-id'] == lastUserId) ) {  // had a case of double repeating messaging
-            if ( lastNonce === userstate['client-nonce'] ) {
-                    console.log("REPEAT MESSAGE: userstate", userstate);
+            if ( lastMsgId === userstate['id']) // || ( userstate['tmi-sent-ts'] == lastMsgTime && userstate['user-id'] == lastUserId) ) {  // had a case of double repeating messaging
+            //if ( lastNonce === userstate['client-nonce'] ) // not every message has one
+            {
+                console.error( r("REPEAT MESSAGE: userstate"), userstate, "lastNonce", lastNonce, "lastUserId", lastUserId, "lastUser", lastUser, 
+                    "last time", lastMsgTime, "lastMessage", lastMessage);
                 return false;
             }
             lastNonce = userstate['client-nonce'];
-            //lastMsgId = userstate['id'];    // unique to every message so it should be enough but I get repeats
-            //lastUserId = userstate['user-id'];
-            //lastMsgTime = userstate['tmi-sent-ts'];
+            lastMsgId = userstate['id'];    // unique to every message so it should be enough but I get repeats
+            lastUserId = userstate['user-id'];
+            lastUser = userstate['display-name'];
+            lastMsgTime = userstate['tmi-sent-ts'];
+            lastMessage = message;
 
             if ( TTSVars.chatQueueLimit && speech.queue_length() >= TTSVars.chatQueueLimit ) {
                 // emit(queuetoolong)
@@ -480,6 +489,9 @@ console.debug("COMMAND PACK", sayCmdPack);
         if (e.error === "not-allowed") {console.log("speech_error_callback", e);
             TTSVars.flashFunc();
         } else {
+            if (e.error === "interrupted") 
+                return; 
+
             console.error("SPEECH ERROR:", e);
         }
     }
