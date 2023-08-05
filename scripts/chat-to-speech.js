@@ -80,7 +80,7 @@ try {   // scope starts ( in case I can demodularise this )
     const ALL_CHAT_RANDOM_VOICE = true; // disable for server
 
     const TTSVars = TMIConfig.TTSVars;
-    const TTS_MOD_COOLDOWN = 5;
+    const TTS_MOD_COOLDOWN = 0; // THIS might have been causing problems in Flip's
     const TTS_TEST_TEXT = "Testing the voice one two three";
 
     const emote_filter = new Emoter()
@@ -96,6 +96,8 @@ try {   // scope starts ( in case I can demodularise this )
     const isEdgeChrome = window.navigator.userAgent.toLowerCase().includes('edg/');
     const isAndroid = window.navigator.userAgent.toLowerCase().includes('android');
     const isChrome = window.navigator.userAgent.toLowerCase().includes('chrome');
+
+    const speechQueueOldDiv = gid('speechqueueold');
 
     TTSVars.speecher = speech;
     add_speecher_global_utterance_events(speech);
@@ -200,7 +202,15 @@ try {   // scope starts ( in case I can demodularise this )
 
     function entry_deque(e) {
         try {
-            TTSVars.speech_queue_remove_entry(e.target.queueid);
+            //TTSVars.speech_queue_remove_entry(e.target.queueid);
+            TTSVars.speech_queue_entry_to_old_messages(e.target.queueid);
+
+                // remove older entries
+            while ( speechQueueOldDiv.childElementCount > TTSVars.speechQueueOldLimit ) {
+                speechQueueOldDiv.removeChild( speechQueueOldDiv.lastChild );
+            }
+            
+            
         } catch (error) {
             console.error(error)
             console.error(`Error removing speech queue row # ${e.target.queueid} on utterance end event`)
@@ -253,6 +263,7 @@ try {   // scope starts ( in case I can demodularise this )
 
     function add_edge_end_workaround () {
         console.log( y("********* ADDING EDGE no end event workaround ***********") );
+        let synthErrors = {};
 
         speech.addEventListener('beforespeak', (data) => {
 
@@ -270,9 +281,9 @@ try {   // scope starts ( in case I can demodularise this )
                 entry_deque( {target: {queueid: qid}} );// may be triggered by cancel_id triggering end
             }
 
-            let voiceEndTimeout = TTSVars.edgeVoiceTimeout * 1000;
+            let voiceEndTimeoutMilliSeconds = TTSVars.edgeVoiceTimeout * 1000;
 
-            let end_TO  = setTimeout(speech_end_TO_callback, voiceEndTimeout);
+            let end_TO  = setTimeout(speech_end_TO_callback, voiceEndTimeoutMilliSeconds);
                 // start timeout also clears end
             let speech_start_TO_callback = () => {    //function speech_timeout(queueid) {
                 console.error(`START ERROR EDGE speech_start_timeout error : cancelling queueid: ${qid} with text "${data.detail.utterance.text}" voice: ${data.detail.utterance.voice.voiceURI}`);
@@ -286,6 +297,16 @@ try {   // scope starts ( in case I can demodularise this )
                 // add start end end events to the utterance.
             data.detail.utterance.addEventListener( 'start', a => clearTimeout( start_TO ) );
             data.detail.utterance.addEventListener( 'end', a => clearTimeout( end_TO ) );
+                // clear both timeouts if there's an error
+            data.detail.utterance.addEventListener( 'error', e => { 
+                clearTimeout( start_TO ); 
+                clearTimeout( end_TO ); 
+                if (e.error === "synthesis-failed" && ! synthErrors[e.utterance.voice.name]) {
+                    console.log(r("SYNTHESIS FAILED FOR"), e.utterance.voice.name);
+                    synthErrors[e.utterance.voice.name] = true;
+                    log('<strong style="color: red">WARNING:</strong> Synthesis failed for voice ' + e.utterance.voice.name)
+                }
+            });
         });
     }
 
@@ -492,7 +513,7 @@ console.debug("COMMAND PACK", sayCmdPack);
             if (e.error === "interrupted") 
                 return; 
 
-            console.error("SPEECH ERROR:", e);
+            //console.error("SPEECH ERROR:", e);    // plenty of notifies elsewhere
         }
     }
 

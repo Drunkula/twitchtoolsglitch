@@ -693,6 +693,10 @@
         <p>speech queue</p>
         <div id="speechqueue"></div>
       </div>
+      <div class="box">
+        <p>old messages</p>
+        <div id="speechqueueold"></div>
+      </div>
       <div class="not-mobile-view mb-2" id="logbox">
         <div class="box">
           <button class="delete is-pulled-right" data-target="#logbox"></button>
@@ -883,6 +887,12 @@
                 <div class="field">
                   <div class="control">
                     <input class="input number-input-3 form-save" type="number" id="edgevoicetimeout" min="0" max="180" value="30" data-toint="TTSVars.edgeVoiceTimeout">
+                  </div>
+                </div>
+                <label class="label">Old message queue limit</label>
+                <div class="field">
+                  <div class="control">
+                    <input class="input number-input-4 form-save" type="number" id="oldmessagelimit" min="0" max="100" value="20" data-toint="TTSVars.speechQueueOldLimit">
                   </div>
                 </div>
               </div>

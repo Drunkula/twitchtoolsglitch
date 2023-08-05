@@ -5,7 +5,8 @@
 
 {	// SCOPE
 
-	const $speechQDiv = gid('speechqueue')
+	const $speechQDiv = gid('speechqueue');
+	const $speechQOldDiv = gid('speechqueueold');
 	const TTSVars = TMIConfig.TTSVars;
 
 	TTSVars.speech_queue_list_add = function speech_queue_add_entry( data ) {
@@ -60,6 +61,19 @@
  */
 		frag.appendChild(speechQRow);
 		$speechQDiv.appendChild(frag)
+	}
+
+		// transfers a message from the main queue to the old queue
+
+	TTSVars.speech_queue_entry_to_old_messages = function (id) {
+		id = gid('sq-' + id);
+
+		if (!id) {
+			return false;
+		}
+
+		//$speechQOldDiv.appendChild(id);
+		$speechQOldDiv.prepend(id);
 	}
 
 		// iteratively clear the html speech list
