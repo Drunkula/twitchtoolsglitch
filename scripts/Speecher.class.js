@@ -1,4 +1,6 @@
 /**
+ * ERRORS: Where could they be?  Utterance is stored globally and in the this.utterance
+ *
  * My Speech engine with bits learned from EasySpeech
  *
  * Basically setting up getVoices with a delay if onvoiceschanged isn't availabled
@@ -25,10 +27,10 @@
  * NOTE queueid is added to each utterance
  */
 "use strict"
-	// these are an attempt to fix the failed end events with Edge does it fix it?  No.
+	// these are an attempt to fix the failed end events with Edge does it fix it?  No.  So Maybe remove them
+	// they were there to avoid garbage disposal
 var TTS_GLOBAL_UTTERANCE;
 var TTS_GLOBAL_UTTERANCE_OLD
-var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 
 
 {	// scope
@@ -54,6 +56,7 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 
 		utterance = null; 		// new SpeechSynthesisUtterance();
 		oldUtterance = null;	// to stop the old utterance being garbage collected before end event
+
 		voices = [];
 		voiceDefault = null;
 
@@ -185,7 +188,7 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 			utteranceEvents.forEach( ev => {
 				if (evs[ev] && typeof evs[ev] === 'function') {
 					//this.#utterance_handlers[ev] = evs[ev];	// add an object with the handler type
-					console.log("PUSHING", ev);
+					console.log("Adding utterance event with on()", ev);
 					this.#utterance_handlers.push( [ev, evs[ev]] )	;// = evs[ev];
 				}
 			})
@@ -274,7 +277,7 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 				rate: {min: 0.1, max: 10.0, default: 1.0},
 				volume: {min: 0.0, max: 1.0, default: 1.0}
 			}
-
+				// sets params to default if they exceed the max and min.  maybe I should clamp instead
 			for (const key in maxMins) {
 				const test = maxMins[key];
 				filtered[key] = test.default;
@@ -299,6 +302,7 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 			// immediate ignores speaking and paused and throws it into the queue
 
 		#sayQueueProcess(immediate = false) {
+				// if it's already speaking return unless immediate is specified
 			if ( !immediate && (this.ss.speaking || this.#isPaused || this.#isSpeaking) ) {
 				//SPEECHER_log("Speaking, returning");
 				return;
@@ -331,6 +335,7 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 				this.utterance.queueid = id;
 					// emit that we're about to speak and check for a cancel
 				this.#cancelNextSpeak = false;
+					// the utterance may be modified by receivers of he beforespeak event
 				this.emit('beforespeak', { id });
 					// they can call this.cancel_next() to stop this utterance
 				if (this.#cancelNextSpeak) {
@@ -355,12 +360,12 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 				// is pack an utterance, object or string
 			if ( typeof pack === 'string' ) {
 				this.utterance = new SpeechSynthesisUtterance(pack);
-				SPEECHER_log("PACK IS STRING");
+				//SPEECHER_log("PACK IS STRING");
 			} else if (pack instanceof SpeechSynthesisUtterance) {
-				SPEECHER_log("PACK IS utterance");
+				//SPEECHER_log("PACK IS utterance");
 				this.utterance = pack;
 			} else if (hasProperty(pack, 'text')) {	// obj I'm guessing
-				SPEECHER_log("PACK IS object");	// NOTE here pack handlers are {event:function, event2:function} which I'm not too fussed on.
+				//SPEECHER_log("PACK IS object");	// NOTE here pack handlers are {event:function, event2:function} which I'm not too fussed on.
 				let u = new SpeechSynthesisUtterance(pack.text);	// might be the garbage collection issue
 
 				let p = this.#validate_params(pack);
@@ -371,6 +376,8 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 				this.utterance = u;
 			} else {
 				SPEECHER_log("ERROR: speech pack is unknown", pack);
+				this.utterance = new SpeechSynthesisUtterance("Error error error process utterance is where the bug is, tell Drunkula");
+				TTS_GLOBAL_UTTERANCE = new SpeechSynthesisUtterance("Error error global utterance is the problem, tell Drunkula");
 				return false;
 			}
 
@@ -379,11 +386,12 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 
 				// add our two default handlers
 			this.utterance.addEventListener('end', (e) => {
-				this.#isSpeaking = false;	console.log(m("UTTERANCE END EVENT") + ` for ${e.utterance.queueid} : ${e.utterance.text}`);
+				//console.log(m("UTTERANCE END EVENT") + ` for ${e.utterance.queueid} : ${e.utterance.text}`);
+				this.#isSpeaking = false;
 				this.#sayQueueProcess()
 			});
 			this.utterance.addEventListener('error', e => {
-				SPEECHER_log("UTTERANCE ERROR ", e);
+				//SPEECHER_log("UTTERANCE ERROR ", e);
 				this.#isSpeaking = false;
 				this.#sayQueueProcess();	// CRITICAL
 			});

@@ -73,6 +73,8 @@ TMIConfig.TTSVars = {       // more props added from forms
     voices: [],
     sayCmds: {},
     voiceHashToIndex: new Map(),
+
+    synthErrors: [],    // maps voices that have had synthesis errors
 }
 
 
@@ -80,8 +82,8 @@ try {   // scope starts ( in case I can demodularise this )
     const ALL_CHAT_RANDOM_VOICE = true; // disable for server
 
     const TTSVars = TMIConfig.TTSVars;
-    const TTS_MOD_COOLDOWN = 0; // THIS might have been causing problems in Flip's
-    const TTS_TEST_TEXT = "Testing the voice one two three";
+    const TTS_MOD_COOLDOWN = 0; // THIS might have been causing problems in Flip's as I had it set to 5 secs
+    const TTS_TEST_TEXT = "Whoffff you had for tea, love";
 
     const emote_filter = new Emoter()
     TT.emote_filter = emote_filter;
@@ -110,7 +112,7 @@ try {   // scope starts ( in case I can demodularise this )
     })
 
     let TTS_EVENTS = [
-        {selector: '#saycmds [id^="sc-"], #saycmds input[type="range"], #saycmds select', event: 'change', 
+        {selector: '#saycmds [id^="sc-"], #saycmds input[type="range"], #saycmds select', event: 'change',
             function: update_say_commands, params: {}},
 
             // want this it happen AFTER update_say_commands
@@ -198,19 +200,16 @@ try {   // scope starts ( in case I can demodularise this )
     });// on load ends
 
 
-        // pulls a value out of the display queue
+        // pulls a value out of the display queue called on error, end and Start and End timeouts
 
     function entry_deque(e) {
         try {
             //TTSVars.speech_queue_remove_entry(e.target.queueid);
             TTSVars.speech_queue_entry_to_old_messages(e.target.queueid);
-
                 // remove older entries
             while ( speechQueueOldDiv.childElementCount > TTSVars.speechQueueOldLimit ) {
                 speechQueueOldDiv.removeChild( speechQueueOldDiv.lastChild );
             }
-            
-            
         } catch (error) {
             console.error(error)
             console.error(`Error removing speech queue row # ${e.target.queueid} on utterance end event`)
@@ -237,8 +236,8 @@ try {   // scope starts ( in case I can demodularise this )
                 }
             }
 
-        speech.on({ end: (e) => { console.log("END EVENT FIRED FOR", e.utterance.queueid, e.utterance.text);} })
         speech.on({ start: (e) => { console.log("START EVENT FIRED FOR", e.utterance.queueid, e.utterance.text);} })
+        speech.on({ end: (e) => { console.log("END EVENT FIRED FOR", e.utterance.queueid, e.utterance.text);} })
 
         speech.on({ error: speech_error_callback });
         speech.on({ error: entry_deque, end: entry_deque, pause: pause_it, resume: resume_it });
@@ -257,16 +256,14 @@ try {   // scope starts ( in case I can demodularise this )
          * Timeouts for each speech entry in case the end event fails to fire - only needed on Edge so far.
          * edge sometimes garbage collects the utterance which causes no end event
          * it's possible these might no longer be needed if the garbage collection issue is solved by oldUtterance in the speecher class
-         * 
+         *
          * MAYBE I should still add the start timeout, just not the end one
          */
 
     function add_edge_end_workaround () {
         console.log( y("********* ADDING EDGE no end event workaround ***********") );
-        let synthErrors = {};
 
         speech.addEventListener('beforespeak', (data) => {
-
             if (TTSVars.edgeVoiceTimeout <= 0) {
                 return;
             }
@@ -298,14 +295,9 @@ try {   // scope starts ( in case I can demodularise this )
             data.detail.utterance.addEventListener( 'start', a => clearTimeout( start_TO ) );
             data.detail.utterance.addEventListener( 'end', a => clearTimeout( end_TO ) );
                 // clear both timeouts if there's an error
-            data.detail.utterance.addEventListener( 'error', e => { 
-                clearTimeout( start_TO ); 
-                clearTimeout( end_TO ); 
-                if (e.error === "synthesis-failed" && ! synthErrors[e.utterance.voice.name]) {
-                    console.log(r("SYNTHESIS FAILED FOR"), e.utterance.voice.name);
-                    synthErrors[e.utterance.voice.name] = true;
-                    log('<strong style="color: red">WARNING:</strong> Synthesis failed for voice ' + e.utterance.voice.name)
-                }
+            data.detail.utterance.addEventListener( 'error', e => {
+                clearTimeout( start_TO );
+                clearTimeout( end_TO );
             });
         });
     }
@@ -347,7 +339,7 @@ try {   // scope starts ( in case I can demodularise this )
         //let lastUserId = null;
         let lastMsgTime = null; // messages have tmi-sent-ts and a room id
         // it also has client-nonce which I've never seen before
-        let lastNonce = null;   // NOT EVERY MESSAGE HAS A NONCE so can't use
+        //let lastNonce = null;   // NOT EVERY MESSAGE HAS A NONCE so can't use
         let lastUser = null;
         let lastUserId = null;
         let lastMessage = null;
@@ -356,18 +348,18 @@ try {   // scope starts ( in case I can demodularise this )
         TT.cclient.on('message', (channel, userstate, message, self) => {
 
             //console.log("userstate", userstate)
-            console.log(y("Received: ") + g(userstate["display-name"]), message);
+            console.debug(y("Received: ") + g(userstate["display-name"]), message);
 
             if (self || TTSVars.chatEnabled === false) return;   // Don't listen to my own messages..
 
             if ( lastMsgId === userstate['id']) // || ( userstate['tmi-sent-ts'] == lastMsgTime && userstate['user-id'] == lastUserId) ) {  // had a case of double repeating messaging
             //if ( lastNonce === userstate['client-nonce'] ) // not every message has one
             {
-                console.error( r("REPEAT MESSAGE: userstate"), userstate, "lastNonce", lastNonce, "lastUserId", lastUserId, "lastUser", lastUser, 
+                console.error( r("REPEAT MESSAGE: userstate"), userstate, "lastNonce", lastNonce, "lastUserId", lastUserId, "lastUser", lastUser,
                     "last time", lastMsgTime, "lastMessage", lastMessage);
                 return false;
             }
-            lastNonce = userstate['client-nonce'];
+            //lastNonce = userstate['client-nonce'];
             lastMsgId = userstate['id'];    // unique to every message so it should be enough but I get repeats
             lastUserId = userstate['user-id'];
             lastUser = userstate['display-name'];
@@ -387,66 +379,10 @@ try {   // scope starts ( in case I can demodularise this )
                 // Handle different message types..
             switch(userstate["message-type"]) {
                 case "action": case "chat": case "whisper":
-                        // filter out emotes
-                    let sayCommand = is_say_command(message);  // returns !command / false
-                    let sayCmdPack = {};
-                    let commandSliceOffset = 0   // amount to strip from message
-                    let voiceIndexDefault = 1; // I START AT ONE
-
-                        // if sayCommand is false create one if all chat is on
-
-                    if (sayCommand === false) {
-                        if ( !TTSVars.chatReadAll || ('!' === message[0] && TTSVars.chatReadOtherCommands !== true) ) {
-                            return;
-                        }
-                            // create an all-chat say command
-                            // if personalised user command use that
-                            // if random pick one
-                        sayCommand = is_say_command("!" + TTSVars.usercommands[userstate['username']]);
-
-                        if (sayCommand) {   // their auto assigned voice
-                            sayCmdPack.params = TTSVars.sayCmds[sayCommand]
-                        } else if (TTSVars.randomVoices) {
-                            let vIdx = Math.floor(Math.random() * TTSVars.voices.length);
-                            let voice = TTSVars.voices[vIdx]; console.log("RAND VOICE", voice.name);
-                            sayCmdPack.params = { rate: 1.3, pitch: 1.0, voice }
-                        } else { // use voice 1
-                            sayCmdPack.params = get_voice_settings( voiceIndexDefault );
-                        }
-
-                        sayCommand = '!all-chat';
-                    } else { // remove the voice command from the message
-                        commandSliceOffset = sayCommand.length + 1;
-                        message = message.slice(commandSliceOffset).trim();
-                        sayCmdPack.params = TTSVars.sayCmds[sayCommand];
-                    }
-
-                    sayCmdPack.command = sayCommand;
-
-                    if ( ! TTSVars.chatReadEmotes ) {
-                        message = emote_filter.filter(message, userstate);
-                    }
-                        // if we're here
-                    //message = message.slice(commandSliceOffset).trim();
-                    console.log(userstate['display-name'], "message length:", message.length);
-                    if (message.length === 0) { console.log("message zero returning");
-                        return;
-                    }
-                    if (message.length < 4) {
-                        console.log("Message to encode", encodeURIComponent(message));
-                        for (let i = 0; i < message.length; i++) {
-                            console.log(i, message.charCodeAt(i) );
-                            //console.log( message.code(i) );
-                        }
-                    }
-
-                    sayCmdPack.message = message;
-                        // if read all create a fake say command
-
                         // category out a single user by setting similar commands to a single value e.g. !allsaycommands
                     let cooldownParams = {
                         channel: 'ALL-CHANS',    // cooldowns are CHANNEL based - so set to a common value if you want to put globals on for all
-                        command: sayCommand ? sayCommand : '!all-chat',   // set to !userCategoryFake to category out only users
+                        command: '!ANY-SPEECH', //sayCommand ? sayCommand : '!all-chat',   // set to !userCategoryFake to category out only users
                         //category: "text-to-speech-"+ channel,   // example to category out channels individually
                         userstate,
                         globalCooldown: TTSVars.chatCooldownGlobal,
@@ -462,9 +398,68 @@ try {   // scope starts ( in case I can demodularise this )
                     }
                     cooldowns.cooldown_set(cooldownParams)
 
+                    let sayCommand = is_say_command(message);  // returns !command / false
+                    let sayCmdPack = {};
+                    let commandSliceOffset = 0   // amount to strip from message
+                    let voiceIndexDefault = 1; // I START AT ONE
+
+                    // if sayCommand is false create one if all chat is on
+
+                    if (sayCommand === false) {
+                        if ( !TTSVars.chatReadAll || ('!' === message[0] && TTSVars.chatReadOtherCommands !== true) ) {
+                            return;
+                        }
+
+                        // if read all create a fake say command
+                        sayCommand = '!all-chat';
+
+                        // if personalised user command use that
+                        // if random pick one
+
+                        let autoCommand = is_say_command("!" + TTSVars.usercommands[userstate['username']]);
+
+                        if (autoCommand) {   // their auto assigned voice
+                            sayCmdPack.params = TTSVars.sayCmds[autoCommand];
+                        } else if (TTSVars.randomVoices) {
+                            let vIdx = Math.floor(Math.random() * TTSVars.voices.length);
+                            let voice = TTSVars.voices[vIdx]; console.log("RAND VOICE", voice.name);
+                            sayCmdPack.params = { rate: 1.3, pitch: 1.0, voice }
+                        } else { // use voice 1
+                            sayCmdPack.params = get_voice_settings( voiceIndexDefault );
+                        }
+                    } else { // remove the voice command from the message
+                        commandSliceOffset = sayCommand.length + 1;
+                        message = message.slice(commandSliceOffset).trim();
+                        sayCmdPack.params = TTSVars.sayCmds[sayCommand];
+                    }
+
+                    sayCmdPack.command = sayCommand;
+
+                        // filter out emotes
+                    if ( ! TTSVars.chatReadEmotes ) {
+                        message = emote_filter.filter(message, userstate);
+                    }
+                        // if we're here
+                    //message = message.slice(commandSliceOffset).trim();
+                    console.log(userstate['display-name'], "message length:", message.length);
+                    if (message.length === 0) { console.log("message zero returning");
+                        return;
+                    }
+                        // What the hell is this?
+                    /*
+                    if (message.length < 4) {
+                        console.log("Message to encode", encodeURIComponent(message));
+                        for (let i = 0; i < message.length; i++) {
+                            console.log(i, message.charCodeAt(i) );
+                            //console.log( message.code(i) );
+                        }
+                    }//*/
+
+                    sayCmdPack.message = message;
+
 console.debug("COMMAND PACK", sayCmdPack);
 
-                    let nid = speech.next_id();
+let nid = speech.next_id();
                     TTSVars.speech_queue_list_add({user: userstate["display-name"], text: message, id: nid})
 
                         // this actually writes to the global params WHICH MIGHT LEAD TO PROBLEMS
@@ -507,13 +502,35 @@ console.debug("COMMAND PACK", sayCmdPack);
         // if browser requires interaction before allowing speech then flash the screen
 
     function speech_error_callback(e) {
-        if (e.error === "not-allowed") {console.log("speech_error_callback", e);
-            TTSVars.flashFunc();
-        } else {
-            if (e.error === "interrupted") 
-                return; 
+        console.error("Utterance Error:", e);
 
-            //console.error("SPEECH ERROR:", e);    // plenty of notifies elsewhere
+        switch( e.error ) {
+            case "not-allowed" :
+                console.log("speech_error_callback", e);
+                TTSVars.flashFunc("CLICK<br>THE<br>PAGE!");
+                break;
+
+            case "interrupted":
+                return;
+                break;
+                    // synth fails will flash the screen for the first X fails
+            case "synthesis-failed" :
+                let fails = TTSVars.synthErrors[e.utterance.voice.name] ? TTSVars.synthErrors[e.utterance.voice.name]: 0;
+
+                fails++;
+                TTSVars.synthErrors[e.utterance.voice.name] = fails;
+
+                document.title = `Synthesis Error #${fails} see log`;
+
+                if (fails > 3 ) {
+                    return; // has already been logged
+                }
+
+                console.log(r("SYNTHESIS FAILED FOR"), e.utterance.voice.name);
+                log('<strong style="color: red">WARNING:</strong> Synthesis failed for voice <strong>' + e.utterance.voice.name + '</strong>');
+
+                TTSVars.flashFunc(`Voice Error ${fails}<br>See Log`, "font-size: 10vw; line-height: 10vw;");
+                break;
         }
     }
 
@@ -531,7 +548,7 @@ console.debug("COMMAND PACK", sayCmdPack);
 
         return false;
     }
-
+        // takes "!command " from the start of a string
     function strip_command(str) {
         return str.slice( str.indexOf(' ') + 1);
     }
@@ -544,7 +561,6 @@ console.debug("COMMAND PACK", sayCmdPack);
 
     function create_speech_selects_options () {
         let voice_name_filter = (v => v.replace(/Microsoft\s*|Google\s*/, ''))
-
 
         let selects = qsa(".voice-select")
 
@@ -652,7 +668,20 @@ console.debug("COMMAND PACK", sayCmdPack);
 
         TTSVars.flashActive = false;
 
-        let flashFunc = () => {
+        let flashFunc = (text = "Click<br>the<br>page!", style = "") => {
+            let contents = document.createDocumentFragment()
+            let p = document.createElement("p");
+            p.innerHTML = text;
+
+            if (style) {
+                p.setAttribute("style", style);
+            }
+
+            contents.append(p);
+
+            //gid('flasher').replaceWith(contents);
+            gid('flasher').replaceChildren(contents);
+
             if (TTSVars.flashActive) return;
             start_flash();
         }
