@@ -459,7 +459,7 @@ try {   // scope starts ( in case I can demodularise this )
 
 console.debug("COMMAND PACK", sayCmdPack);
 
-let nid = speech.next_id();
+                    let nid = speech.next_id();
                     TTSVars.speech_queue_list_add({user: userstate["display-name"], text: message, id: nid})
 
                         // this actually writes to the global params WHICH MIGHT LEAD TO PROBLEMS
@@ -510,9 +510,6 @@ let nid = speech.next_id();
                 TTSVars.flashFunc("CLICK<br>THE<br>PAGE!");
                 break;
 
-            case "interrupted":
-                return;
-                break;
                     // synth fails will flash the screen for the first X fails
             case "synthesis-failed" :
                 let fails = TTSVars.synthErrors[e.utterance.voice.name] ? TTSVars.synthErrors[e.utterance.voice.name]: 0;
@@ -531,7 +528,11 @@ let nid = speech.next_id();
 
                 TTSVars.flashFunc(`Voice Error ${fails}<br>See Log`, "font-size: 10vw; line-height: 10vw;");
                 break;
-        }
+
+/*                 case "interrupted":
+                    return;
+                    break;
+ */            }
     }
 
         // Does the text match one of the defined !command text inputs
