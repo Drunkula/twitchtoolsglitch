@@ -330,8 +330,8 @@ var TTS_GLOBAL_UTTERANCE_OLD
 				}
 //console.log("THIS UTTERANCE", this.utterance);
 				//this.utterance.lang = this.utterance.voice?.lang ? this.utterance.voice.lang : 'en-GB';  // Android needs lang
-					// changed 10th Aug 23
-				this.utterance.voice.lang = this.utterance.voice?.lang ? this.utterance.voice.lang : 'en-GB';  // Android needs lang
+					// changed 10th Aug 23 Oh, can't do this as it's only a getter
+				// this.utterance.voice.lang = this.utterance.voice?.lang ? this.utterance.voice.lang : 'en-GB';  // Android needs lang
 
 //				SPEECHER_log("Queue ABOUT TO SAY:", this.utterance.text, this.utterance);
 //				SPEECHER_log("Speech Queue AFTER", this.speechQueueMap.size);
