@@ -1,6 +1,4 @@
 /**
- * ERRORS: Where could they be?  Utterance is stored globally and in the this.utterance
- *
  * My Speech engine with bits learned from EasySpeech
  *
  * Basically setting up getVoices with a delay if onvoiceschanged isn't availabled
@@ -25,14 +23,12 @@
  *	In the pack you can specify {immediate: true} which will cancel, possibly add { saynext: true }
  *
  * NOTE queueid is added to each utterance
- *
- * TMIConfig.TTSVars.speecher.speechQueueMap when debugging
  */
 "use strict"
-	// these are an attempt to fix the failed end events with Edge does it fix it?  No.  So Maybe remove them
-	// they were there to avoid garbage disposal
+	// these are an attempt to fix the failed end events with Edge does it fix it?  No.
 var TTS_GLOBAL_UTTERANCE;
 var TTS_GLOBAL_UTTERANCE_OLD
+var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 
 
 {	// scope
@@ -58,7 +54,6 @@ var TTS_GLOBAL_UTTERANCE_OLD
 
 		utterance = null; 		// new SpeechSynthesisUtterance();
 		oldUtterance = null;	// to stop the old utterance being garbage collected before end event
-
 		voices = [];
 		voiceDefault = null;
 
@@ -190,7 +185,7 @@ var TTS_GLOBAL_UTTERANCE_OLD
 			utteranceEvents.forEach( ev => {
 				if (evs[ev] && typeof evs[ev] === 'function') {
 					//this.#utterance_handlers[ev] = evs[ev];	// add an object with the handler type
-					console.log("Adding utterance event with on()", ev);
+					console.log("PUSHING", ev);
 					this.#utterance_handlers.push( [ev, evs[ev]] )	;// = evs[ev];
 				}
 			})
@@ -226,6 +221,40 @@ var TTS_GLOBAL_UTTERANCE_OLD
 		clear() {
 			this.speechQueueMap.clear();
 		}
+
+			// pack = {text, pitch, rate, voice, volume}, string or utterance
+			// Returns ID of speech queue entry
+
+		speak(pack)
+		{
+			this.stopNow = false;
+
+				// if it's immediate put an earlier ID into the queue
+			this.speechQueueID++;
+
+				// immediate puts to the front of the map
+
+			if (pack.immediate) {
+				this.ss.cancel();	// stop the current voice
+				pack.saynext = true;
+			}
+
+			if (pack.saynext) {
+				this.speechQueueMap = new Map( [ [this.speechQueueID, pack], ...this.speechQueueMap ] );
+
+			} else {
+				this.speechQueueMap.set(this.speechQueueID, pack);
+			}
+
+			SPEECHER_log("Speech Queue", this.speechQueueMap.size);
+			this.#sayQueueProcess(pack.immediate);
+
+			return this.speechQueueID;
+		}
+			// alias
+		say(pack) {
+			return this.speak(pack);
+		}
 			// test SpeechSynthesis voice (EasySpeech method)
 		#is_voice(v) {
 			return v && v.lang && v.name && v.voiceURI;
@@ -245,7 +274,7 @@ var TTS_GLOBAL_UTTERANCE_OLD
 				rate: {min: 0.1, max: 10.0, default: 1.0},
 				volume: {min: 0.0, max: 1.0, default: 1.0}
 			}
-				// sets params to default if they exceed the max and min.  maybe I should clamp instead
+
 			for (const key in maxMins) {
 				const test = maxMins[key];
 				filtered[key] = test.default;
@@ -267,44 +296,9 @@ var TTS_GLOBAL_UTTERANCE_OLD
 			return filtered;
 		}
 
-			// pack = {text, pitch, rate, voice, volume}, string or utterance
-			// Returns ID of speech queue entry
-
-		speak(pack)
-		{
-			this.stopNow = false;
-
-				// if it's immediate put an earlier ID into the queue
-			this.speechQueueID++;
-
-				// immediate puts to the front of the map
-
-			if (pack.immediate) {
-				this.ss.cancel();	// stop the current voice.  The voice will have already been dequeued
-				pack.saynext = true;
-			}
-
-			if (pack.saynext) {
-				this.speechQueueMap = new Map( [ [this.speechQueueID, pack], ...this.speechQueueMap ] );
-
-			} else {
-				this.speechQueueMap.set(this.speechQueueID, pack);
-			}
-
-			SPEECHER_log("Speech Queue", this.speechQueueMap.size);
-			this.#sayQueueProcess(pack.immediate);
-
-			return this.speechQueueID;
-		}
-			// alias
-		say(pack) {
-			return this.speak(pack);
-		}
-
 			// immediate ignores speaking and paused and throws it into the queue
 
 		#sayQueueProcess(immediate = false) {
-				// if it's already speaking return unless immediate is specified
 			if ( !immediate && (this.ss.speaking || this.#isPaused || this.#isSpeaking) ) {
 				//SPEECHER_log("Speaking, returning");
 				return;
@@ -319,19 +313,17 @@ var TTS_GLOBAL_UTTERANCE_OLD
 			this.#isSpeaking = false;
 				// I hate doing a while
 			for ( const [id, pack] of this.speechQueueMap.entries() ) {
-				this.speechQueueMap.delete(id); // have now put this FIRST Possible cause of BUG?
-
+				/* Removing this for now Oct 23.  Maybe it's the cause of the madness
 				if (!pack) {
 					continue;
-				}
-					// process SETS this.utterance
+				} */
+				this.speechQueueMap.delete(id); // moved above
+
 				if ( !this.#process_utterance(pack) ) {
 					continue;	// pack was bad
 				}
 //console.log("THIS UTTERANCE", this.utterance);
-				//this.utterance.lang = this.utterance.voice?.lang ? this.utterance.voice.lang : 'en-GB';  // Android needs lang
-					// changed 10th Aug 23 Oh, can't do this as it's only a getter
-				// this.utterance.voice.lang = this.utterance.voice?.lang ? this.utterance.voice.lang : 'en-GB';  // Android needs lang
+				this.utterance.lang = this.utterance.voice?.lang ? this.utterance.voice.lang : 'en-GB';  // Android needs lang
 
 //				SPEECHER_log("Queue ABOUT TO SAY:", this.utterance.text, this.utterance);
 //				SPEECHER_log("Speech Queue AFTER", this.speechQueueMap.size);
@@ -340,7 +332,6 @@ var TTS_GLOBAL_UTTERANCE_OLD
 				this.utterance.queueid = id;
 					// emit that we're about to speak and check for a cancel
 				this.#cancelNextSpeak = false;
-					// the utterance may be modified by receivers of he beforespeak event
 				this.emit('beforespeak', { id });
 					// they can call this.cancel_next() to stop this utterance
 				if (this.#cancelNextSpeak) {
@@ -360,17 +351,17 @@ var TTS_GLOBAL_UTTERANCE_OLD
 
 		#process_utterance(pack) {
 			this.oldUtterance = this.utterance;
-			// TEST TTS_GLOBAL_UTTERANCE_OLD = this.utterance;
+			TTS_GLOBAL_UTTERANCE_OLD = this.utterance;
 
 				// is pack an utterance, object or string
 			if ( typeof pack === 'string' ) {
 				this.utterance = new SpeechSynthesisUtterance(pack);
-				//SPEECHER_log("PACK IS STRING");
+				SPEECHER_log("PACK IS STRING");
 			} else if (pack instanceof SpeechSynthesisUtterance) {
-				//SPEECHER_log("PACK IS utterance");
+				SPEECHER_log("PACK IS utterance");
 				this.utterance = pack;
 			} else if (hasProperty(pack, 'text')) {	// obj I'm guessing
-				//SPEECHER_log("PACK IS object");	// NOTE here pack handlers are {event:function, event2:function} which I'm not too fussed on.
+				SPEECHER_log("PACK IS object");	// NOTE here pack handlers are {event:function, event2:function} which I'm not too fussed on.
 				let u = new SpeechSynthesisUtterance(pack.text);	// might be the garbage collection issue
 
 				let p = this.#validate_params(pack);
@@ -381,20 +372,19 @@ var TTS_GLOBAL_UTTERANCE_OLD
 				this.utterance = u;
 			} else {
 				SPEECHER_log("ERROR: speech pack is unknown", pack);
-				this.utterance = 		new SpeechSynthesisUtterance("Error error error process utterance is where the bug is, tell Drunkula");
-				TTS_GLOBAL_UTTERANCE =	new SpeechSynthesisUtterance("Error error global utterance is the problem, tell Drunkula");
 				return false;
 			}
 
 				// workaround for garbage collection?
-			// TEST TTS_GLOBAL_UTTERANCE = this.utterance;
+			TTS_GLOBAL_UTTERANCE = this.utterance;
 
 				// add our two default handlers
-			this.utterance.addEventListener('end', (e) => {				//console.log(m("UTTERANCE END EVENT") + ` for ${e.utterance.queueid} : ${e.utterance.text}`);
-				this.#isSpeaking = false;
+			this.utterance.addEventListener('end', (e) => {
+				this.#isSpeaking = false;	console.log(m("UTTERANCE END EVENT") + ` for ${e.utterance.queueid} : ${e.utterance.text}`);
 				this.#sayQueueProcess()
 			});
-			this.utterance.addEventListener('error', e => {				//SPEECHER_log("UTTERANCE ERROR ", e);
+			this.utterance.addEventListener('error', e => {
+				SPEECHER_log("UTTERANCE ERROR ", e);
 				this.#isSpeaking = false;
 				this.#sayQueueProcess();	// CRITICAL
 			});

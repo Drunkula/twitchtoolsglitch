@@ -18,7 +18,7 @@
 
 		let frag = document.createDocumentFragment();
 
-		let speechQRow = dce('nav');	// document create element
+		let speechQRow = dce('nav');
 		speechQRow.id = qID;
 		speechQRow.classList.add('speechQRow');
 
@@ -72,6 +72,7 @@
 			return false;
 		}
 
+		//$speechQOldDiv.appendChild(id);
 		$speechQOldDiv.prepend(id);
 	}
 
