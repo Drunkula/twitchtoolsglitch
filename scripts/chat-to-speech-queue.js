@@ -1,5 +1,5 @@
 /*
-	Add list to the visual queue - all html, no speech logic
+	Add list to the VISUAL queue - all html, no speech logic
 */
 "use strict"
 

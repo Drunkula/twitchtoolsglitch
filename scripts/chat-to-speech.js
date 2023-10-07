@@ -110,7 +110,7 @@ try {   // scope starts ( in case I can demodularise this )
     })
 
     let TTS_EVENTS = [
-        {selector: '#saycmds [id^="sc-"], #saycmds input[type="range"], #saycmds select', event: 'change', 
+        {selector: '#saycmds [id^="sc-"], #saycmds input[type="range"], #saycmds select', event: 'change',
             function: update_say_commands, params: {}},
 
             // want this it happen AFTER update_say_commands
@@ -200,7 +200,7 @@ try {   // scope starts ( in case I can demodularise this )
 
         // pulls a value out of the display queue
 
-    function entry_deque(e) {
+    function display_queue_entry_deque(e) {
         try {
             //TTSVars.speech_queue_remove_entry(e.target.queueid);
             TTSVars.speech_queue_entry_to_old_messages(e.target.queueid);
@@ -209,8 +209,8 @@ try {   // scope starts ( in case I can demodularise this )
             while ( speechQueueOldDiv.childElementCount > TTSVars.speechQueueOldLimit ) {
                 speechQueueOldDiv.removeChild( speechQueueOldDiv.lastChild );
             }
-            
-            
+
+
         } catch (error) {
             console.error(error)
             console.error(`Error removing speech queue row # ${e.target.queueid} on utterance end event`)
@@ -241,9 +241,19 @@ try {   // scope starts ( in case I can demodularise this )
         speech.on({ start: (e) => { console.log("START EVENT FIRED FOR", e.utterance.queueid, e.utterance.text);} })
 
         speech.on({ error: speech_error_callback });
-        speech.on({ error: entry_deque, end: entry_deque, pause: pause_it, resume: resume_it });
+        speech.on({ error: display_queue_entry_deque, end: display_queue_entry_deque, pause: pause_it, resume: resume_it });
 
-        speech.addEventListener('beforespeak', () => speech.utterance.volume = TTSVars.volumemaster)
+            // show current spoken message
+        speech.on({
+            start: e => { gid("speechqueuesaying").innerHTML = '<span class="speechQUser">Saying: </span>' +
+            (e.target.queueid ? `[${e.target.queueid}] ` : "[n/a] ") + e.target.text; },
+            end: e => { gid("speechqueuesaying").innerHTML = ""; },
+            error: e => { console.log(e); gid("speechqueuesaying").innerHTML = '<span class="tag is-danger">Error:</span> : ' + e.error; }
+        });
+
+
+        speech.addEventListener('beforespeak', () => speech.utterance.volume = TTSVars.volumemaster);
+        speech.addEventListener('cancelled', data => { TTSVars.speech_queue_remove_entry(data.id, true); })
 
             // add timeouts for when things goes wrong
 
@@ -257,7 +267,9 @@ try {   // scope starts ( in case I can demodularise this )
          * Timeouts for each speech entry in case the end event fails to fire - only needed on Edge so far.
          * edge sometimes garbage collects the utterance which causes no end event
          * it's possible these might no longer be needed if the garbage collection issue is solved by oldUtterance in the speecher class
-         * 
+         *
+         * NOTE: Checked for every message if it is chrome so the time value can be changed dynamically.
+         *
          * MAYBE I should still add the start timeout, just not the end one
          */
 
@@ -273,34 +285,37 @@ try {   // scope starts ( in case I can demodularise this )
 
             let qid = data.detail.id;
                 // NOTE: this WILL kill any paused speeches if you leave it
-            let speech_end_TO_callback =  () => {    //function speech_timeout(queueid) {
-                console.error(`END ERROR EDGE speech_end_timeout error : cancelling queueid: ${qid} with text "${data.detail.utterance.text}" voice: ${data.detail.utterance.voice.voiceURI}`);
-                console.debug("Detail", data.detail);
-                //console.debug("Speecher state: ",  TTSVars.speecher);
-                TTSVars.speecher.cancel_id(qid);    // might automatically deque
-                entry_deque( {target: {queueid: qid}} );// may be triggered by cancel_id triggering end
-            }
 
             let voiceEndTimeoutMilliSeconds = TTSVars.edgeVoiceTimeout * 1000;
 
-            let end_TO  = setTimeout(speech_end_TO_callback, voiceEndTimeoutMilliSeconds);
-                // start timeout also clears end
-            let speech_start_TO_callback = () => {    //function speech_timeout(queueid) {
-                console.error(`START ERROR EDGE speech_start_timeout error : cancelling queueid: ${qid} with text "${data.detail.utterance.text}" voice: ${data.detail.utterance.voice.voiceURI}`);
-                clearTimeout(end_TO);
-                TTSVars.speecher.cancel_id(qid);
-                entry_deque( {target: {queueid: qid}} );
+            let speech_end_timeout_callback =  () => {    //function speech_timeout(queueid) {
+                console.error(`END ERROR EDGE speech_end_timeout error : cancelling queueid: ${qid} after ${voiceEndTimeoutMilliSeconds}ms with text "${data.detail.utterance.text}" voice: ${data.detail.utterance.voice.voiceURI}`);
+                console.debug("Detail", data.detail);
+                //console.debug("Speecher state: ",  TTSVars.speecher);
+                TTSVars.speecher.cancel_id(qid);    // might automatically deque
+                display_queue_entry_deque( {target: {queueid: qid}} );// may be triggered by cancel_id triggering end
             }
 
-            let start_TO = setTimeout(speech_start_TO_callback, SPEECH_START_TIMEOUT_MS);
+            let end_timeout  = setTimeout(speech_end_timeout_callback, voiceEndTimeoutMilliSeconds);
+
+                // start timeout also clears end
+
+            let speech_start_timeout_callback = () => {    //function speech_timeout(queueid) {
+                console.error(`START ERROR EDGE speech_start_timeout error : cancelling queueid: ${qid} after ${PEECH_START_TIMEOUT_MS}ms with text "${data.detail.utterance.text}" voice: ${data.detail.utterance.voice.voiceURI}`);
+                clearTimeout(end_timeout);
+                TTSVars.speecher.cancel_id(qid);
+                display_queue_entry_deque( {target: {queueid: qid}} );
+            }
+
+            let start_timeout = setTimeout(speech_start_timeout_callback, SPEECH_START_TIMEOUT_MS);
 
                 // add start end end events to the utterance.
-            data.detail.utterance.addEventListener( 'start', a => clearTimeout( start_TO ) );
-            data.detail.utterance.addEventListener( 'end', a => clearTimeout( end_TO ) );
+            data.detail.utterance.addEventListener( 'start', a => clearTimeout( start_timeout ) );
+            data.detail.utterance.addEventListener( 'end', a => clearTimeout( end_timeout ) );
                 // clear both timeouts if there's an error
-            data.detail.utterance.addEventListener( 'error', e => { 
-                clearTimeout( start_TO ); 
-                clearTimeout( end_TO ); 
+            data.detail.utterance.addEventListener( 'error', e => {
+                clearTimeout( start_timeout );
+                clearTimeout( end_timeout );
                 if (e.error === "synthesis-failed" && ! synthErrors[e.utterance.voice.name]) {
                     console.log(r("SYNTHESIS FAILED FOR"), e.utterance.voice.name);
                     synthErrors[e.utterance.voice.name] = true;
@@ -363,7 +378,7 @@ try {   // scope starts ( in case I can demodularise this )
             if ( lastMsgId === userstate['id']) // || ( userstate['tmi-sent-ts'] == lastMsgTime && userstate['user-id'] == lastUserId) ) {  // had a case of double repeating messaging
             //if ( lastNonce === userstate['client-nonce'] ) // not every message has one
             {
-                console.error( r("REPEAT MESSAGE: userstate"), userstate, "lastNonce", lastNonce, "lastUserId", lastUserId, "lastUser", lastUser, 
+                console.error( r("REPEAT MESSAGE: userstate"), userstate, "lastNonce", lastNonce, "lastUserId", lastUserId, "lastUser", lastUser,
                     "last time", lastMsgTime, "lastMessage", lastMessage);
                 return false;
             }
@@ -429,16 +444,20 @@ try {   // scope starts ( in case I can demodularise this )
                         // if we're here
                     //message = message.slice(commandSliceOffset).trim();
                     console.log(userstate['display-name'], "message length:", message.length);
+
                     if (message.length === 0) { console.log("message zero returning");
                         return;
                     }
+                        // WHY am I doing this ?
+                        /*
                     if (message.length < 4) {
                         console.log("Message to encode", encodeURIComponent(message));
                         for (let i = 0; i < message.length; i++) {
                             console.log(i, message.charCodeAt(i) );
                             //console.log( message.code(i) );
                         }
-                    }
+                    } */
+                    // I've noticed blank messages which must contain unprintable characters
 
                     sayCmdPack.message = message;
                         // if read all create a fake say command
@@ -510,8 +529,8 @@ console.debug("COMMAND PACK", sayCmdPack);
         if (e.error === "not-allowed") {console.log("speech_error_callback", e);
             TTSVars.flashFunc();
         } else {
-            if (e.error === "interrupted") 
-                return; 
+            if (e.error === "interrupted")
+                return;
 
             //console.error("SPEECH ERROR:", e);    // plenty of notifies elsewhere
         }

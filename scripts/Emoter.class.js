@@ -285,10 +285,10 @@ class Emoter {
 			console.log(`twitch filtered:`, message);
 		}
 //*
-	if ( filters.includes('plain') ) {
-		message = message.replace( this.UNICODE_EMOTE_REGEX, '' );
-//			console.log("Regex filtered:", message);
-	}//*/
+		if ( filters.includes('plain') ) {
+			message = message.replace( this.UNICODE_EMOTE_REGEX, '' );
+	//			console.log("Regex filtered:", message);
+		}//*/
 
 		if ( filters.includes("bttv") ) {
 			message = this.filter_emotes_generic( message, chanId, this.channelsBTTV, this.globalsBTTV );

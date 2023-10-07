@@ -690,6 +690,7 @@
       </div>
       <div class="box">
         <div id="mainoutput"></div>
+        <div id="speechqueuesaying"></div>
         <p>speech queue</p>
         <div id="speechqueue"></div>
       </div>
@@ -869,7 +870,7 @@
                 </div>
               </div>
               <div class="tab-pane">
-                <label class="label">Nicknames.  Use user=nickname e.g. jonathan_bun=Jonny Cakes </label>
+                <label class="label">Nicknames.  Use user=nickname e.g. jonathan_bun=Jonny Cakes</label>
                 <div class="field">
                   <div class="control">
                     <textarea class="textarea form-save Xform-filter-spaces-to-commas" id="nicknames" rows="9" placeholder="e.g. jo_king=Crazy Jo d_wolf=Dean Wolf" data-toequalpairslc="TTSVars.nicknames"></textarea>
@@ -883,7 +884,7 @@
                 </div>
               </div>
               <div class="tab-pane">
-                <label class="label">Edge only stalling fix.  Max seconds before stopping a message, zero to disable which might cause stalling in Edge.</label>
+                <label class="label">Edge stalling fix.  Max message seconds, zero disables which might cause Edge to stall.</label>
                 <div class="field">
                   <div class="control">
                     <input class="input number-input-3 form-save" type="number" id="edgevoicetimeout" min="0" max="180" value="30" data-toint="TTSVars.edgeVoiceTimeout">

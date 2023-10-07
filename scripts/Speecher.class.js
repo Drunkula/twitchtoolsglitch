@@ -185,7 +185,7 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 			utteranceEvents.forEach( ev => {
 				if (evs[ev] && typeof evs[ev] === 'function') {
 					//this.#utterance_handlers[ev] = evs[ev];	// add an object with the handler type
-					console.log("PUSHING", ev);
+					console.log("ADDING EVENT: ", ev);
 					this.#utterance_handlers.push( [ev, evs[ev]] )	;// = evs[ev];
 				}
 			})
@@ -312,29 +312,32 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 
 			this.#isSpeaking = false;
 				// I hate doing a while
+				// is deleting from the Map while iterating through it a bad idea?  No.  The iterator uses Next()
+
 			for ( const [id, pack] of this.speechQueueMap.entries() ) {
-				/* Removing this for now Oct 23.  Maybe it's the cause of the madness
-				if (!pack) {
+				this.speechQueueMap.delete(id); // needs to happen immediately
+				/* Removing this for now Oct 23 and always deleting.  Maybe it's the cause of the madness
+				if (!pack) { // what exactly is this test ?
 					continue;
 				} */
-				this.speechQueueMap.delete(id); // moved above
 
+// SHOULD I EMIT A "BAD ENTRY" so that any visually queued entries can be deleted.  I think so
 				if ( !this.#process_utterance(pack) ) {
+					this.emit("cancelled", id);
 					continue;	// pack was bad
 				}
-//console.log("THIS UTTERANCE", this.utterance);
-				this.utterance.lang = this.utterance.voice?.lang ? this.utterance.voice.lang : 'en-GB';  // Android needs lang
 
-//				SPEECHER_log("Queue ABOUT TO SAY:", this.utterance.text, this.utterance);
-//				SPEECHER_log("Speech Queue AFTER", this.speechQueueMap.size);
+				this.utterance.lang = this.utterance.voice?.lang ? this.utterance.voice.lang : 'en-GB';  // Android needs lang
 
 				this.currentSpeakingID = id;
 				this.utterance.queueid = id;
+
 					// emit that we're about to speak and check for a cancel
+					// listeners can call this.cancel_next() to stop this utterance
 				this.#cancelNextSpeak = false;
 				this.emit('beforespeak', { id });
-					// they can call this.cancel_next() to stop this utterance
 				if (this.#cancelNextSpeak) {
+					this.emit("cancelled", id);
 					continue;
 				}
 
