@@ -65,15 +65,22 @@
 
 		// transfers a message from the main queue to the old queue
 
-	TTSVars.speech_queue_entry_to_old_messages = function (id) {
-		id = gid('sq-' + id);
+	TTSVars.speech_queue_entry_to_old_messages = function (id, include_id) {
+		let nid = gid('sq-' + id);
 
-		if (!id) {
+		if (!nid) {
 			return false;
+		}
+			// insert a div
+		if (include_id) {
+			let idDiv = document.createElement("span");
+			idDiv.innerText = `${id}`;
+			idDiv.className = "tag is-info mr-1";
+			nid.prepend(idDiv);
 		}
 
 		//$speechQOldDiv.appendChild(id);
-		$speechQOldDiv.prepend(id);
+		$speechQOldDiv.prepend(nid);
 	}
 
 		// iteratively clear the html speech list

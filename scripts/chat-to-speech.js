@@ -203,7 +203,7 @@ try {   // scope starts ( in case I can demodularise this )
     function display_queue_entry_deque(e) {
         try {
             //TTSVars.speech_queue_remove_entry(e.target.queueid);
-            TTSVars.speech_queue_entry_to_old_messages(e.target.queueid);
+            TTSVars.speech_queue_entry_to_old_messages(e.target.queueid, true);
 
                 // remove older entries
             while ( speechQueueOldDiv.childElementCount > TTSVars.speechQueueOldLimit ) {
@@ -243,11 +243,11 @@ try {   // scope starts ( in case I can demodularise this )
         speech.on({ error: speech_error_callback });
         speech.on({ error: display_queue_entry_deque, end: display_queue_entry_deque, pause: pause_it, resume: resume_it });
 
-            // show current spoken message
+            // INTERFACE : show current spoken message
         speech.on({
-            start: e => { gid("speechqueuesaying").innerHTML = '<span class="speechQUser">Saying: </span>' +
-            (e.target.queueid ? `[${e.target.queueid}] ` : "[n/a] ") + e.target.text; },
-            end: e => { gid("speechqueuesaying").innerHTML = ""; },
+            start: e => { gid("speechqueuesaying").innerHTML = '<span class="tag is-info">Saying: </span> : ' +
+            (e.target.queueid ? `<span class="tag is-primary">${e.target.queueid}</span> ` : "[n/a] ") + e.target.text; },
+            end: e => { gid("speechqueuesaying").innerHTML = "Idle..."; },
             error: e => { console.log(e); gid("speechqueuesaying").innerHTML = '<span class="tag is-danger">Error:</span> : ' + e.error; }
         });
 
