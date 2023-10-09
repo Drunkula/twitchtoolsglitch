@@ -64,15 +64,17 @@
 	}
 
 		// transfers a message from the main queue to the old queue
+		// include_id inserts a tag with the message id before the message
 
-	TTSVars.speech_queue_entry_to_old_messages = function (id, include_id) {
+	TTSVars.speech_queue_entry_to_old_messages = function (id, addIdTag) {
 		let nid = gid('sq-' + id);
 
 		if (!nid) {
+			console.log("********* ERRROR: Could not get entry with ID : "+id);
 			return false;
 		}
 			// insert a div
-		if (include_id) {
+		if (addIdTag) {
 			let idDiv = document.createElement("span");
 			idDiv.innerText = `${id}`;
 			idDiv.className = "tag is-info mr-1";
@@ -99,6 +101,7 @@
 			return false;
 		}
 		id.remove();
+		return true;
 	}
 
 		// freeze row if ban hit - stops utterance end events clearing the row
@@ -148,9 +151,14 @@
 		// delete buttons remove rows no problem
 
 	function del_button_onclick(e) {
-		TTSVars.speecher.cancel_id(e.target.dataset.id);
-		// delete this?
-		gid('sq-' + e.target.dataset.id)?.remove();
+		let isSpeaking = TTSVars.speecher.cancel_id(e.target.dataset.id);
+			// delete this?  Yes, but if it's speaking then it stops it going into the history
+		if (isSpeaking) {
+			TTSVars.speech_queue_entry_to_old_messages(e.target.dataset.id);
+		}
+		else {
+			gid('sq-' + e.target.dataset.id)?.remove();
+		}
 	}
 		// document create element
 	function dce(i) {

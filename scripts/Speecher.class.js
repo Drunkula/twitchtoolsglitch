@@ -23,6 +23,15 @@
  *	In the pack you can specify {immediate: true} which will cancel, possibly add { saynext: true }
  *
  * NOTE queueid is added to each utterance
+ *
+ *
+ * EVENTS:
+ * 	ready
+ * 	beforespeak - the utterance is ready to be fired.  Watchers can modify it
+ * 	rejected - the speech pack was bad
+ *  cancelled -
+ * 	cancelledcurrent - the current talking voice has been cancelled
+ * 	voiceschanged - the number of found voices has been updated.  Edge causes this to happen too often
  */
 "use strict"
 	// these are an attempt to fix the failed end events with Edge does it fix it?  No.
@@ -176,7 +185,7 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 			this.#readyResolve(true);
 			this.#voicesPromiseResolve(this.voices);
 
-			this.emit('ready');
+			this.emit("ready");
 		}
 
 			// add event handlers globally takes object { event : fn , event2 : fn} so multiple calls for same event
@@ -323,7 +332,7 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 
 // SHOULD I EMIT A "BAD ENTRY" so that any visually queued entries can be deleted.  I think so
 				if ( !this.#process_utterance(pack) ) {
-					this.emit("cancelled", id);
+					this.emit("rejecting", { id, pack });
 					continue;	// pack was bad
 				}
 
@@ -427,15 +436,24 @@ var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 		}
 
 			// cancel by id if it's in the shifting id queue it doesn't matter
+			// returns TRUE if it was speaking the message
 
 		cancel_id(id) {
 			id = parseInt(id);
 			this.speechQueueMap.delete( id );
+
 			if ( this.currentSpeakingID === id ) {
 				this.ss.cancel();			// cancel calls end handler? it seems to
 				this.#isSpeaking = false;
 				//this._sayQueueProcess();	// don't know if I need this, does cancel fire the end event?
+				this.emit("cancelledcurrent", {"id" : id,
+					"utterance" : this.utterance
+				});
+
+				return true;
 			}
+
+			return false;
 		}
 
 		queue_length() {

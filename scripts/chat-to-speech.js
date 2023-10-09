@@ -203,7 +203,7 @@ try {   // scope starts ( in case I can demodularise this )
     function display_queue_entry_deque(e) {
         try {
             //TTSVars.speech_queue_remove_entry(e.target.queueid);
-            TTSVars.speech_queue_entry_to_old_messages(e.target.queueid, true);
+            TTSVars.speech_queue_entry_to_old_messages(e.target.queueid, true); // true includes the ID
 
                 // remove older entries
             while ( speechQueueOldDiv.childElementCount > TTSVars.speechQueueOldLimit ) {
@@ -247,13 +247,17 @@ try {   // scope starts ( in case I can demodularise this )
         speech.on({
             start: e => { gid("speechqueuesaying").innerHTML = '<span class="tag is-info">Saying: </span> : ' +
             (e.target.queueid ? `<span class="tag is-primary">${e.target.queueid}</span> ` : "[n/a] ") + e.target.text; },
+
             end: e => { gid("speechqueuesaying").innerHTML = "Idle..."; },
+
             error: e => { console.log(e); gid("speechqueuesaying").innerHTML = '<span class="tag is-danger">Error:</span> : ' + e.error; }
         });
 
 
         speech.addEventListener('beforespeak', () => speech.utterance.volume = TTSVars.volumemaster);
-        speech.addEventListener('cancelled', data => { TTSVars.speech_queue_remove_entry(data.id, true); })
+        speech.addEventListener('cancelled', data => { TTSVars.speech_queue_remove_entry(data.id, true); });
+            // log rejected packs
+        speech.addEventListener("rejected", e => { console.log("######## SPEECHER PACK REJECTED ############", e); document.title = "*** REJECTION CHECK LOG ***"});
 
             // add timeouts for when things goes wrong
 
@@ -509,8 +513,17 @@ console.debug("COMMAND PACK", sayCmdPack);
             if (TTSVars.nicknames[name]) {
                 name = TTSVars.nicknames[name];
             }
-            else if ( !TTSVars.chatReadNameDigits ) {
-                name = name.replace(/\d/g, ' ');
+            else {
+                if ( !TTSVars.chatReadNameDigits ) {
+                    name = name.replace(/\d/g, ' ');
+                }
+
+                    // camelCase names are more likely to be read correctly
+                name = state['display-name'];
+                // replace later caps into spaces
+                name = name.replaceAll("_", " ");
+                const reggie = /([a-z]+)([A-Z])/g;
+                name = name.replace(reggie, "$1 $2");
             }
 
             channel = channel.slice(1); // get rid of #
