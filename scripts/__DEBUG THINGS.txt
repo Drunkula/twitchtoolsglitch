@@ -1,0 +1,41 @@
+
+
+This was a command pack:
+
+it said the message was:
+"Oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+
+But in the params
+
+text: tiki tiki tiki says I’ve got Asda egg fried rice & chicken balls in the fridge lol
+
+Actually loads of the command packs are borked
+
+
+I found two entries DIFFERENT in the queue but both said the same 356 line:
+
+355 THE CAT THE CAT
+356 thomascerveaux says I meant the cat, yeah
+
+
+PACKS COME IN WITH
+pitch, rate, text, voice
+
+
+FLOW on.message creates
+
+    sayCmdPack {
+        command: command reference e.g. "!tr" or "!all-chat",
+        message: the incoming message unaltered
+
+        params: {
+            rate:
+            pitch:
+            voice: Object,
+            text: run through add_speech_before_after(message, userstate, channel);
+        }
+    }
+
+    Then ONLY the params are passed to speech.say(...)
+
+    TTSVars.sayCmds is the source of the problem.  .text property gets added and WRITTEN BACK TO it

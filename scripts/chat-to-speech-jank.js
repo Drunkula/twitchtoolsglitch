@@ -306,7 +306,7 @@ try {   // scope starts ( in case I can demodularise this )
                 console.error(`START ERROR EDGE speech_start_timeout error : cancelling queueid: ${qid} after ${SPEECH_START_TIMEOUT_MS}ms with text "${data.detail.utterance.text}" voice: ${data.detail.utterance.voice.voiceURI}`);
                 clearTimeout(end_timeout);
                 TTSVars.speecher.cancel_id(qid);
-                display_queue_entry_deque( {target: {queueid: qid}} ); // you could call the function this calls directly
+                display_queue_entry_deque( {target: {queueid: qid}} );
             }
 
             let start_timeout = setTimeout(speech_start_timeout_callback, SPEECH_START_TIMEOUT_MS);
@@ -407,9 +407,9 @@ try {   // scope starts ( in case I can demodularise this )
                         let nameIsCmd = is_say_command("!" + TTSVars.usercommands[userstate['username']]);
 
                         if (nameIsCmd) {   // sayCmds are !cmd = {rate, pitch, voice}
-                            //sayCmdPack.params = TTSVars.sayCmds[nameIsCmd]; // THIS IS THE BUG THIS IS THE BUG .text get written to the global
+                            sayCmdPack.params = TTSVars.sayCmds[nameIsCmd]; // THIS IS THE BUG THIS IS THE BUG .text get written to the global
+                            //sayCmdPack.params = {...TTSVars.sayCmds[nameIsCmd]};    // FIXED
                             // check TMIConfig.TTSVars.sayCmds
-                            sayCmdPack.params = {...TTSVars.sayCmds[nameIsCmd]};    // FIXED
                         } else if (TTSVars.randomVoices) {
                             let vIdx = Math.floor(Math.random() * TTSVars.voices.length);
                             let voice = TTSVars.voices[vIdx]; console.log("RAND VOICE", voice.name);
@@ -423,8 +423,8 @@ try {   // scope starts ( in case I can demodularise this )
                         commandSliceOffset = sayCommand.length + 1;
                         message = message.slice(commandSliceOffset).trim();
                             // this might also cause griefs! BUG POSSIBLE
-                        //sayCmdPack.params = TTSVars.sayCmds[sayCommand];
-                        sayCmdPack.params = {...TTSVars.sayCmds[sayCommand]};   // FIXED
+                        sayCmdPack.params = TTSVars.sayCmds[sayCommand];
+                        //sayCmdPack.params = {...TTSVars.sayCmds[sayCommand]};   // FIXED
                     }
 
                     sayCmdPack.command = sayCommand;    // it's just a reference
