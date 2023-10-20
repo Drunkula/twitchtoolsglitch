@@ -39,3 +39,5 @@ FLOW on.message creates
     Then ONLY the params are passed to speech.say(...)
 
     TTSVars.sayCmds is the source of the problem.  .text property gets added and WRITTEN BACK TO it
+
+    TMIConfig.TTSVars.sayCmds check in browser

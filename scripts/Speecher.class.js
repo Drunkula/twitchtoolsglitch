@@ -51,9 +51,9 @@
 	const GETVOICES_MAX_TIMEOUT = 3000;
 	const GETVOICES_CHECK_PERIOD = 250;
 
-	const utteranceEvents = ['boundary', 'end', 'error', 'mark', 'pause', 'resume', 'start']
+	const utteranceEventTypes = ['boundary', 'end', 'error', 'mark', 'pause', 'resume', 'start']
 
-	const SPEECHER_LOGGING = true;
+	const SPEECHER_LOGGING = false;
 
 	const SPEECHER_log = SPEECHER_LOGGING ? console.debug : l => l;	// if you don't want logging
 
@@ -243,6 +243,8 @@
 				pack.saynext = true;
 			}
 				// saynext without immediate will not top the current voice
+				// WHEN IT WAS JANKY the packs were being passed by reference, now a next object is created
+				// that could be overcome with pack = {...pack} in this method but I want to keep a janky version
 			if (pack.saynext) {
 				this.speechQueueMap = new Map( [ [this.speechQueueID, pack], ...this.speechQueueMap ] );
 			} else {
@@ -265,11 +267,10 @@
 
 			// returns filtered voice, pitch, volume, rate and utterance handlers
 
-		#validate_params(pObj) {		//_validate_params({pitch, rate, volume, voice, ...handlers}) {
-			//let filtered = { handlers: {} };
+		#validate_params(params) {		//_validate_params({pitch, rate, volume, voice, ...handlers}) {
 			let filtered = { handlers: [] };
 
-			let v = pObj.voice;
+			let v = params.voice;
 			filtered.voice = this.#is_voice(v) ? v : this.voiceDefault;
 
 			const maxMins = {
@@ -281,8 +282,8 @@
 			for (const key in maxMins) {
 				const test = maxMins[key];
 				filtered[key] = test.default;
-				if (key in pObj) {
-					let p = parseFloat( pObj[key] );
+				if (key in params) {
+					let p = parseFloat( params[key] );
 				 	if (p >= test.min && p <= test.max) {
 						filtered[key] = p;
 					}
@@ -290,9 +291,9 @@
 			}
 				// makes sure handlers are functions
 				// NOTE: this presumes that the passed events are in {event : function, ev:fn...} form while elsewhere they're not
-			for (const uev of utteranceEvents) {
-				if (uev in pObj && typeof pObj[uev] === 'function') {
-					filtered.handlers[uev] = pObj[uev];
+			for (const uev of utteranceEventTypes) {
+				if (uev in params && typeof params[uev] === 'function') {
+					filtered.handlers[uev] = params[uev];
 				}
 			}
 
@@ -403,7 +404,7 @@
 			// validate is a function?	No, it's done before
 		#utterance_add_handlers(u, handlers) {
 			for (const [ev, fn] of handlers) {
-				if (utteranceEvents.includes(ev)) {					//u.addEventListener(ev, handlers[ev]);
+				if (utteranceEventTypes.includes(ev)) {					//u.addEventListener(ev, handlers[ev]);
 					u.addEventListener(ev, fn);
 				}
 			}
@@ -461,7 +462,7 @@
 			// added to every UTTERANCE, takes { event : fn , event2 : fn} so multiple calls for same even
 
 		utteranceOn(evs) {
-			utteranceEvents.forEach( ev => {
+			utteranceEventTypes.forEach( ev => {
 				if (evs[ev] && typeof evs[ev] === 'function') {
 					//this.#utterance_handlers[ev] = evs[ev];	// add an object with the handler type
 					console.log("ADDING EVENT: ", ev);

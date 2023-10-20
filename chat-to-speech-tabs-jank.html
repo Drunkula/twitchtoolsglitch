@@ -55,6 +55,7 @@
       <script src="/scripts/Speecher.class.js" defer></script>
       <script src="/scripts/Cooldowns.class.js" defer></script>
       <script src="/scripts/Emoter.class.js" defer></script>
+      <script src="/scripts/chat-to-speech.js" defer></script>
       <script src="/scripts/chat-to-speech-jank.js" defer></script>
       <script src="/scripts/chat-to-speech-queue.js" defer></script>
       <div id="flasher">
@@ -886,7 +887,7 @@
                 </div>
               </div>
               <div class="tab-pane">
-                <label class="label">Edge stalling fix.  Max message seconds, zero disables which might cause Edge to stall.</label>
+                <label class="label">Max message seconds, zero disables which might cause Edge to stall.</label>
                 <div class="field">
                   <div class="control">
                     <input class="input number-input-3 form-save" type="number" id="edgevoicetimeout" min="0" max="180" value="30" data-toint="TTSVars.edgeVoiceTimeout">
