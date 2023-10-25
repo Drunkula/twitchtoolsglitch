@@ -362,10 +362,7 @@ var TTSMain = TTSMain || {};
 // ***** PROBLEMS WITH REPEATS / SKIP - found out that there's a global value out there that gets written to - let's fix that
     function add_chat_to_speech_tmi_listener()
     {       // https://dev.twitch.tv/docs/irc/tags#globaluserstate-twitch-tags
-        console.log("************* CLEAN TTS LISTENER ************");
         //let lastMsgId = null;   // after a reconnect TMI sometimes sents repeats
-
-            // DEBUG idea.  Are userstate or message passed by reference?
 
         TT.cclient.on('message', (channel, userstate, message, self) => {
             //console.log("userstate", userstate)
@@ -396,9 +393,8 @@ var TTSMain = TTSMain || {};
             switch(userstate["message-type"]) {
                 case "action": case "chat": case "whisper":
                         // filter out emotes
-                    let sayCommand = is_say_command(message);  // returns !command / false
+                    let sayCommand = starts_with_say_command(message);  // returns !command / false
                     let voiceParams = {};
-                    //let sayCmdPack = {};
                     let commandSliceOffset = 0   // amount to strip from message
                     let voiceIndexDefault = 1; // I START AT ONE
 
@@ -408,10 +404,10 @@ var TTSMain = TTSMain || {};
                         if ( !TTSVars.chatReadAll || ('!' === message[0] && TTSVars.chatReadOtherCommands !== true) ) {
                             return;
                         }
-                            // if personalised user command use that
-                        let nameIsCmd = is_say_command("!" + TTSVars.usercommands[userstate['username']]);
-                            // is their name an alias to a voice?
-                        if (nameIsCmd) {   // sayCmds are !cmd = {rate, pitch, voice}
+                            // test for a personalised user command.  usercommands = {username: "alias", edtrots: "ed"}
+                        let nameIsCmd = starts_with_say_command("!" + TTSVars.usercommands[userstate['username']]);
+                            // !cmd or false returned
+                        if (nameIsCmd) {   // sayCmds are !cmd: {rate, pitch, voice}
                             //sayCmdPack.params = TTSVars.sayCmds[nameIsCmd]; check TMIConfig.TTSVars.sayCmds // THIS IS THE BUG THIS IS THE BUG .text get written to the global
                             //voiceParams = {...TTSVars.sayCmds[nameIsCmd]};    // FIXED
                             voiceParams = ns.get_voice_settings_by_name(nameIsCmd);
@@ -425,9 +421,9 @@ var TTSMain = TTSMain || {};
 
                         sayCommand = '!all-chat';
                     } else { // DEFAULT VOICE// remove the voice command from the message
+                        console.log("MESSAGE", message);
                         commandSliceOffset = sayCommand.length + 1;
                         message = message.slice(commandSliceOffset).trim();
-                            // THIS WAS BUG: sayCmdPack.params = TTSVars.sayCmds[sayCommand];
                         //voiceParams = {...TTSVars.sayCmds[sayCommand]};   // FIXED
                         voiceParams = ns.get_voice_settings_by_name(sayCommand);
                     }
@@ -437,6 +433,7 @@ var TTSMain = TTSMain || {};
                     if ( ! TTSVars.chatReadEmotes ) {
                         message = emote_filter.filter(message, userstate);
                     }
+
                         // any message left?
                     if (message.length === 0) { console.log("message zero returning");
                         return;
@@ -467,6 +464,9 @@ var TTSMain = TTSMain || {};
                         // visually add to the speech queue
                     TTSVars.speech_queue_list_add({user: userstate["display-name"], text: message, id: nid})
 
+                        // replace atted name underscores and camel casing e.g bigJohn_Jenkins = big John Jenkins
+                    message = atted_names_convert(message);
+
                         // this USED to write to the global sayCmds WHICH LEAD TO PROBLEMS
                     voiceParams.text = add_speech_before_after(message, userstate, channel);
                         // when it was bugged this used to sometimes get a global array entry
@@ -477,6 +477,28 @@ var TTSMain = TTSMain || {};
                     break;
             }
         });
+    }
+
+        // convert atted names and underscores so @some_nameIsCool -> some name Is Cool
+
+    function atted_names_convert(message) {
+        const atNameRegex = /@\w+/g;
+        const rMatches = message.match(atNameRegex);
+
+        if (rMatches !== null) {
+            for (let match of rMatches) {
+                let subName = match.replaceAll("_", " ");
+
+                const reggie = /([a-z]+)([A-Z])/g;  // spaces between theCamelCases
+                subName = subName.replace(reggie, "$1 $2");
+                if (match !== subName) {
+                    message = message.replace(match, subName);
+                    //console.log("CONVERTED @: ", match, subName);
+                }
+            }
+        }
+
+        return message;
     }
 
         // adds tagged strings before and after the message and names to nicknames
@@ -522,9 +544,8 @@ var TTSMain = TTSMain || {};
     }
 
         // Does the text match one of the defined !command text inputs
-        // returns obj {command: "!say", rest: "after command", params: [voices pitch/rate paramaters matching the !command]
-        // filter emotes BEFORE calling this
-    function is_say_command (str) {
+        // returns the command string, e.g. !ali or false
+    function starts_with_say_command (str) {
         if (str[0] === '!') {	// get the first word with ! lowercased
             let words = str.split(' ');//.filter(e => e);
                 // rest of first word to lower case

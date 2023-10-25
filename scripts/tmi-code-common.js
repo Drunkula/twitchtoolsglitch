@@ -100,7 +100,7 @@ cclient.on('connected', (addr, port) => {
 	console.debug('connected as:', cclient.getUsername())
 });
 
-cclient.on("connefting", (address, port) => {
+cclient.on("connecting", (address, port) => {
 	log(`Connecting to addr: ${address}:${port}`)
 });
 
