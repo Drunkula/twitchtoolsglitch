@@ -363,6 +363,8 @@ var TTSMain = TTSMain || {};
     function add_chat_to_speech_tmi_listener()
     {       // https://dev.twitch.tv/docs/irc/tags#globaluserstate-twitch-tags
         //let lastMsgId = null;   // after a reconnect TMI sometimes sents repeats
+        let lastUser = "";
+        let lastMsgTime = 0;
 
         TT.cclient.on('message', (channel, userstate, message, self) => {
             //console.log("userstate", userstate)
@@ -391,12 +393,13 @@ var TTSMain = TTSMain || {};
 
                 // Handle different message types..
             switch(userstate["message-type"]) {
-                case "action": case "chat": case "whisper":
+                case "action": case "chat": //case "whisper":
                         // filter out emotes
                     let sayCommand = starts_with_say_command(message);  // returns !command / false
                     let voiceParams = {};
                     let commandSliceOffset = 0   // amount to strip from message
                     let voiceIndexDefault = 1; // I START AT ONE
+                    const username = userstate["username"];
 
                         // if sayCommand is false create one if all chat is on
 
@@ -407,10 +410,10 @@ var TTSMain = TTSMain || {};
                             // test for a personalised user command.  usercommands = {username: "alias", edtrots: "ed"}
                         let nameIsCmd = starts_with_say_command("!" + TTSVars.usercommands[userstate['username']]);
                             // !cmd or false returned
-                        if (nameIsCmd) {   // sayCmds are !cmd: {rate, pitch, voice}
-                            //sayCmdPack.params = TTSVars.sayCmds[nameIsCmd]; check TMIConfig.TTSVars.sayCmds // THIS IS THE BUG THIS IS THE BUG .text get written to the global
+                        if (nameIsCmd) {   // sayCmds are !cmd: {rate, pitch, voice} // THIS IS THE BUG THIS IS THE BUG .text get written to the global later cos reference.
+                            //sayCmdPack.params = TTSVars.sayCmds[nameIsCmd]; check TMIConfig.TTSVars.sayCmds
                             //voiceParams = {...TTSVars.sayCmds[nameIsCmd]};    // FIXED
-                            voiceParams = ns.get_voice_settings_by_name(nameIsCmd);
+                            voiceParams = ns.get_voice_settings_by_name(nameIsCmd); // allows "patching" the jank version back
                         } else if (TTSVars.randomVoices) {
                             let vIdx = Math.floor(Math.random() * TTSVars.voices.length);
                             let voice = TTSVars.voices[vIdx]; // console.log("RAND VOICE", voice.name);
@@ -467,10 +470,21 @@ var TTSMain = TTSMain || {};
                         // replace atted name underscores and camel casing e.g bigJohn_Jenkins = big John Jenkins
                     message = atted_names_convert(message);
 
-                        // this USED to write to the global sayCmds WHICH LEAD TO PROBLEMS
-                    voiceParams.text = add_speech_before_after(message, userstate, channel);
+                        // I should check the channel AND the name
+                    console.log("time difference:", userstate["tmi-sent-ts"] - lastMsgTime);
+                    if (lastUser = username && TTSVars.chatNoNameRepeatSeconds &&
+                            userstate["tmi-sent-ts"] - lastMsgTime >= TTSVars.chatNoNameRepeatSeconds * 1000) {
+                       // this USED to write to the global sayCmds WHICH LEAD TO PROBLEMS
+                       voiceParams.text = add_speech_before_after(message, userstate, channel);
+                     } else {
+                        voiceParams.text = message;
+                     }
+
                         // when it was bugged this used to sometimes get a global array entry
                     speech.say(voiceParams);
+
+                    lastMsgTime = userstate["tmi-sent-ts"];
+                    lastUser = username;
 
                     break;
                 default: // pfff ?
@@ -483,14 +497,15 @@ var TTSMain = TTSMain || {};
 
     function atted_names_convert(message) {
         const atNameRegex = /@\w+/g;
+        const camelCaseRegex = /([a-z]+)([A-Z])/g;  // spaces between theCamelCases
+
         const rMatches = message.match(atNameRegex);
 
         if (rMatches !== null) {
             for (let match of rMatches) {
                 let subName = match.replaceAll("_", " ");
 
-                const reggie = /([a-z]+)([A-Z])/g;  // spaces between theCamelCases
-                subName = subName.replace(reggie, "$1 $2");
+                subName = subName.replace(camelCaseRegex, "$1 $2");
                 if (match !== subName) {
                     message = message.replace(match, subName);
                     //console.log("CONVERTED @: ", match, subName);
@@ -502,6 +517,7 @@ var TTSMain = TTSMain || {};
     }
 
         // adds tagged strings before and after the message and names to nicknames
+        // userstate has tmi-sent-ts unix milliseconds
 
     function add_speech_before_after(msg, state, channel) {
         if (TTSVars.chatSayBefore || TTSVars.chatSayAfter) {
