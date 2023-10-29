@@ -472,10 +472,11 @@ var TTSMain = TTSMain || {};
                     message = atted_names_convert(message);
 
                         // I should check the channel AND the name
-                    if (lastUser === username && lastChannel === channel && TTSVars.chatNoNameRepeatSeconds && userstate["tmi-sent-ts"] - lastMsgTime >= TTSVars.chatNoNameRepeatSeconds * 1000) {
-                        voiceParams.text = add_speech_before_after(message, userstate, channel);
-                    } else {
-                        voiceParams.text = message;
+                    if (lastUser === username && lastChannel === channel &&
+                        TTSVars.chatNoNameRepeatSeconds && userstate["tmi-sent-ts"] - lastMsgTime <= TTSVars.chatNoNameRepeatSeconds * 1000) {
+                            voiceParams.text = message;
+                        } else {
+                            voiceParams.text = add_speech_before_after(message, userstate, channel);
                     }
 
                         // when it was bugged this used to sometimes get a global array entry
