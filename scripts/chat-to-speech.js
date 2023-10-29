@@ -364,6 +364,7 @@ var TTSMain = TTSMain || {};
     {       // https://dev.twitch.tv/docs/irc/tags#globaluserstate-twitch-tags
         //let lastMsgId = null;   // after a reconnect TMI sometimes sents repeats
         let lastUser = "";
+        let lastChannel = "";
         let lastMsgTime = 0;
 
         TT.cclient.on('message', (channel, userstate, message, self) => {
@@ -471,20 +472,18 @@ var TTSMain = TTSMain || {};
                     message = atted_names_convert(message);
 
                         // I should check the channel AND the name
-                    console.log("time difference:", userstate["tmi-sent-ts"] - lastMsgTime);
-                    if (lastUser = username && TTSVars.chatNoNameRepeatSeconds &&
-                            userstate["tmi-sent-ts"] - lastMsgTime >= TTSVars.chatNoNameRepeatSeconds * 1000) {
-                       // this USED to write to the global sayCmds WHICH LEAD TO PROBLEMS
-                       voiceParams.text = add_speech_before_after(message, userstate, channel);
-                     } else {
+                    if (lastUser === username && lastChannel === channel && TTSVars.chatNoNameRepeatSeconds && userstate["tmi-sent-ts"] - lastMsgTime >= TTSVars.chatNoNameRepeatSeconds * 1000) {
+                        voiceParams.text = add_speech_before_after(message, userstate, channel);
+                    } else {
                         voiceParams.text = message;
-                     }
+                    }
 
                         // when it was bugged this used to sometimes get a global array entry
                     speech.say(voiceParams);
 
                     lastMsgTime = userstate["tmi-sent-ts"];
                     lastUser = username;
+                    lastChannel = channel;
 
                     break;
                 default: // pfff ?
