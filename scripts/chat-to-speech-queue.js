@@ -10,7 +10,7 @@
 	const TTSVars = TMIConfig.TTSVars;
 
 	TTSVars.speech_queue_list_add = function speech_queue_add_entry( data ) {
-		let { user, id, text } = data;
+		let { user, id, text, msgid } = data;
 
 			// create a text entry
 
@@ -20,6 +20,7 @@
 
 		let speechQRow = dce('nav');
 		speechQRow.id = qID;
+		speechQRow.dataset["msgid"] = msgid;	// the Twitch message id
 		speechQRow.classList.add('speechQRow');
 
 			// left = username (left, middle and right are flexbox items, order changed on media query)
@@ -103,7 +104,12 @@
 		id.remove();
 		return true;
 	}
-
+		// returns the id of a row by its twitch message id
+	TTSVars.speech_queue_msgid_to_id = function (msgid) {
+		let el = document.querySelector(`[data-msgid="${msgid}"]`);
+		if (el) return el["id"].split("-")[1];
+		return false;
+	}
 		// freeze row if ban hit - stops utterance end events clearing the row
 
 	function speech_queue_entry_freeze(id) {

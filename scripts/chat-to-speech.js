@@ -208,7 +208,7 @@ var TTSMain = TTSMain || {};
     function display_queue_entry_deque(e) {
         try {
             //TTSVars.speech_queue_remove_entry(e.target.queueid);
-            TTSVars.speech_queue_entry_to_old_messages(e.target.queueid, true); // true includes the ID
+            TTSVars.speech_queue_entry_to_old_messages(e.target.queueid, false); // true includes the ID
 
                 // remove older entries
             while ( speechQueueOldDiv.childElementCount > TTSVars.speechQueueOldLimit ) {
@@ -465,13 +465,16 @@ var TTSMain = TTSMain || {};
                     cooldowns.cooldown_set(cooldownParams)
 
                     let nid = speech.next_id();
+                    let msgid = userstate["id"];  // each message has one
                         // visually add to the speech queue
-                    TTSVars.speech_queue_list_add({user: userstate["display-name"], text: message, id: nid})
+                        // what if I change id to the userstate msg-id?
+                    TTSVars.speech_queue_list_add({user: userstate["display-name"], text: message, id: nid, msgid})
 
                         // replace atted name underscores and camel casing e.g bigJohn_Jenkins = big John Jenkins
                     message = atted_names_convert(message);
 
-                        // I should check the channel AND the name
+                        // add "user says" only if enough time has passed between same user messages
+                        // really I'd like to check the end of the last utterance and see if they were speaking next.
                     if (lastUser === username && lastChannel === channel &&
                         TTSVars.chatNoNameRepeatSeconds && userstate["tmi-sent-ts"] - lastMsgTime <= TTSVars.chatNoNameRepeatSeconds * 1000) {
                             voiceParams.text = message;
@@ -489,8 +492,28 @@ var TTSMain = TTSMain || {};
                     break;
                 default: // pfff ?
                     break;
-            }
-        });
+            } // switch (message-type)
+        });// TT.cclient.on(message)
+
+        TT.cclient.on('messagedeleted', message_moderation_handler);
+    } // add_chat_to_speech_tmi_listener
+
+    function message_moderation_handler(channel, username, deletedMessage, userstate) {
+        // userstate has login for2 name, room-id, target-msg-id, and time
+        if (!TTSVars.chatRemoveModerated) return;
+
+        let speecherId = TTSVars.speech_queue_msgid_to_id(userstate["target-msg-id"]);
+        //console.log("**** MESSAGE MODERATION", userstate, "to message id", speecherId);
+        if (speecherId) {
+            TTSVars.speecher.cancel_id(speecherId);
+            TTSVars.speech_queue_entry_to_old_messages(speecherId, false);
+
+            let nid = gid('sq-' + speecherId);
+            let idDiv = document.createElement("span");
+			idDiv.innerText = `moderated`;
+			idDiv.className = "tag is-danger mr-1";
+			nid.prepend(idDiv);
+        }
     }
 
         // convert atted names and underscores so @some_nameIsCool -> some name Is Cool
