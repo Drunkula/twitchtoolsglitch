@@ -252,8 +252,9 @@ var TTSMain = TTSMain || {};
 
             // INTERFACE : show current spoken message
         speech.utteranceOn({
-            start: e => { gid("speechqueuesaying").innerHTML = '<span class="tag is-info">Saying: </span> : ' +
-            (e.target.queueid ? `<span class="tag is-primary">${e.target.queueid}</span> ` : "[n/a] ") + e.target.text; },
+            start: e => { gid("speechqueuesaying").innerHTML = '<span class="tag is-info">Saying: </span> : '
+            //+ (e.target.queueid ? `<span class="tag is-primary">${e.target.queueid}</span> ` : "[n/a] ")
+            + e.target.text; },
 
             end: e => { gid("speechqueuesaying").innerText = "Idle..."; },
 
@@ -372,16 +373,7 @@ var TTSMain = TTSMain || {};
             //console.log(y("Received: ") + g(userstate["display-name"]), message);
 
             if (self || TTSVars.chatEnabled === false) return;   // Don't listen to my own messages..
-            /*
-            if ( lastMsgId === userstate['id']) // || ( userstate['tmi-sent-ts'] == lastMsgTime && userstate['user-id'] == lastUserId) ) {  // had a case of double repeating messaging
-            {
-                document.title = "REPEAT MESSAGE RECEIVED!";
-                console.error( r("REPEAT MESSAGE: userstate"), userstate, "lastNonce", lastNonce, "lastUserId", lastUserId, "lastUser", lastUser,
-                    "last time", lastMsgTime, "lastMessage", lastMessage);
-                return false;
-            }
-            lastMsgId = userstate['id'];    // unique to every message so it should be enough but I get repeats
-            */
+
             if ( TTSVars.chatQueueLimit && speech.queue_length() >= TTSVars.chatQueueLimit ) {
                 return false;
             }
@@ -467,7 +459,6 @@ var TTSMain = TTSMain || {};
                     let nid = speech.next_id();
                     let msgid = userstate["id"];  // each message has one
                         // visually add to the speech queue
-                        // what if I change id to the userstate msg-id?
                     TTSVars.speech_queue_list_add({user: userstate["display-name"], text: message, id: nid, msgid})
 
                         // replace atted name underscores and camel casing e.g bigJohn_Jenkins = big John Jenkins
@@ -496,10 +487,13 @@ var TTSMain = TTSMain || {};
         });// TT.cclient.on(message)
 
         TT.cclient.on('messagedeleted', message_moderation_handler);
+        TT.cclient.on('ban', message_ban_handler);
     } // add_chat_to_speech_tmi_listener
 
+        // moderated messages can be discarded
+
     function message_moderation_handler(channel, username, deletedMessage, userstate) {
-        // userstate has login for2 name, room-id, target-msg-id, and time
+        // userstate has login for name, room-id, target-msg-id, and time
         if (!TTSVars.chatRemoveModerated) return;
 
         let speecherId = TTSVars.speech_queue_msgid_to_id(userstate["target-msg-id"]);
@@ -507,14 +501,23 @@ var TTSMain = TTSMain || {};
         if (speecherId) {
             TTSVars.speecher.cancel_id(speecherId);
             TTSVars.speech_queue_entry_to_old_messages(speecherId, false);
-
-            let nid = gid('sq-' + speecherId);
-            let idDiv = document.createElement("span");
-			idDiv.innerText = `moderated`;
-			idDiv.className = "tag is-danger mr-1";
-			nid.prepend(idDiv);
+            TTSVars.speech_queue_add_tag(speecherId, "moderated", "danger");
         }
     }
+
+        // ban handler.
+
+    function message_ban_handler(channel, username, reason, userstate) {
+        let user = userstate["display-name"];   // username param is lower case
+        let entries = qsa(`[data-user="${user}"]`); // data in ban buttons are capitalised
+            // stop speech entries, transfer visible queue and add "banned"
+        entries.foreach(e => {
+            TTSVars.speecher.cancel_id(e.dataset.id);
+            TTSVars.speech_queue_entry_to_old_messages(e.dataset.id, false);
+            TTSVars.speech_queue_add_tag(e.dataset.id, "banned", "danger");
+        });
+    }
+
 
         // convert atted names and underscores so @some_nameIsCool -> some name Is Cool
 

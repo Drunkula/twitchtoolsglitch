@@ -56,10 +56,7 @@
 		buttons.appendChild(btnDel);
 			// username - text - buttons
 		speechQRow.append(username, speech, buttons);
-/* 		speechQRow.appendChild(username)
-		speechQRow.appendChild(speech)
-		speechQRow.appendChild(buttons)
- */
+
 		frag.appendChild(speechQRow);
 		$speechQDiv.appendChild(frag)
 	}
@@ -71,19 +68,30 @@
 		let nid = gid('sq-' + id);
 
 		if (!nid) {
-			console.log("********* ERRROR: Could not get entry with ID : "+id);
+			console.log("*** ERRROR: no speech queue entry with ID : "+id);
 			return false;
 		}
 			// insert a div
 		if (addIdTag) {
-			let idDiv = document.createElement("span");
-			idDiv.innerText = `${id}`;
-			idDiv.className = "tag is-info mr-1";
-			nid.prepend(idDiv);
+			speech_queue_add_tag(id, id, "info");
+		}
+			//$speechQOldDiv.appendChild(id);
+		$speechQOldDiv.prepend(nid);
+	}
+
+		// colour can be info black dark light white primary link info success warning danger
+		// "danger is-light" could also be used
+	TTSVars.speech_queue_add_tag = function(id, text, colour = "info") {
+		let nid = gid('sq-' + id);
+
+		if (!nid) {
+			return false;
 		}
 
-		//$speechQOldDiv.appendChild(id);
-		$speechQOldDiv.prepend(nid);
+		let idDiv = document.createElement("span");
+		idDiv.innerText = text;
+		idDiv.className = `tag is-${colour} mr-1`;
+		nid.prepend(idDiv);
 	}
 
 		// iteratively clear the html speech list
@@ -124,14 +132,14 @@
 
 	function ban_button_onclick(e) {
 		let user = e.target.dataset.user;
-		let sameUser = qsa(`[data-user="${user}"]`)
+		let sameUser = qsa(`[data-user="${user}"]`); // ban buttons have user and datad-id
 		let id = e.target.dataset.id;
 		let banned = e.target.dataset.banned
 
 			// already banned so unban
 		if (banned === "true") {console.log("UNBANNING", user);
 			TT.ignored_users_remove(user);
-				// unban removes all entries
+				// unban removes all queue entries as they've already been removed from the speecher queue
 			sameUser.forEach(e => {
 				TTSVars.speech_queue_remove_entry(e.dataset.id, true);
 			})
