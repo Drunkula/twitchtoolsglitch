@@ -46,9 +46,9 @@
 		btnDel.dataset.id = id;
 			// and a ban button
 		let btnBan = dce('button');
-		btnBan.textContent = 'ban';
+		btnBan.textContent = 'ignore';
 		btnBan.classList.add('button', 'is-danger', 'is-small');
-		btnBan.onclick = ban_button_onclick;
+		btnBan.onclick = ignore_button_onclick;
 		btnBan.dataset.id = id;
 		btnBan.dataset.user = user;
 
@@ -85,13 +85,13 @@
 		let nid = gid('sq-' + id);
 
 		if (!nid) {
-			return false;
+			return;
 		}
 
-		let idDiv = document.createElement("span");
-		idDiv.innerText = text;
-		idDiv.className = `tag is-${colour} mr-1`;
-		nid.prepend(idDiv);
+		let tagSpan = document.createElement("span");
+		tagSpan.innerText = text;
+		tagSpan.className = `tag is-${colour} mr-1`;
+		nid.prepend(tagSpan);
 	}
 
 		// iteratively clear the html speech list
@@ -130,34 +130,27 @@
 		// ban freezes the current entry allowing you do unban.
 		// on ban all the user's other entries are cleared and their name is added to ignored users.
 
-	function ban_button_onclick(e) {
+	function ignore_button_onclick(e) {
 		let user = e.target.dataset.user;
-		let sameUser = qsa(`[data-user="${user}"]`); // ban buttons have user and datad-id
-		let id = e.target.dataset.id;
+		let sqUpcomingEntries = qsa(`#speechqueue [data-user="${user}"]`); // ban buttons have user and datad-id
+		let sqAllEntries = qsa(`[data-user="${user}"]`);	// for changing allows
 		let banned = e.target.dataset.banned
 
-			// already banned so unban
+			// already ignored so allow and change button to allow on all
 		if (banned === "true") {console.log("UNBANNING", user);
 			TT.ignored_users_remove(user);
-				// unban removes all queue entries as they've already been removed from the speecher queue
-			sameUser.forEach(e => {
-				TTSVars.speech_queue_remove_entry(e.dataset.id, true);
-			})
-		}
-		else {	// not banned, so ban, stop all speech, add to bad users
-			console.log("BANNING", user);
-			TT.ignored_users_add(user);
-			speech_queue_entry_freeze(id);	// stop the entry from being removed by a speech end event
-				//
-			sameUser.forEach(e => {
-				TTSVars.speecher.cancel_id(e.dataset.id);
+			sqAllEntries.forEach(e => { e.dataset.banned = false; e.textContent="ignore";} );
 
-				if (e.dataset.id !== id ) {
-					TTSVars.speech_queue_remove_entry(e.dataset.id, true);
-				} else {
-					e.textContent = "unban";
-					e.dataset.banned = "true";
-				}
+		}
+		else {	// not ignored, so ban, stop all speech, add to bad users
+			console.log("************* IGNORING", user);
+			TT.ignored_users_add(user);
+			sqAllEntries.forEach(e => {e.dataset.banned = true; e.textContent = "allow"});
+				//speech_queue_entry_freeze(id);	// stop the entry from being removed by a speech end event
+			sqUpcomingEntries.forEach(e => {	// only add tags to messages in main queue
+				TTSVars.speecher.cancel_id(e.dataset.id);
+				TTSVars.speech_queue_entry_to_old_messages(e.dataset.id);
+				TTSVars.speech_queue_add_tag(e.dataset.id, "ignored", 'success');
 			})
 		}
 	}

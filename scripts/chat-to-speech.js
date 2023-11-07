@@ -486,13 +486,13 @@ var TTSMain = TTSMain || {};
             } // switch (message-type)
         });// TT.cclient.on(message)
 
-        TT.cclient.on('messagedeleted', message_moderation_handler);
-        TT.cclient.on('ban', message_ban_handler);
+        TT.cclient.on('messagedeleted', message_twitch_moderation_handler);
+        TT.cclient.on('ban', message_twitch_ban_handler);
     } // add_chat_to_speech_tmi_listener
 
         // moderated messages can be discarded
 
-    function message_moderation_handler(channel, username, deletedMessage, userstate) {
+    function message_twitch_moderation_handler(channel, username, deletedMessage, userstate) {
         // userstate has login for name, room-id, target-msg-id, and time
         if (!TTSVars.chatRemoveModerated) return;
 
@@ -505,13 +505,13 @@ var TTSMain = TTSMain || {};
         }
     }
 
-        // ban handler.
+        // ban handler.  Bans send username in lower case and in userstate
+        // room-id target-user-id tmi-sent-ts
 
-    function message_ban_handler(channel, username, reason, userstate) {
-        let user = userstate["display-name"];   // username param is lower case
-        let entries = qsa(`[data-user="${user}"]`); // data in ban buttons are capitalised
+    function message_twitch_ban_handler(channel, username, reason, userstate) {
+        let entries = qsa(`[data-user="${username}" i]`); // data in ban buttons are capitalised so use insensitive search
             // stop speech entries, transfer visible queue and add "banned"
-        entries.foreach(e => {
+        entries.forEach(e => {
             TTSVars.speecher.cancel_id(e.dataset.id);
             TTSVars.speech_queue_entry_to_old_messages(e.dataset.id, false);
             TTSVars.speech_queue_add_tag(e.dataset.id, "banned", "danger");
