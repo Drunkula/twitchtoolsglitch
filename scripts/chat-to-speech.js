@@ -369,6 +369,11 @@ var TTSMain = TTSMain || {};
         let lastMsgTime = 0;
 
         TT.cclient.on('message', (channel, userstate, message, self) => {
+                // same user and channel as last message
+            const username = userstate["username"];
+            const sameUser = username == lastUser;
+            const sameChannel = channel == lastChannel;
+
             //console.log("userstate", userstate)
             //console.log(y("Received: ") + g(userstate["display-name"]), message);
 
@@ -390,6 +395,7 @@ var TTSMain = TTSMain || {};
                         // filter out emotes
                     let sayCommand = starts_with_say_command(message);  // returns !command / false
                     let voiceParams = {};
+
                     let commandSliceOffset = 0   // amount to strip from message
                     let voiceIndexDefault = 1; // I START AT ONE
                     const username = userstate["username"];
@@ -466,19 +472,21 @@ var TTSMain = TTSMain || {};
 
                         // add "user says" only if enough time has passed between same user messages
                         // really I'd like to check the end of the last utterance and see if they were speaking next.
-                    if (lastUser === username && lastChannel === channel &&
+                    if (sameUser && sameChannel &&
                         TTSVars.chatNoNameRepeatSeconds && userstate["tmi-sent-ts"] - lastMsgTime <= TTSVars.chatNoNameRepeatSeconds * 1000) {
                             voiceParams.text = message;
                         } else {
                             voiceParams.text = add_speech_before_after(message, userstate, channel);
                     }
 
-                        // when it was bugged this used to sometimes get a global array entry
-                    speech.say(voiceParams);
+                        // should Last User only be updated when there's an actual speech?  It should, really
 
                     lastMsgTime = userstate["tmi-sent-ts"];
                     lastUser = username;
                     lastChannel = channel;
+
+                        // when it was bugged this used to sometimes get a global array entry
+                    speech.say(voiceParams);
 
                     break;
                 default: // pfff ?
