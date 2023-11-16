@@ -92,7 +92,6 @@ var TTSMain = TTSMain || {};
     const emote_filter = new Emoter()
     TT.emote_filter = emote_filter;
 
-
     const SPEECH_START_TIMEOUT_MS = 2000;     // seconds that speech has to start before it's cancelled
     const SPEECH_END_TIMEOUT_MS = 20000;     // seconds that speech has to end before it's cancelled
 
@@ -371,46 +370,24 @@ var TTSMain = TTSMain || {};
         TT.cclient.on('messagedeleted', message_twitch_moderation_handler);
         TT.cclient.on('ban', message_twitch_ban_handler);
         TT.cclient.on('notice', message_twitch_notice_handler);
+        TT.cclient.on('raw_message', message_twitch_raw_clearchat_handler);
+        //TT.cclient.on('raw_message', (clone, msg) => { console.log(msg); });
 
-        TT.cclient.on('raw_message', (cloned, msg) => {console.log("Raw", msg.tags.flags);} );
-
-        // lc username.  Automod does timeouts and kills all messages
-        TT.cclient.on("timeout", (channel, username, reason, duration, userstate) => {
-            console.log("timeout username, duration, state", username, reason, duration, userstate);
-        });
-        TT.cclient.on("clearchat", function foo() {console.log("clearchat:", arguments);});
-
-            // we can check for automod IN the message!  The flags are in userstate
-
-        TT.cclient.on('message', twitch_message_handler);// TT.cclient.on(message)
-
+            // we can check for automod IN the message!  The flags are in userstate but they're not modding, they're
+            // notices about swears, etc. like 0-4:S.5 or 3-9:P.0 where the first digits are position, and the second the reason
+        TT.cclient.on('message', twitch_message_handler);
     } // add_chat_to_speech_tmi_listener
-
-    function is_flags_moderated(state) {
-        return TTSVars.chatRemoveModerated && typeof state.flags == "string" && state.flags.split(":")[1] === "S.5";
-    }
-        // moderated messages can be discarded.  Only MANUALLY modded
-
-    function message_twitch_moderation_handler(channel, username, deletedMessage, userstate) {
-        // userstate has login for name, room-id, target-msg-id, and time
-        if (!TTSVars.chatRemoveModerated) return;
-
-        let speecherId = TTSVars.speech_queue_msgid_to_id(userstate["target-msg-id"]);
-        //console.log("**** MESSAGE MODERATION", userstate, "to message id", speecherId);
-        if (speecherId) {
-            TTSVars.speecher.cancel_id(speecherId);
-            TTSVars.speech_queue_entry_to_old_messages(speecherId, false);
-            TTSVars.speech_queue_add_tag(speecherId, "moderated", "danger");
-        }
-    }
 
     function twitch_message_handler (channel, userstate, message, self) {
         //console.log("state", userstate);
-        //console.log("message", message);
+        console.log("message", message);
             // same user and channel as last message
         const username = userstate["username"];
         const sameUser = username == TTSVars.lastUser;
         const sameChannel = channel == TTSVars.lastChannel;
+
+        if (userstate.flags)
+            console.log("flags", userstate.flags, message, userstate);
 
         if (self || TTSVars.chatEnabled === false) return;   // Don't listen to my own messages..
 
@@ -497,11 +474,11 @@ var TTSMain = TTSMain || {};
                 TTSVars.speech_queue_list_add({user: userstate["display-name"], text: message, id: nid, msgid})
 
                     // now check if we should throw the message away
-
+                /*
                 if ( is_flags_moderated(userstate) ) { // user current fn as a shortcut
                     message_twitch_moderation_handler(channel, userstate.username, message, {"target-msg-id": userstate.id});
                     return;
-                }
+                }*/
 
                     // replace atted name underscores and camel casing e.g bigJohn_Jenkins = big John Jenkins
                 message = atted_names_convert(message);
@@ -529,6 +506,31 @@ var TTSMain = TTSMain || {};
                 break;
         } // switch (message-type)
     }   // end twitch_message_handler
+
+        // CLEARCHAT happens on /ban /timeout or /clear :tmi.twitch.tv CLEARCHAT #dallas for entire room :tmi.twitch.tv CLEARCHAT #dallas :aSingleUser
+
+    function message_twitch_raw_clearchat_handler(clone, msg) {
+        if ( TTSVars.chatRemoveModerated &&  msg.command === "CLEARCHAT" && msg.params.length > 1) {
+            message_twitch_ban_handler(msg.params[0], msg.params[1], null, null);
+        }   // 1 param = whole room, 2 = single user
+    }
+
+        // moderated messages can be discarded.  Only MANUALLY modded
+
+    function message_twitch_moderation_handler(channel, username, deletedMessage, userstate) {
+        // userstate has login for name, room-id, target-msg-id, and time
+        if (!TTSVars.chatRemoveModerated) return;
+
+        let speecherId = TTSVars.speech_queue_msgid_to_id(userstate["target-msg-id"]);
+        //console.log("**** MESSAGE MODERATION", userstate, "to message id", speecherId);
+        if (speecherId) {
+            TTSVars.speecher.cancel_id(speecherId);
+            TTSVars.speech_queue_entry_to_old_messages(speecherId, false);
+            TTSVars.speech_queue_add_tag(speecherId, "moderated", "danger");
+        }
+    }
+
+
 
         // ban handler.  Bans send username in lower case and in userstate
         // room-id target-user-id tmi-sent-ts
