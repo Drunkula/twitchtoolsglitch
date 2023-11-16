@@ -304,7 +304,6 @@
 
 		#sayQueueProcess(immediate = false) {
 			if ( !immediate && (this.ss.speaking || this.#isPaused || this.#isSpeaking) ) {
-				//SPEECHER_log("Speaking, returning");
 				return;
 			}
 
@@ -386,13 +385,15 @@
 
 				// add our two default handlers
 			this.utterance.addEventListener('end', (e) => {
-				this.#isSpeaking = false;
 				//console.log(m("UTTERANCE END EVENT") + ` for ${e.utterance.queueid} : ${e.utterance.text}`);
+				this.#isSpeaking = false;
+				this.currentSpeakingID = -1;
 				this.#sayQueueProcess()
 			});
 			this.utterance.addEventListener('error', e => {
 				SPEECHER_log("UTTERANCE ERROR ", e);
 				this.#isSpeaking = false;
+				this.currentSpeakingID = -1;
 				this.#sayQueueProcess();	// CRITICAL
 			});
 
@@ -404,7 +405,8 @@
 			// validate is a function?	No, it's done before
 		#utterance_add_handlers(u, handlers) {
 			for (const [ev, fn] of handlers) {
-				if (utteranceEventTypes.includes(ev)) {					//u.addEventListener(ev, handlers[ev]);
+				if (utteranceEventTypes.includes(ev)) {
+					//u.addEventListener(ev, handlers[ev]);
 					u.addEventListener(ev, fn);
 				}
 			}
@@ -445,6 +447,8 @@
 					"utterance" : this.utterance
 				});
 
+				//this.currentSpeakingID = -1;
+
 				return true;
 			}
 
@@ -456,7 +460,6 @@
 		}
 
 		// ************** EVENTS ************** //
-
 
 		// *** Utterance events *** ///
 			// added to every UTTERANCE, takes { event : fn , event2 : fn} so multiple calls for same even

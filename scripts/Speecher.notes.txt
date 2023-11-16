@@ -28,3 +28,33 @@ EDGE STALLING - due to a non triggering of the end event:
 
 In the other browsers start timeouts happen but they seem not to be needed and solve themselves.  sometimes
 an actual error event will happen and they're not automatically cleared by that.
+
+
+
+Twitch messages
+
+/*  raw_msg I got when typing a term that would be auto-moderated.  When moderation happens all messages for that user get cleared
+	and a timeout occurs.  It was just for one second
+{
+	"raw": "@ban-duration=1;room-id=703313907;target-user-id=576952126;tmi-sent-ts=1700132718837 :tmi.twitch.tv CLEARCHAT #flipthatnoise :auntiebrenda",
+	"tags": {
+		"ban-duration": "1",
+		"room-id": "703313907",
+		"target-user-id": "576952126",
+		"tmi-sent-ts": "1700132718837"
+	},
+	"prefix": "tmi.twitch.tv",
+	"command": "CLEARCHAT",
+	"params": [
+		"#flipthatnoise",
+		"auntiebrenda"
+	]
+}
+
+Ahh-ha!  In a normal message tags.flags will be null.  In a moderated message got this:
+flags=
+
+clearchat happens when all messages are removed and a ban duration happens
+clearmsg takes out a single message and has a target-msg-id
+PRIVMSG then tags.flags "0-2:5.5" when it was auto modded. where the first part is the position in the string
+*/

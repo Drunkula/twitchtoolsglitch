@@ -172,9 +172,11 @@
 		let isSpeaking = TTSVars.speecher.cancel_id(e.target.dataset.id);
 			// delete this?  Yes, but if it's speaking then it stops it going into the history
 		if (isSpeaking) {
+			console.log("It's speaking");
 			TTSVars.speech_queue_entry_to_old_messages(e.target.dataset.id);
 		}
 		else {
+			console.log("Not speaking");
 			gid('sq-' + e.target.dataset.id)?.remove();
 		}
 	}
