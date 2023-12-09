@@ -14,7 +14,7 @@ Controller handles communication between sockets and the player
 
 */
 import { Socketty } from "./Socketty.class.js";
-import { YTPlayer } from "./ytplayer.class.js";
+import { YTPlayer } from "./ytplayer.class.mod.js";
 
     // whether next or prev was last used
 const DirFwd = 1;
