@@ -1,0 +1,54 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+     -->
+     <title>Youtube Player</title>
+    <style>
+        body, html, iframe {margin: 0; padding: 0;}
+    </style>
+
+    <script>
+           // this will be run before the module
+        qs = new window.URLSearchParams( window.location.search );
+        QPx = qs.get("x"); QPy = qs.get("y"); QPmuted = qs.get("muted");
+
+        ytplayerXSize = QPx ??= 1280;
+        ytplayerYSize = QPy ??= 720;
+        ytplayerMuted = QPmuted ??= 0;
+        ytplayerVolume = 100;
+
+
+        function out() { return;
+            var nDiv = document.createElement("div");
+            nDiv.innerText = [...arguments].join("");
+            document.getElementById("messages").append(nDiv);
+        }
+
+        function clog() {
+            //console.log(...arguments);
+        }
+    </script>
+    <script src="entrypoint.mod.js" type="module"></script>
+    <!-- if you don't defer it doesn't work even if the controller is run first
+        You pretty much have to have the callback it triggers in place
+        <script src="https://www.youtube.com/iframe_api" defer></script>
+    -->
+</head>
+<body>
+    <div id="ytplayer"></div>
+    <div id="messages" style="clear: left;"></div>
+</body>
+</html>
+<!--
+Things to hide
+
+ytp-chrome-top ytp-show-cards-title
+ytp-title
+    ytp-watermark
+
+
+    ytp-channel-title-logo
+
+-->
