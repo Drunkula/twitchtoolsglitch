@@ -90,7 +90,7 @@ class YTController {
         stop:       d => this.yt.stopVideo(),
         resume:     d => this.yt.playVideo(),
         restart:    d => { this.yt.seekTo(0); this.play();},
-        fwd:        d => {this.yt.seekTo( this.yt.getCurrentTime() + d.data);},
+        fwd:        d => {clog("=========== fwd", d); this.yt.seekTo( this.yt.getCurrentTime() + d.data);},
         rwd:        d => {this.yt.seekTo( this.yt.getCurrentTime() - d.data);},
         almostend:  d => { this.yt.seekTo( this.yt.getDuration() - 2); },
         "next()":       d => {this.yt.nextVideo()},
@@ -107,13 +107,14 @@ class YTController {
         title:      d => clog(this.yt.videoTitle),
         qualityget: d => clog(this.yt.getAvailableQualityLevels()),
 
-        sendmessage:d => { this.send(d.target.dataset["msg"]); },
+        sendmessage:d => { this.send(d.data); },
         playlistadd:d => { this.add(d.data, d.addnext ? true : false); },
             // the entire thing
         fullplaylist:d => { this.playlistLoaded = true; this.add(d.data, d.addnext ? true : false); },
 
         shuffle:    d => { this.shuffle(false); },
         shuffleall: d => { this.shuffle(true); },
+        getvideoinfo: d => {clog( this.yt.getVideoData() ); },
 
         next:       d => { this.next(); },
         prev:       d => { this.prev(); },
@@ -347,35 +348,37 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
 // debug console filter
 // -url:https://play.google.com/ -url:chrome-extension://mnjggcdmjocbbbhaepdhchncahnbgone/js/content.js -url:https://www.youtube.com
 // or use current context only
+// handler for socket messages and string actions
 
     message_handler(e) {
-        if (e.data == "pong") {
-            //clog("PONG!");
-            return;
+        let data = null, action, json = "not json";
+
+        if (typeof e === "string") {
+            action = e;
+        } else {
+            action = e.data;
         }
 
-        // this filtering was only needed for bad c# raw literal Json strings
-        let json = e.data;//.replace(/\r|\t|\n/g, '');
-//clog("socket message:", e);
-        if (e.data[0] === '{')
+        if (action[0] === '{')
         try {
-            let jP = JSON.parse(json);
-
-            if (jP.action && this.actions[jP.action]) {
-                this.actions[jP.action](jP);
-            }
-                // don't log everything
-            if (jP.action === "consolelog") {
-                return;
-            }
-
-            clog("JSON?", jP);
-            //this.send("Thanks, partner!");
+            json = JSON.parse(action);
+            action = json.action;
+            data = json;
         } catch (error) {
             clog("message_hander:", e);
             clog("ERROR:", error.toString());
         }
 
+        if (this.actions[action]) {
+            this.actions[action](data);
+        }
+            // don't log everything
+        if (["consolelog", "pong"].includes(action)) {
+            return;
+        }
+
+        clog("Action:", action, "JSON?", json);
+            //this.send("Thanks, partner!")
     }
 
     error_handler(e) {
@@ -446,7 +449,7 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
     }
 
     current_video_info() {
-        return this.yt.getVideoInfo();
+        return this.yt.getVideoData();
     }
 
 

@@ -21,7 +21,9 @@ window.addEventListener('load', main);
 
 async function main() {
     console.log("Main entry point init");
-    out("Hello there.");
+    out("Hello there.  Press F12 to open the dev console and observer messages");
+    out("Set up watch expressions    ytpc.playlist");
+    out('ptr: " + ytpc.playlistPointer + " nexts: " + ytpc.playlistNextCount + " [ptr]:" + ytpc.playlist[ytpc.playlistPointer] + " plyCurrStr: " + ytpc.playlistCurrent;');
 
     let ytpc = new YTController();
 
@@ -33,7 +35,7 @@ window.playlistDefaults = playlistDefaults;
     // ytpc.add(playlistDefaults);
 
     // now we can init the iframe
-    let res = ytpc.ytPlayer.init_iframe();
+    let res = ytpc.ytPlayer.init_iframe( ytplayerVideoId );
 
     console.log(res ? "Iframe create SUCCESS!" : "FAILED creating iframe");
 
@@ -74,7 +76,8 @@ function init_controls() {
 
     for (const con of controls) {
         let action = con.dataset["action"];
-        con.addEventListener('click', e => ytpc.actions[action](e));
+        //con.addEventListener('click', e => ytpc.actions[action](e));
+        con.addEventListener('click', e => ytpc.message_handler( action ));
     }
 }
 

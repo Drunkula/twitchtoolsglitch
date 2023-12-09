@@ -68,13 +68,13 @@ class YTPlayer {
 
         // the iframe needs a video if playVideo is later called
 
-    init_iframe() {
+    init_iframe(videoId) {
         console.log("YTPlayer.init_iframe(): ");
             // later player will emit onReady if it's successfully loaded a video
         this.player = new YT.Player(this.playerDivName, {
             width: this.width,
             height: this.height,
-            videoId: 'LECSVlc6O1g', // you can omit it but don't playVideo() the url stays the same in the iframe even on video changes
+            videoId, // you can omit it but don't playVideo() the url stays the same in the iframe even on video changes
             playerVars: this.playerVars,
             events: this.events
         });

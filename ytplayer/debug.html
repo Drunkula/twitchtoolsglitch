@@ -24,12 +24,13 @@
         }
 
         qs = new window.URLSearchParams( window.location.search );
-        QPx = qs.get("x"); QPy = qs.get("y"); QPmuted = qs.get("muted");
+        QPx = qs.get("x"); QPy = qs.get("y"); QPmuted = qs.get("muted"); QPVideo = qs.get("video");
 
         ytplayerXSize = QPx ??= 320;
         ytplayerYSize = QPy ??= 180;
         ytplayerMuted = QPmuted ??= 1;
         ytplayerVolume = 20;
+        ytplayerVideoId = QPVideo ??= "LECSVlc6O1g";
 
 
     </script>
@@ -41,6 +42,8 @@
     -->
 </head>
 <body>
+    <div class="section">
+
     <!-- I'm going to have to put in a fucking table -->
     <table class="table">
         <tr>
@@ -52,10 +55,10 @@
                         <li data-action="pause">Pause</li>
                         <li data-action="stop">Stop</li>
                         <li data-action="restart">Restart</li>
-                        <li data-action="next()">Next yt list</li>
-                        <li data-action="prev()">Prev yt list</li>
-                        <li data-action="fwd">fwd</li>
-                        <li data-action="rwd">rwd</li>
+                        <li data-action="next()">Next if yt playlist</li>
+                        <li data-action="prev()">Prev if yt playlist</li>
+                        <li data-action='{"action":"fwd", "data":30}'>fwd</li>
+                        <li data-action='{"action":"rwd", "data":5}'>rwd</li>
                         <li data-action="almostend">toward end</li>
                         <li data-action="adddefaults">adddefaults</li>
                     </ul>
@@ -64,16 +67,16 @@
             <td>
                 <div class="controls">
                     <ul>
-                        <li data-action="sendmessage" data-msg="testaddnext">add video next</li>
-                        <li data-action="sendmessage" data-msg="testaddrandom">add video random pos</li>
+                        <li data-action='{"action":"sendmessage", "data": "testaddnext"}''>add video next</li>
+                        <li data-action='{"action":"sendmessage", "data": "testaddrandom"}''>add video random pos</li>
                         <li data-action="shuffle">Shuffle (not all)</li>
                         <li data-action="shuffleall">Shuffle all</li>
                         <li data-action="big">Big</li>
                         <li data-action="small">Small</li>
                         <li data-action="title">Title</li>
                         <li data-action="qualityget">Qualities</li>
-                        <li data-action="clearchat">Clear Chat</li>
-                        <li data-action="clearvideos">Clear Videas</li>
+                        <li data-action="clearvideos">Clear Videos</li>
+                        <li data-action="getvideoinfo">Video Info</li>
                     </ul>
                 </div>
             </td>
@@ -81,16 +84,16 @@
             <td>
                 <div class="controls">
                     <ul>
-                        <li data-action="next" data-msg="next">next()</li>
-                        <li data-action="prev" data-msg="prev">prev()</li>
+                        <li data-action="next">next()</li>
+                        <li data-action="prev">prev()</li>
                         <li data-action="shuffle">Shuffle (not all)</li>
                         <li data-action="shuffleall">Shuffle all</li>
                         <li data-action="big">Big</li>
                         <li data-action="small">Small</li>
                         <li data-action="connect">Connect Socket</li>
                         <li data-action="disconnect">Disconnect Socket</li>
-                        <li data-action="sendmessage" data-msg="loadplaylist">load_playlist()</li>
-                        <li data-action="sendmessage" data-msg="saveplaylist">save_playlist()</li>
+                        <li data-action='{"action":"sendmessage", "data": "loadplaylist"}'>load_playlist()</li>
+                        <li data-action='{"action":"sendmessage", "data": "saveplaylist"}'>save_playlist()</li>
                     </ul>
                 </div>
             </td>
@@ -108,7 +111,10 @@
         </tr>
     </table>
 
-    <div id="messages" style="clear: left;"></div>
+    <div id="messages" class="block"></div>
+
+    </div>
+
 </body>
 </html>
 <!--
