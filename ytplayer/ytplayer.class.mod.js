@@ -5,7 +5,7 @@
     The class already emits on every player state so let external code handle things to keep us simple
 
     you can loadPlaylist with a csv of ids
-
+ccc
     Possibly have a nextvid NO - the player should be separate from the controller
 */
 class YTPlayer {
