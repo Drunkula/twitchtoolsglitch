@@ -17,7 +17,7 @@ export { Socketty };
 class Socketty {
 
     ws = null;
-    socketUrl = "ws://127.0.0.1:8081/";
+    socketUrl = "ws://localhost:8081/";
     connected = false;
 
     retryConnectingAuto = true;    // open or connect set retryConnecting to this
