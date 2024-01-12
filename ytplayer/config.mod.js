@@ -33,30 +33,5 @@ export let playlistDefaults = [
 //export { config };
 
 /*
-Direct Debit prices quoted on chat for direct debit
-Unit rate (anytime):
-
-£0.0706 per kWh
-
-Standing charge:
-
-£0.3270 per day  That is for gas
-
-12:15 PM
-Business said
-
-Unit rate (anytime):
-
-£0.2751 per kWh
-
-Standing charge:
-
-£0.5753 per da this is for elec
-
-12:14 PM
-
-These prices are no cheaper
-
-
 https://speaker.bot/guide/api/websocket/requests/
 */

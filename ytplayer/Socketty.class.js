@@ -18,7 +18,10 @@ class Socketty {
 
     ws = null;
     socketUrl = "ws://localhost:8081/";
+    connecting = false; // set to true when connect() called
     connected = false;
+    readyPromise = false;
+    readyResolver = x => x; // set by new promise
 
     retryConnectingAuto = true;    // open or connect set retryConnecting to this
     retryConnecting = true;
@@ -93,13 +96,19 @@ class Socketty {
                 return;
             }*/
                 // in case you did want a new socket
-            if (this.ws)
+            if (this.ws) {
                 this.ws.close();
+            }
+
+            this.connected = false;
+
             this.ws = new WebSocket(sockUrl);
         } catch(e) {
             clog("Socketty Connect Error:", e);
             return false;
         }
+
+        this.readyPromise = new Promise(x => this.readyResolver = x);
 
         clog("Socketty connect() ws:", this.ws);
             // can add before connected?
@@ -158,7 +167,28 @@ class Socketty {
         this.ping = true;
     }
 
-        // adds native events.  4 available are open, close, ready, message
+        // can be awaited
+
+    ready() {
+        if (this.ws) {
+            switch (this.ws.readyState) {
+                case this.states['OPEN']:
+                    return Promise.resolve(true);
+                    break;
+                case this.states['CONNECTING']:
+                    return this.readyPromise;
+                    break;
+
+                case this.states['CLOSING']:
+                case this.states['CLOSED']:
+                    return Promise.resolve(false);
+            }
+        }
+            // no connectiona attempt has been made
+        return Promise.resolve(false);
+    }
+
+        // adds native events.  4 available are open, close, error, message
 
     add_events() {
         this.ws.addEventListener("open", e => {
@@ -167,6 +197,10 @@ class Socketty {
 
             this.connected = true;
             this.retryConnecting = this.retryConnectingAuto;    // WARNING: this might not always be wanted
+
+            if (this.readyPromise) {
+                this.readyResolver(true);
+            }
 
             clog("Socketty Websocket opened", e);
             //out("Websocket opened, state: ", states[ws.readyState]);
@@ -179,6 +213,10 @@ class Socketty {
                 //
             if (this.ws.readyState !== this.states.OPEN)   // OPEN
                 this.connected = false; // conditional
+
+            if (this.readyPromise) {
+                this.readyResolver(false);
+            }
         });
 
             // this keeps going as a failed socket will just pump a close event
@@ -188,6 +226,10 @@ class Socketty {
             clog("Socketty Closed after seconds: ", performance.now() / 1000);
 
             this.connected = false;
+
+            if (this.readyPromise) {
+                this.readyResolver(false);
+            }
 
             if (this.retryConnecting)
                this.reconnect();
@@ -219,7 +261,6 @@ class Socketty {
     }
 
     send(d) {
-        //if (!this.connected) return false;
         //if (this.ws.readyState !== this.states.OPEN) return false;
         this.ws.send(d);
     }

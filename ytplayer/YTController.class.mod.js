@@ -1,17 +1,5 @@
-/*x
-I did want to make all of these modules but that means that I'll
-have to use a server for the browser source
-I suppose I could do that and have glitch for the final
-and use nodemon for local.  It's just a bit annoying having to push.  Well not that bad
-now I've made the push.bat file
-
-these will always be present and a backup if the Streamerbot list fails.
-streamerbot list will be JSON and needs to store a numeric id and the adder so you can
-see which villain added something dodgy
-
-Controller handles communication between sockets and the player
-
-
+/*
+    JAVASCRIPT part
 */
 import { Socketty } from "./Socketty.class.js";
 import { YTPlayer } from "./ytplayer.class.mod.js";
@@ -25,7 +13,7 @@ const DirBack = -1;
 
 class YTController {
 
-    socket = new Socketty();
+    socket = new Socketty();    // url is set in constructor
     ytPlayer = new YTPlayer();
     yt;  // shortut to ytPlayer.player.  Don't use until player ready event
 
@@ -110,7 +98,7 @@ class YTController {
         sendmessage:d => { this.send(d.data); },
         playlistadd:d => { this.add(d.data, d.addnext ? true : false); },
             // the entire thing
-        fullplaylist:d => { this.playlistLoaded = true; this.add(d.data, d.addnext ? true : false); },
+        fullplaylist:d => { this.playlistLoaded = true; this.add(d.data, true); this.shuffle(true); this.playlistPointer = -1; this.next(); },
 
         shuffle:    d => { this.shuffle(false); },
         shuffleall: d => { this.shuffle(true); },
@@ -126,6 +114,8 @@ class YTController {
         connect:    d => ytpc.socket.connect(),
         disconnect: d => ytpc.socket.close(),
         f: d => {},
+
+        nowandnext: d => this.now_and_next(d.data.howMany),
     }
 
     // CPH.RunActionById("1a8f5a37-5107-420c-9dd5-4f863ce6ffd1", true);
@@ -411,6 +401,47 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
             this.prev();
     }
         // both of these check they're connected
+
+
+    now_and_next(howMany) {
+        console.log("THEY WANT THIS MANY NOW AND NEXTS:", howMany);
+
+        if (howMany > this.playlist.length) howMany = this.playlist.length;
+
+            // ok, what if we wrap around? then need the slice before
+
+        let start = this.playlistPointer;
+        let end = this.playlistPointer + howMany;
+        let ids = this.playlist.slice( this.playlistPointer, end);
+            // was end > size of list and is there enough at the start?
+
+        console.log(`Start: ${start} end: ${end} so initially have`, ids);
+
+        if (end > this.playlist.length) {
+            end = end % this.playlist.length;
+//console.log("END LONG modding: ", end);
+            //if (end > start) end = start;
+//console.log(`They also need 0 to ${end} added`, this.playlist.slice(0, end));
+            ids = [...ids, ...this.playlist.slice(0, end)];
+        }
+
+        console.log("THEY GET", ids);
+
+        let titles = new Array(ids.length);
+
+        for (let index = 0; index < ids.length; index++) {
+            const id = ids[index];
+            titles[index] = this.playlistMap.has(id) ? this.playlistMap.get(id).title : "unknown";
+        }
+
+        let obj = { action: "nowandnext", count: ids.length, titles };
+
+        if (howMany == 1) {
+            obj = { action: "nowplaying", data: titles[0] };
+        }
+
+        this.send_json(obj);
+    }
 
     send(data) {
         return this.socket.send(data);

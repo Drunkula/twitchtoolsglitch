@@ -26,42 +26,6 @@ THE CONTROLLER PAGE:
 
 
 
-
-Player has 2 internal playlists
-
-NO LONGER TRUE:
-        queued
-        have played
-
-        Then if a video is added the queued list can be reshuffled or
-        the video can be put at the start of the list
-
-        This lets the player have a list for continuous play even if streamerbot goes wrong.
-
-        Prev / next - if I'm using the partially shuffling technique then this could cause problems unless I keep a pointer
-        into the played list
-
-        Imagine the state of played is
-
-        1 2 3 then somebody goes next.  A value of 4 will be pulled from queued
-        . <- do is playead
-        1234 this is fine, Queued can still be shuffled without notice.  Then prev happens 4 times taking you back to 1
-        .
-        1234 doing a prev here is fine, you just pull a value from Queued but put it at the start of the list
-        .
-        51234 when the song is finished this time the playhead will move forward.
-        NEXT doesn't grab a video from Queued until playlistPointer == playlistPlayed.length -1 and a next is received
-
-        This might seem complex but it lets added songs to occur randomly
-
-        SHUFFLING PROBLEMS.  With Queued and Played
-        What if you queue three videos that are "nexts".
-            Normal adds shuffle the Queued, they must not shuffle the nexts
-            Nexts counter addition means any new videos added after the initial
-
-        shuffle could be inserted at a random position of Queued.length - nextsCounter
-
-
 I could add a search
 
 
@@ -121,26 +85,9 @@ needs shuffle action
 
    UNshift pushes one onto the bottom of a stack, like push both have U to add
 
-   Inserts at a certain position, like adding nexts to the front in order
+   Splike inserts/deletes at a certain position, like adding nexts to the front in order
 
    splice(position, delete num, item, item, item...);
-
-
-   4
-   3
-   2
-   1
-   0
-
-   nexts = 2, add a next
-
-   list.splice(list.length-nexts)
-
-
-
-
-
-
 
 
 
@@ -236,7 +183,38 @@ Commands TWITCH
 
 
 
+*********************************
+NO LONGER TRUE BUT KEEPING NOTES:
+*********************************
+        queued
+        have played
 
+        Then if a video is added the queued list can be reshuffled or
+        the video can be put at the start of the list
 
+        This lets the player have a list for continuous play even if streamerbot goes wrong.
+
+        Prev / next - if I'm using the partially shuffling technique then this could cause problems unless I keep a pointer
+        into the played list
+
+        Imagine the state of played is
+
+        1 2 3 then somebody goes next.  A value of 4 will be pulled from queued
+        . <- do is playead
+        1234 this is fine, Queued can still be shuffled without notice.  Then prev happens 4 times taking you back to 1
+        .
+        1234 doing a prev here is fine, you just pull a value from Queued but put it at the start of the list
+        .
+        51234 when the song is finished this time the playhead will move forward.
+        NEXT doesn't grab a video from Queued until playlistPointer == playlistPlayed.length -1 and a next is received
+
+        This might seem complex but it lets added songs to occur randomly
+
+        SHUFFLING PROBLEMS.  With Queued and Played
+        What if you queue three videos that are "nexts".
+            Normal adds shuffle the Queued, they must not shuffle the nexts
+            Nexts counter addition means any new videos added after the initial
+
+        shuffle could be inserted at a random position of Queued.length - nextsCounter
 
 */

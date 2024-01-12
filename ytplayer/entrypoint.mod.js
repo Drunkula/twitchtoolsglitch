@@ -45,9 +45,24 @@ window.playlistDefaults = playlistDefaults;
     out("It ready")
 
     //test_real();
+    let socket = ytplayerWebSock ??= config.socketty.socketUrl;
+    ytpc.socket.connect( socket );
 
+    let sw = await ytpc.socket.ready();
+
+    clog("Awaiting socket ready:", sw, "readystate", ytpc.socket.readyState);
+        // if the above wait resolved false it'll still try and send
     ytpc.ytPlayer.play();   // on, it has to have emitted ready first
-    ytpc.socket.connect(config.socketty.socketUrl);
+
+        // play will try and send a socket message even though it's not open.
+        // IF the socket url has been changed here
+        // socket open will try and load video by id so player has to be ready
+        // it's not worth worrying about.
+        // hang on, have a socket ready promise and we're all good
+
+    // SO DO THIS: await ytpc.socket.ready or something
+
+        // make those text links sing
     init_controls();
 
     return;
