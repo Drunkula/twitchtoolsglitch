@@ -1,6 +1,6 @@
 /** CHAT-TO-speech.js
  *
- *  THIS IS OFFICIALY A MESS as I'm not splitting into smaller files like you're really do.
+ *  THIS IS OFFICIALY A MESS as I'm not splitting into modules so it can stay serverless.
  *
  *  The EDGE stalling problem with this might need a new strategy:
  *      Start a shorter timeout that'll be cancelled on utterance start
@@ -76,7 +76,7 @@ TMIConfig.TTSVars = {       // more props added from forms
 }
 
     // allows us to change the main function.  Yes, maybe I should have just made this a class
-var TTSMain = TTSMain || {};
+var UserMon = UserMon || {};
 
 (function(ns) {
 //try {   // scope starts ( in case I can demodularise this )
@@ -356,27 +356,29 @@ var TTSMain = TTSMain || {};
         return ready;
     };
 
-        // I should of course include the channel, cclient is global
-        // tmi code is re-adding event listeners on disconnects
-        // MAIN Twitch listener
-// ***** PROBLEMS WITH REPEATS / SKIP - found out that there's a global value out there that gets written to - let's fix that
+    // MAIN Twitch listener
+    // ***** PROBLEMS WITH REPEATS / SKIP - found out that there's a global value out there that gets written to - let's fix that
+    // tmi code is re-adding event listeners on disconnects (is it?)
     function add_chat_to_speech_tmi_listener()
     {       // https://dev.twitch.tv/docs/irc/tags#globaluserstate-twitch-tags
-        //let lastMsgId = null;   // after a reconnect TMI sometimes sents repeats
         TTSVars.lastUser = "";
         TTSVars.lastChannel = "";
         TTSVars.lastMsgTime = 0;
 
         TT.cclient.on('messagedeleted', message_twitch_moderation_handler);
         TT.cclient.on('ban', message_twitch_ban_handler);
-        TT.cclient.on('notice', message_twitch_notice_handler);
-        TT.cclient.on('raw_message', message_twitch_raw_clearchat_handler);
-        //TT.cclient.on('raw_message', (clone, msg) => { console.log(msg); });
+        TT.cclient.on('raw_message', message_twitch_raw_clearchat_handler); // handles bans/timeouts if CLEARCHAT appears
+        TT.cclient.on('notice', message_twitch_notice_handler); // currently just logs the notice
 
-            // we can check for automod IN the message!  The flags are in userstate but they're not modding, they're
+        TT.cclient.on("join", (ch,usr,self) => console.log(`JOIN EVENT ${ch}: ${usr}`));
+        TT.cclient.on("part", (ch, usr, self) => console.log(`JOIN PART EVENT ${ch}: ${usr}`));
+
+            // we can check for automod IN the message. The flags are in userstate but they're not modding, they're
             // notices about swears, etc. like 0-4:S.5 or 3-9:P.0 where the first digits are position, and the second the reason
         TT.cclient.on('message', twitch_message_handler);
     } // add_chat_to_speech_tmi_listener
+
+        // ****************   ., mMESSAGE HANDLER ****************
 
     function twitch_message_handler (channel, userstate, message, self) {
         //console.log("state", userstate);
@@ -385,10 +387,10 @@ var TTSMain = TTSMain || {};
         const username = userstate["username"];
         const sameUser = username == TTSVars.lastUser;
         const sameChannel = channel == TTSVars.lastChannel;
-
+/*
         if (userstate.flags)
             console.log("flags", userstate.flags, message, userstate);
-
+*/
         if (self || TTSVars.chatEnabled === false) return;   // Don't listen to my own messages..
 
         if ( TTSVars.chatQueueLimit && speech.queue_length() >= TTSVars.chatQueueLimit ) {
@@ -396,115 +398,119 @@ var TTSMain = TTSMain || {};
         }
 
             // are they permitted ?
-        if (! TT.user_permitted( userstate )) {
-            // console.debug("USER NOT PERMITTED", userstate['username']);
+        if (! TT.user_permitted( userstate )) {            // console.debug("USER NOT PERMITTED", userstate['username']);
             return false;
         }
-
-            // Handle different message types..
+            // return if the message type isn't readable
         switch(userstate["message-type"]) {
             case "action": case "chat": //case "whisper":
-                    // filter out emotes
-                let sayCommand = starts_with_say_command(message);  // returns !command / false
-                let voiceParams = {};
-
-                let commandSliceOffset = 0   // amount to strip from message
-                let voiceIndexDefault = 1; // I START AT ONE
-                const username = userstate["username"];
-
-                    // if sayCommand is false create one if all chat is on
-
-                if (sayCommand === false) {
-                    if ( !TTSVars.chatReadAll || ('!' === message[0] && TTSVars.chatReadOtherCommands !== true) ) {
-                        return;
-                    }
-                        // test for a personalised user command.  usercommands = {username: "alias", edtrots: "ed"}
-                    let nameIsCmd = starts_with_say_command("!" + TTSVars.usercommands[userstate['username']]);
-                        // !cmd or false returned
-                    if (nameIsCmd) {   // sayCmds are !cmd: {rate, pitch, voice} // THIS IS THE BUG THIS IS THE BUG .text get written to the global later cos reference.
-                        //sayCmdPack.params = TTSVars.sayCmds[nameIsCmd]; check TMIConfig.TTSVars.sayCmds
-                        //voiceParams = {...TTSVars.sayCmds[nameIsCmd]};    // FIXED
-                        voiceParams = ns.get_voice_settings_by_name(nameIsCmd); // allows "patching" the jank version back
-                    } else if (TTSVars.randomVoices) {
-                        let vIdx = Math.floor(Math.random() * TTSVars.voices.length);
-                        let voice = TTSVars.voices[vIdx]; // console.log("RAND VOICE", voice.name);
-                        voiceParams = { rate: 1.3, pitch: 1.0, voice }
-                    } else { // use voice 1
-                        voiceParams = get_voice_settings_by_index( voiceIndexDefault );
-                    }
-
-                    sayCommand = '!all-chat';
-                } else { // DEFAULT VOICE// remove the voice command from the message
-                    // console.log("MESSAGE", message);
-                    commandSliceOffset = sayCommand.length + 1;
-                    message = message.slice(commandSliceOffset).trim();
-                    voiceParams = ns.get_voice_settings_by_name(sayCommand);
-                }
-
-                if ( ! TTSVars.chatReadEmotes ) {
-                    message = emote_filter.filter(message, userstate);
-                }
-                    // any message left?  I've noticed blank messages which just contain unprintable characters
-                if (message.length === 0) { //console.log("message zero returning");
-                    return;
-                }
-
-                    // category out a single user by setting similar commands to a single value e.g. !allsaycommands
-                let cooldownParams = {
-                    channel: 'ALL-CHANS',    // cooldowns are CHANNEL based - so set to a common value if you want to put globals on for all
-                    command: sayCommand ? sayCommand : '!all-chat',   // set to !userCategoryFake to category out only users
-                    //category: "text-to-speech-"+ channel,   // example to category out channels individually
-                    userstate,
-                    globalCooldown: TTSVars.chatCooldownGlobal,
-                    userCooldown: TTSVars.chatCooldownUser,
-                    modCooldown: TTS_MOD_COOLDOWN     // tested working
-                }
-
-                let oc = cooldowns.cooldown_check(cooldownParams);
-
-                if (oc !== false ) {    // returns an object of user and global cooldown if on a cooldown
-                    console.debug("ON a cooldown", oc);
-                    return;
-                }
-                cooldowns.cooldown_set(cooldownParams);
-
-                let nid = speech.next_id();
-                let msgid = userstate["id"];  // each message has one
-                    // visually add to the speech queue
-                TTSVars.speech_queue_list_add({user: userstate["display-name"], text: message, id: nid, msgid})
-
-                    // now check if we should throw the message away
-                /*
-                if ( is_flags_moderated(userstate) ) { // user current fn as a shortcut
-                    message_twitch_moderation_handler(channel, userstate.username, message, {"target-msg-id": userstate.id});
-                    return;
-                }*/
-
-                    // replace atted name underscores and camel casing e.g bigJohn_Jenkins = big John Jenkins
-                message = atted_names_convert(message);
-
-                    // add "user says" only if enough time has passed between same user messages
-                    // really I'd like to check the end of the last utterance and see if they were speaking next.
-                if (sameUser && sameChannel &&
-                    TTSVars.chatNoNameRepeatSeconds && userstate["tmi-sent-ts"] - TTSVars.lastMsgTime <= TTSVars.chatNoNameRepeatSeconds * 1000) {
-                        voiceParams.text = message;
-                    } else {
-                        voiceParams.text = add_speech_before_after(message, userstate, channel);
-                }
-
-                    // should Last User only be updated when there's an actual speech?  It should, really
-
-                TTSVars.lastMsgTime = userstate["tmi-sent-ts"];
-                TTSVars.lastUser = username;
-                TTSVars.lastChannel = channel;
-
-                    // when it was bugged this used to sometimes get a global array entry
-                speech.say(voiceParams);
-
                 break;
-            default: // pfff ?
-                break;
-        } // switch (message-type)
+            default:
+                return;
+        }
+
+            // PROCESS THE MESSAGE
+                // filter out emotes
+        let sayCommand = starts_with_say_command(message);  // returns !command / false
+        let voiceParams = {};
+
+        let commandSliceOffset = 0   // amount to strip from message
+        let voiceIndexDefault = 1; // I START AT ONE
+
+            // if sayCommand is false test !say or all chat on
+
+        if (sayCommand === false) {
+                // does it start with "!say"
+            if ( message.startsWith("!say ") ) {
+                message = message.substring(5);
+            }
+            else // Read all chat set?, but not if command
+            if ( !TTSVars.chatReadAll ||
+                (TTSVars.chatReadOtherCommands === false && '!' === message[0] ) ) {
+                return;
+            }
+                // test for a personalised user command.  usercommands = {username: "alias", edtrots: "ed"}
+            let nameIsCmd = starts_with_say_command("!" + TTSVars.usercommands[userstate['username']]);
+                // !cmd or false returned
+            if (nameIsCmd) {   // sayCmds are !cmd: {rate, pitch, voice} // THIS IS THE BUG THIS IS THE BUG .text get written to the global later cos reference.
+                //sayCmdPack.params = TTSVars.sayCmds[nameIsCmd]; check TMIConfig.TTSVars.sayCmds
+                //voiceParams = {...TTSVars.sayCmds[nameIsCmd]};    // FIXED
+                voiceParams = ns.get_voice_settings_by_name(nameIsCmd); // allows "patching" the jank version back
+            } else if (TTSVars.randomVoices) {
+                let vIdx = Math.floor(Math.random() * TTSVars.voices.length);
+                let voice = TTSVars.voices[vIdx]; // console.log("RAND VOICE", voice.name);
+                voiceParams = { rate: 1.3, pitch: 1.0, voice }
+            } else { // use voice 1
+                voiceParams = get_voice_settings_by_index( voiceIndexDefault );
+            }
+
+            sayCommand = '!all-chat';
+        } else { // DEFAULT VOICE// remove the voice command from the message
+            // console.log("MESSAGE", message);
+            commandSliceOffset = sayCommand.length + 1;
+            message = message.slice(commandSliceOffset).trim();
+            voiceParams = ns.get_voice_settings_by_name(sayCommand);
+        }
+
+        if ( ! TTSVars.chatReadEmotes ) {
+            message = emote_filter.filter(message, userstate);
+        }
+            // any message left?  I've noticed blank messages which just contain unprintable characters
+        if (message.length === 0) { //console.log("message zero returning");
+            return;
+        }
+
+            // category out a single user by setting similar commands to a single value e.g. !allsaycommands
+        let cooldownParams = {
+            channel: 'ALL-CHANS',    // cooldowns are CHANNEL based - so set to a common value if you want to put globals on for all
+            command: sayCommand ? sayCommand : '!all-chat',   // set to !userCategoryFake to category out only users
+            //category: "text-to-speech-"+ channel,   // example to category out channels individually
+            userstate,
+            globalCooldown: TTSVars.chatCooldownGlobal,
+            userCooldown: TTSVars.chatCooldownUser,
+            modCooldown: TTS_MOD_COOLDOWN     // tested working
+        }
+
+        let oc = cooldowns.cooldown_check(cooldownParams);
+
+        if (oc !== false ) {    // returns an object of user and global cooldown if on a cooldown
+            console.debug("ON a cooldown", oc);
+            return;
+        }
+        cooldowns.cooldown_set(cooldownParams);
+
+        let nid = speech.next_id();
+        let msgid = userstate["id"];  // each message has one
+            // visually add to the speech queue
+        TTSVars.speech_queue_list_add({user: userstate["display-name"], text: message, id: nid, msgid})
+
+            // now check if we should throw the message away
+        /*
+        if ( is_flags_moderated(userstate) ) { // user current fn as a shortcut
+            message_twitch_moderation_handler(channel, userstate.username, message, {"target-msg-id": userstate.id});
+            return;
+        }*/
+
+            // replace atted name underscores and camel casing e.g bigJohn_Jenkins = big John Jenkins
+        message = atted_names_convert(message);
+
+            // add "user says" only if enough time has passed between same user messages
+            // really I'd like to check the end of the last utterance and see if they were speaking next.
+        if (sameUser && sameChannel &&
+            TTSVars.chatNoNameRepeatSeconds && userstate["tmi-sent-ts"] - TTSVars.lastMsgTime <= TTSVars.chatNoNameRepeatSeconds * 1000) {
+                voiceParams.text = message;
+            } else {
+                voiceParams.text = add_speech_before_after(message, userstate, channel);
+        }
+
+            // should Last User only be updated when there's an actual speech?  It should, really
+
+        TTSVars.lastMsgTime = userstate["tmi-sent-ts"];
+        TTSVars.lastUser = username;
+        TTSVars.lastChannel = channel;
+
+            // when it was bugged this used to sometimes get a global array entry
+        speech.say(voiceParams);
     }   // end twitch_message_handler
 
         // CLEARCHAT happens on /ban /timeout or /clear :tmi.twitch.tv CLEARCHAT #dallas for entire room :tmi.twitch.tv CLEARCHAT #dallas :aSingleUser
@@ -819,7 +825,7 @@ var TTSMain = TTSMain || {};
     function volume_master_slider_oninput(e) {
         gid('volumemasterdisplay').textContent = Math.round( e.target.value * 100.0 );
     }
-})(TTSMain);
+})(UserMon);
 /*
 }   // try / SCOPE ENDS
 catch (e) {

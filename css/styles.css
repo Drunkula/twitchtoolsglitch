@@ -339,3 +339,14 @@ html {
 		padding: 0;
 	}
 }
+
+#messagelog, #usersinchannels {
+	display: table;
+}
+#messagelog > div, #usersinchannels > div {
+	display: table-row;
+}
+#messagelog > div > div, #usersinchannels > div > div {
+	display: table-cell;
+	padding-left: 2px;
+}

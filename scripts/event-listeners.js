@@ -17,7 +17,7 @@
 */
 
 
-
+// TT is the scope this adds to
 (function(ns) {	// SCOPE using jQuery methodology
 
 	const ONCHANGE_URL_UPDATE_DELAY_MS = 100;

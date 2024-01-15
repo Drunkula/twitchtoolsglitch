@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Twitch Tools</title>
+    <meta name="description">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <script defer="" src="https://use.fontawesome.com/releases/v6.1.1/js/all.js"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+  </head>
+  <body>
+    <div class="block mx-5 my-3 main-container">
+      <style>.main-container { margin: 0 !important; padding: 0 !important; }</style>
+      <div class="outer-logo-holder gradient-slide">
+        <div class="inner-logo-holder py-5 px-4"><img class="img main-logo-twitch" src="/assets/twitch-alone.svg"><img class="img main-logo-tools" src="/assets/tools-alone.svg"></div>
+      </div>
+      <div class="columns is-multiline last-child-big">
+        <div class="column is-6 section is-small">
+          <header>
+            <h2>Speak My Chat</h2>
+            <h3>Speech with nothing to install</h3>
+          </header>
+          <div class="block">Make chat commands like !say for your users to get their message read out in the chat or get all of your chat get read out (Also useful for following chat on a channel if you're doing the washing up).</div>
+          <div class="block">Different voices, cooldowns, blocked users, limit to mods, etc - <i>of course!</i><a class="tag is-info is-small mr-2" href="chat-to-speech.html">Try it here.</a>need more voices?<a class="tag is-info is-small ml-2" href="chat-to-speech-tabs.html">here you go.</a></div>
+        </div>
+        <div class="column is-6 section is-small">
+          <header>
+            <h2>New Chatter List</h2>
+            <h3>it's super attentive</h3>
+          </header>
+          <div class="block">The first time one of your viewers chats their name will be added to a list, letting you know who's around without having to scroll through the chat history.</div>
+          <div class="block">This tool will let you easily spot a chatter that might get buried under chat between your regulars or who's joined since you did a BRB.<a class="tag is-info is-small ml-3" href="new-chatter.html">Try it here.</a></div>
+        </div>
+        <div class="column is-6 section is-small">
+          <header>
+            <h2>OBS Control via chat</h2>
+            <h3>Mod helpers</h3>
+          </header>
+          <div class="block">Custom chat commands will let mods, vips or named chatters change scenes (you left it on BRB again!) or even unmute your mic.</div>
+          <div class="block">A little more complicated than the other tools as you'll need to install OBS Websockets - which you might already be using if if you're using tools like Touch Portal or Lioranboard.</div>
+          <div class="block"><span class="mr-1">!gamescene !brb !unmute, etc... you get the idea.</span><a class="mr-1 tag is-success is-small" href="scene-switcher.html">OBS v27.</a><span class="mr-1">or</span><a class="tag is-success is-small" href="scene-switcher-v5.html">OBS v28.</a></div>
+        </div>
+        <div class="column is-6 section is-small">
+          <header>
+            <h2>Chat Alerts</h2>
+            <h3>Don't miss out</h3>
+          </header>
+          <div class="block">If you don't check on the chat because you're caught up in your game or you're a smaller channel not used to getting many messages then this tool can alert you by flashing the browser or playing a sound (your choice).  Cooldowns mean you won't get alerts for every message and you can set timeouts any time at the click of a button.<a class="tag is-success is-small ml-3" href="chat-alert.html">Try it here.</a></div>
+        </div>
+        <div class="column is-6 section is-small">
+          <header>
+            <h2>You're muted!</h2>
+            <h3>Ding ding!</h3>
+          </header>
+          <div class="block">Alerts you when people say you're muted by flashing the browser or playing a sound.</div>
+          <div class="block">You can limit it to mods, vips or named chatters and cooldowns will automatically trigger, or be extended with the click of a button.<a class="tag is-link is-danger ml-3" href="muted-alert.html">Try it here.</a></div>
+        </div>
+        <div class="column is-6 section is-small">
+          <header>
+            <h2>Known Chatters</h2>
+            <h3>good and bad</h3>
+          </header>
+          <div class="block">VIPs, named people or 'wrong uns' enter the chat - you get told</div>
+          <div class="block">I'm considering a community driven <em>wrong 'un</em> list.  You'd be notified by the tool as soon as they joined the channel even before they sent any messages with tags on why they'd been reported.</div>
+        </div>
+        <div class="column is-6 section is-small">
+          <header>
+            <h2>OBS Remote Control Panel</h2>
+            <h3>Mod like a boss</h3>
+          </header>
+          <div class="block">Easily set up a remote control panel that'll allow a mod to select scenes, mute and unmute your mic, etc.  As with the chat commands if you've left yourself muted and on the BRB screen then mods can save the day.</div>
+          <div class="block">After you've created a panel you can send a link to the panel page that'll be valid only for 6 hours, or you can enable panels for longer and revoke its use as any time.</div>
+        </div>
+        <div class="column is-6 section is-small">
+          <header>
+            <h2>A Bonus</h2>
+            <h3>That's nice</h3>
+          </header>
+          <div class="block">Most tools this can be added as a custom dock in OBS so they'll always be ready.</div>
+          <div class="block">If you can't see OBS while gaming then chat commands like !muted cooldown 5 or !newchatter disable will let you or your mods stop things from getting really annoying.</div>
+        </div>
+        <div class="column is-6 section is-small">
+          <header>
+            <h2 class="is-italic">Where are the rest of the tools?</h2>
+            <h3>Gimme nawww!</h3>
+          </header>
+          <div class="block">I've already implemented most of them but I want to tart them up for the website and create micro-versions for using in OBS custom docks.  And I'll have to make this entire thing look like less of a mess.</div>
+        </div>
+        <div class="column is-6 section is-small">
+          <header>
+            <h2>Security</h2>
+            <h3>who's listening?</h3>
+          </header>
+          <div class="block">All of these tools bar one (mod remote panel, or if the community blacklist happens) will work directly from whatever browser you choose running entirely locally in javascript with zero communication to this site.  This means you can download all or any of the tools and use them locally.  You won't even need a local web server.  You can edit the config files to add the channel(s) to load by default and set preferences on who can use use custom commands.</div>
+          <div class="block">All tools can be limited to just your use as broadcaster or extend them with checkboxes to mods, vips or everyone.  Use can even be limited to those named only where appropriate.</div>
+        </div>
+      </div>
+      <footer class="footer">
+        <p>A footer I'll put some tripe in eventually.  Carry on.</p>
+      </footer>
+    </div>
+  </body>
+</html>
