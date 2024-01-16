@@ -96,6 +96,7 @@
                 <li class="is-active"><a>Do this, yeah?</a></li>
                 <!-- li: a Settings 2-->
                 <li><a>Searches</a></li>
+                <li><a>Searches 2</a></li>
                 <li><a>Settings</a></li>
               </ul>
             </div>
@@ -112,13 +113,22 @@
                 <div class="block">Separate terms with commas e.g. badger fights, colo?ring book?, shit!weasel</div>
                 <div class="block">
                   <ul class="ml-5">
-                    <li><span class="has-text-weight-bold">*</span> finds anything or nothing: spaces, weird characters, <b>everything</b>.  pig*sty will match <i>pigsty, pig sty, piggy be feisty, piglet wanna pasty, pig!!!! don't be hasty</i></li>
                     <li><span class="has-text-weight-bold">!</span> an optional space so you!is!smel finds <i>you is smell, youissmell, youis smel</i>, etc</li>
-                    <li><span class="has-text-weight-bold">?</span> optional non-space characters only so Geoff? will match <i>Geoff, Geoffry, Geoffers</i> but not <i>Geoff Dog</i>.  Colo?r will match <i>colour</i> or <i>color</i>.  book? finds <i>book, books</i> or <i>booklets</i></li>
+                    <li><span class="has-text-weight-bold">?</span> optional non-space characters only so Geoff? will match <i>Geoff, Geoffry, Geoffers</i> but not <i>Geoff Dog</i>.  Colo?r will match <i>colour</i> or <i>color</i>.  book? finds <i>book, books</i> or <i>booklets</i>.</li>
                     <li><span class="has-text-weight-bold">+</span> like ? but there must be at least one character so gin+ will match <i>ginster</i> but not <i>gin</i></li>
-                    <li><span class="has-text-weight-bold">^</span> 10 chars of anything. Reduces really far apart matches that * might cause. tea^pot will find <i>teapot, tea pot, team spot</i> but not <i>teacher is a tosspot</i>.  Add ++ to allow 20 chars between, etc</li>
                   </ul>
                 </div>
+              </div>
+              <div class="tab-pane">
+                <div class="block">
+                  <ul class="ml-5">
+                    <li><span class="has-text-weight-bold">*</span> finds anything or nothing: spaces, weird characters, <b>everything</b>.  pig*sty will match <i>pigsty, pig sty, piggy be feisty, piglet wanna pasty, pig!!!! don't be hasty</i></li>
+                    <li><span class="has-text-weight-bold">^</span> 10 chars of anything. Reduces really far apart matches that * might cause. tea^pot will find <i>teapot, tea pot, team spot</i> but not <i>teacher is a tosspot</i>.  Add ++ to allow 20 chars between, etc</li>
+                    <li><span class="has-text-weight-bold">(s)</span> optional plural/possessive after a word so Jane(s) will match <i>Jane, Janes or Jane's.</i>  Useful for name searches</li>
+                    <li><span class="has-text-weight-semibold">(opt1|opt2|opt3)</span> any of the terms so (gi|wi|bo)ggle will match <i>giggle, wiggle or boggle</i></li>
+                  </ul>
+                </div>
+                <div class="block">To test these out open a twitch chat (<b><a href="https://www.twitch.tv/popout/foofoomagoo/chat?popout=" target="_blank">use foofoomagoo</a></b>) add the channel for monitoring and type away.</div>
               </div>
               <div class="tab-pane">
                 <label class="label">message queue limit</label>
