@@ -34,6 +34,7 @@
 
 		{selector: '[data-toarray]', event: 'change', function: set_conf_array, params: {}},
 		{selector: '[data-toarraylc]', event: 'change', function: set_conf_array_lc, params: {}},
+		{selector: '[data-tocsvarray]', event: 'change', function: set_conf_csv_array, params: {}},
 
 		{selector: '[data-toequalpairslc]', event: 'change', function: set_conf_array_equal_pairs_lc, params: {}},
 
@@ -163,11 +164,19 @@
 		return v2a;
 	}
 
+	function set_conf_csv_array(e) {	//verify_data_varname(event);
+		let v2a = split_csv_array(e.target.value);		// allows you to use props.multi.deep
+		TT.set_conf(e.target.dataset.tocsvarray, v2a);
+		return v2a;
+	}
 		// string to array of 'usual' characters
 	function split_to_array(str) {
 		return str.split(/[^a-zA-Z0-9-_]/).filter(e => e);
 	}
 
+	function split_csv_array(str) {
+		return str.split(",").map(e => e.trim()).filter(e => e);
+	}
 
 		// turns foo=bar into an associative array using regex
 

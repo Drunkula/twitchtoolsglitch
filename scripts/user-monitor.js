@@ -12,9 +12,11 @@ var UserMonVars = {};
     //* The user list still gets two changes
     const USERMON_EVENTS = [
 		{selector: '#users', event: 'change', function: users_tracked_changed, params: {noAutoChange: true}},
+		{selector: '#buzzwords', event: 'change', function: search_terms_changed, params: {noAutoChange: false}},
     ];//*/
 
     var userT, messageT;
+    var searchTermRegex = null;
 
     window.addEventListener('load', async (event) => {
         document.title = "Twitch User Monitor";
@@ -25,10 +27,11 @@ var UserMonVars = {};
             // restores params and permissions
         TT.forms_init_common();
 
-        TT.add_event_listeners(USERMON_EVENTS);
-
-            // this adds the #mainform submit handler
+        // this adds the #mainform submit handler
         TT.add_events_common();
+
+            // add AFTER common events
+        TT.add_event_listeners(USERMON_EVENTS);
 
         TT.cclient.on("join", join_handler);
         TT.cclient.on("part", part_handler);
@@ -61,7 +64,8 @@ var UserMonVars = {};
     }
 
     function message_handler(channel, userstate, message, self) {
-        if ( TMIConfig.users.includes( userstate["username"] )  ) {
+        if (searchTermRegex.test(message)
+            || TMIConfig.users.includes( userstate["username"] )  ) {
             console.log(`${userstate["username"]} in ${channel}: ${message}`);
 //console.log(userstate);
             msg_add(channel, userstate["display-name"], message, userstate["tmi-sent-ts"]);
@@ -144,6 +148,34 @@ console.log("AFTER reconnect", res);
 
     function user_channel_div_id(channel, user) {
         return (user + channel).toLowerCase();
+    }
+
+        // search terms updated
+
+    function search_terms_changed() {
+        console.log("SEARCH TERMS NOW", TMIConfig.buzzwords, TMIConfig.buzzwords.length);
+
+        let terms = [];
+
+        if (TMIConfig.buzzwords.length) {
+            for (let term of TMIConfig.buzzwords) {
+                // make parts of a regex, replace stars with .* and escape chars
+
+                term = term.replace("\\", "\\\\");
+                term = term.replace(".", "\\.");
+                term = term.replace("*", ".*");
+
+                terms.push(term);
+            }
+
+            let regexStr = "(\\b" + terms.join("\\b|\\b") + "\\b)";
+            // backslashes ARE considered as word boundaries and \b\\b doesn't work
+            searchTermRegex = new RegExp(regexStr, "i");
+            //searchTermRegex = new RegExp("\\b\\\\\\b", "i");
+            console.log("REGEX STRING", regexStr, searchTermRegex);
+        } else {
+            searchTermRegex = null;
+        }
     }
 
 		// document create element

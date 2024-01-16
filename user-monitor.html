@@ -60,23 +60,32 @@
       </div>
       <div class="box mb-2 py-1">
         <form class="not-mobile-view mb-2" id="mainform">
-          <label class="label is-hidden-mobile">Channels</label>
+          <label class="label">Channels</label>
           <div class="field has-addons not-mobile-view">
             <div class="control is-expanded">
               <input class="input is-fullwidth form-save form-filter-spaces-to-commas" id="channels" type="text" size="50" placeholder="Channel names space or comma separated">
             </div>
             <div class="control">
-              <button class="button is-link urlpopulate" id="join">Join</button>
+              <button class="button is-link urlpopulate" id="join">Chans</button>
             </div>
           </div>
         </form>
-        <label class="label is-hidden-mobile">Users to monitor</label>
+        <label class="label">Users to monitor</label>
         <div class="field has-addons not-mobile-view">
           <div class="control is-expanded">
             <input class="input is-fullwidth form-save form-filter-spaces-to-commas" id="users" type="text" size="50" data-toarraylc="users" placeholder="User names space or comma separated">
           </div>
           <div class="control">
-            <button class="button is-link" id="usersupdate">Update</button>
+            <button class="button is-link" id="usersupdate">Users</button>
+          </div>
+        </div>
+        <label class="label">Terms to monitor (all users) comma separated, wildcards* allowed</label>
+        <div class="field has-addons not-mobile-view">
+          <div class="control is-expanded">
+            <input class="input is-fullwidth form-save" id="buzzwords" type="text" size="50" data-tocsvarray="buzzwords" placeholder="comma separated, * wildcard e.g. something, some thing, some th*">
+          </div>
+          <div class="control">
+            <button class="button is-link" id="termsupdate">Terms</button>
           </div>
         </div>
       </div>
