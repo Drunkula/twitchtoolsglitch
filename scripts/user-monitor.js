@@ -5,7 +5,14 @@ var UserMonVars = {};
 
 /*
     To get new join events then all tmi connected channels will have to be parted
-    when a change to users is made
+    when a change to users is made.
+
+    Soft wildcards.
+    Match an optional space.
+    Match a max of X characters
+
+    !"£$%^&*()[]-=_+;':@,.<>
+    !^+
 */
 
 (function(ns) {
@@ -166,6 +173,10 @@ console.log("AFTER reconnect", res);
                 term = term.replace(/\\/g, "\\\\");
                 term = term.replace(/\./g, "\\.");
                 term = term.replace(/\*/g, ".*");
+                term = term.replace(/!/g, "\\s*");
+                term = term.replace(/\+/g, ".{0,10}");
+                // ?@&^%
+                term = term.replace(/\+/g, "\w*");
 
                 terms.push(term);
             }
