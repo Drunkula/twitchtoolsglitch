@@ -173,15 +173,15 @@ console.log("AFTER reconnect", res);
         if (TMIConfig.buzzwords.length) {
             for (let term of TMIConfig.buzzwords) {
                 // make parts of a regex, replace stars with .* and escape chars
-
                 term = term.replace(/\\/g, "\\\\");
                 term = term.replace(/\./g, "\\.");
                 term = term.replace(/\*/g, ".*");
                 term = term.replace(/!/g, "\\s*");
                 term = term.replace(/\^/g, ".{0,10}");
-                // ?@&^%
-                term = term.replace(/\?/g, "\\w*");
-                term = term.replace(/\+/g, "\\w+");
+                // @&%
+                    // non-space characters
+                term = term.replace(/\?/g, "\\S*");
+                term = term.replace(/\+/g, "\\S+");
 
                 terms.push(term);
             }
