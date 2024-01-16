@@ -23,10 +23,10 @@
       <div id="flasher">
         <p>SOMEONE<br>JOINED</p>
       </div>
-      <div class="box mb-2 py-1">
+      <div class="box mb-2 py-1 not-mobile-view">
         <form class="not-mobile-view mb-2" id="mainform">
-          <label class="label">Channels</label>
-          <div class="field has-addons not-mobile-view">
+          <label class="has-text-weight-semibold">Channels</label>
+          <div class="field has-addons">
             <div class="control is-expanded">
               <input class="input is-fullwidth form-save form-filter-spaces-to-commas" id="channels" type="text" size="50" placeholder="Channel names space or comma separated">
             </div>
@@ -35,8 +35,8 @@
             </div>
           </div>
         </form>
-        <label class="label">Users to monitor</label>
-        <div class="field has-addons not-mobile-view">
+        <label class="has-text-weight-semibold">Users to monitor</label>
+        <div class="field has-addons">
           <div class="control is-expanded">
             <input class="input is-fullwidth form-save form-filter-spaces-to-commas" id="users" type="text" size="50" data-toarraylc="users" placeholder="User names space or comma separated">
           </div>
@@ -44,8 +44,8 @@
             <button class="button is-link" id="usersupdate">Users</button>
           </div>
         </div>
-        <label class="label">Terms to monitor (all users) comma separated, wildcards* allowed</label>
-        <div class="field has-addons not-mobile-view">
+        <label class="has-text-weight-semibold">Terms to monitor (all users) comma separated, wildcards* allowed</label>
+        <div class="field has-addons">
           <div class="control is-expanded">
             <input class="input is-fullwidth form-save" id="buzzwords" type="text" size="50" data-tocsvarray="buzzwords" placeholder="comma separated, * wildcard e.g. something, some thing, some th*">
           </div>
@@ -61,10 +61,77 @@
           </div>
         </div>
         <div class="column is-two-thirds">
-          <div class="box">Messages
+          <div class="box">Messages<span class="tag is-warning button mobile-view-btn ml-3 is-pulled-right" id="miniview">[mini view]</span><span class="tag button is-info is-light is-small ml-2 modal-trigger is-pulled-right" id="instructionsbtn" data-target="instructions">[Instructions]</span>
             <div id="messagelog"></div>
           </div>
           <div class="box" id="log"></div>
+        </div>
+      </div>
+      <div class="modal" id="instructionsss">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+          <header class="modal-card-head">
+            <p class="modal-card-title">Modal title</p>
+            <button class="delete" aria-label="close"></button>
+          </header>
+          <section class="modal-card-body"></section>
+          <!-- Content ...-->
+          <footer class="modal-card-foot">
+            <button class="button is-success">Save changes</button>
+            <button class="button">Cancel</button>
+          </footer>
+        </div>
+      </div>
+      <div class="modal" id="instructions">
+        <div class="modal-background modal-dismiss"></div>
+        <div class="modal-card">
+          <header class="modal-card-head">
+            <p class="modal-card-title">Hello shitburgs!</p>
+            <button class="delete" aria-label="close"></button>
+          </header>
+          <section class="modal-card-body">
+            <!-- Content ...-->
+            <div class="tabs is-fullwidth is-toggle is-toggle-rounded is-small" data-target="#configpanels">
+              <ul>
+                <li class="is-active"><a>Do this, yeah?</a></li>
+                <!-- li: a Settings 2-->
+                <li><a>Settings</a></li>
+              </ul>
+            </div>
+            <div class="block tab-content" id="configpanels">
+              <div class="tab-pane is-active">
+                <div class="block">The <span class="is-italic">users in channels</span> pane takes a while to spot lurkers, so shurrup and wait.</div>
+                <div class="block">There are <span class="has-text-weight-bold">wildcards</span>
+                  <ul class="ml-5">
+                    <li><span class="has-text-weight-bold">*</span> match anything or nothing: spaces, weird characters, <b>everything</b></li>
+                    <li><span class="has-text-weight-bold">!</span> optional space so you!is!smel matches <i>you is smell, youissmell, youis smel</i>, etc</li>
+                    <li><span class="has-text-weight-bold">?</span> optional non-space characters only so fr?gface will match <i>frgface, frorrgface</i> but not <i>fro gface</i></li>
+                    <li><span class="has-text-weight-bold">+</span> like ? but there must be at least one character so +git will match <i>yougit</i> but not <i>git</i></li>
+                    <li><span class="has-text-weight-bold">^</span> 10 chars of anything. Reduces really far apart matches that * might cause. tea^pot will match <i>teapot, tea pot, tea pissy pot</i> but not <i>tea is really lovely pot</i>.  Add two for allowing 20 chars between, etc</li>
+                  </ul>
+                </div>
+                <div class="block">OBS dock? Do all your settings, next door click start on miniview, copy the url for the dock = less gubbins showing up.</div>
+                <div class="block">If you make changes <b>BOOKMARK</b> the link again to save your settings.</div>
+              </div>
+              <div class="tab-pane">
+                <label class="label">message queue limit</label>
+                <div class="field">
+                  <div class="control">
+                    <input class="input number-input-5 form-save" type="number" id="messagelimit" min="0" max="100000" value="10000" data-toint="messageLimit">
+                  </div>
+                </div>
+                <div class="control">
+                  <label class="checkbox is-link is-responsive has-text-weight-medium">
+                    <input class="form-save" type="checkbox" data-tocheckbox="miniviewOnStart" id="miniview"> Miniview on start
+                  </label>
+                </div>
+              </div>
+            </div>
+          </section>
+          <footer class="modal-card-foot">
+            <button class="button is-success modal-dismiss">Bye then.</button>
+          </footer>
+          <!--button.button.modal-dismiss.is-small Cancel-->
         </div>
       </div>
     </div>

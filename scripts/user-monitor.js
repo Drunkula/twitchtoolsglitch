@@ -45,6 +45,10 @@ var UserMonVars = {};
         TT.cclient.on("message", message_handler);
             // JOIN events can take a while to arrive
         TT.join_chans();
+
+        if (TMIConfig.miniviewOnStart) {
+            TT.mini_view_on(true);
+        }
     });
 
 
@@ -174,9 +178,10 @@ console.log("AFTER reconnect", res);
                 term = term.replace(/\./g, "\\.");
                 term = term.replace(/\*/g, ".*");
                 term = term.replace(/!/g, "\\s*");
-                term = term.replace(/\+/g, ".{0,10}");
+                term = term.replace(/\^/g, ".{0,10}");
                 // ?@&^%
-                term = term.replace(/\+/g, "\w*");
+                term = term.replace(/\?/g, "\\w*");
+                term = term.replace(/\+/g, "\\w+");
 
                 terms.push(term);
             }

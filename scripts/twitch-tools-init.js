@@ -196,24 +196,31 @@
 
 		// set up mobile view buttons
 
-	function init_mobile_view_buttons() {
-		let mobileViewOn = 0;
+	TT.miniViewOn = false;
 
+	function init_mobile_view_buttons() {
 		let btns = document.querySelectorAll('.mobile-view-btn');
-		let mobViewItems = document.querySelectorAll('.not-mobile-view, .navbar');
 
 			// I could add is-hidden but immediately thought .hidden-mobile
 		btns.forEach(btn => {
 			btn.addEventListener('click', () => {
-				mobileViewOn = !mobileViewOn;
-
-				if (mobileViewOn) {	// was is-hidden-mobile
-					mobViewItems.forEach(i => i.classList.add('is-hidden'));
-				} else {
-					mobViewItems.forEach(i => i.classList.remove('is-hidden'));
-				}
+				TT.miniViewOn = !TT.miniViewOn;
+				mini_view_on(TT.miniViewOn);
 			});
 		});
+	}
+
+	let mobViewItems = document.querySelectorAll('.not-mobile-view, .navbar');
+	TT.mini_view_on = mini_view_on; // make function 'public'
+	// on = bool
+	function mini_view_on(on) {
+		TT.miniViewOn = on;
+
+		if (on) {	// was is-hidden-mobile
+			mobViewItems.forEach(i => i.classList.add('is-hidden'));
+		} else {
+			mobViewItems.forEach(i => i.classList.remove('is-hidden'));
+		}
 	}
 
 })();	// BULMA inits
