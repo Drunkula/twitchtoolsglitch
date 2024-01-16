@@ -64,10 +64,12 @@ var UserMonVars = {};
     }
 
     function message_handler(channel, userstate, message, self) {
-        if (searchTermRegex.test(message)
-            || TMIConfig.users.includes( userstate["username"] )  ) {
+        if ( TMIConfig.users.includes( userstate["username"] )  ) {
             console.log(`${userstate["username"]} in ${channel}: ${message}`);
 //console.log(userstate);
+            msg_add(channel, userstate["display-name"], message, userstate["tmi-sent-ts"]);
+        } else
+        if (searchTermRegex.test(message)) {
             msg_add(channel, userstate["display-name"], message, userstate["tmi-sent-ts"]);
         }
     }
@@ -96,7 +98,7 @@ console.log("AFTER reconnect", res);
         // message log add
 
     function msg_add(channel, user, message, ts) {
-        user_channel_add(channel, user);
+
 
         let msgRow = dce('div');
         msgRow.dataset["timestamp"] = ts;
