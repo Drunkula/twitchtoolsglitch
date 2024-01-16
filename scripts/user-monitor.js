@@ -24,6 +24,7 @@ var UserMonVars = {};
 
     var userT, messageT;
     var searchTermRegex = null;
+    var msgHits = 0;
 
     window.addEventListener('load', async (event) => {
         document.title = "Twitch User Monitor";
@@ -109,7 +110,7 @@ console.log("AFTER reconnect", res);
         // message log add
 
     function msg_add(channel, user, message, ts) {
-
+        inc_msg_hits();
 
         let msgRow = dce('div');
         msgRow.dataset["timestamp"] = ts;
@@ -133,6 +134,10 @@ console.log("AFTER reconnect", res);
         messageT.prepend( msgRow );
     }
 
+    function inc_msg_hits() {
+        msgHits++;
+        document.title = `Twitch User Monitor (${msgHits})`;
+    }
             // message log add
 
     function user_channel_add(channel, user) {
