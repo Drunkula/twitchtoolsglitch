@@ -310,7 +310,6 @@ html {
 	align-items: center; /* vertically? */
 
 	border-bottom: 1px solid gray;
-
 }
 
 .speechQUser {
@@ -330,22 +329,32 @@ html {
 }
 
 .speechQText {
-	padding: 0 8px;
+	/* padding: 0 8px; */
 	width: 100%;
 }
 
 @media only screen and (max-width: 600px) {
 	.speechQRow {
 		flex-wrap: wrap;
-		align-content: flex-start;
 	}
 
-	.speSechQButtons {
-		white-space: nowrap;
+	.speechQButtons {
+		align-self: flex-end;
 	}
 
 	.speechQText {
 		order: 1;	/* standard is 0 so pushes right */
 		padding: 0;
 	}
+}
+
+#usersinchannels {
+	display: table;
+}
+#usersinchannels > div {
+	display: table-row;
+}
+#usersinchannels > div > div {
+	display: table-cell;
+	padding-right: 6px;
 }
