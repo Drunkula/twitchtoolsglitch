@@ -113,24 +113,32 @@ console.log("AFTER reconnect", res);
         inc_msg_hits();
 
         let msgRow = dce('div');
+        msgRow.classList.add('speechQRow');
         msgRow.dataset["timestamp"] = ts;
-        // .classList.add('speechQRow');
+            // user
         let userDiv = dce('div');
         userDiv.classList.add('speechQUser');
         userDiv.textContent = user;
 
+        let timeNMsgDiv = dce('div');
+        timeNMsgDiv.classList.add('speechQButtons');
+
+            // message
         let msgDiv = dce('div');
 		msgDiv.textContent = message;
 		msgDiv.classList.add('speechQText');
+            // time
+        let tDiv = dce('div');  // well done for not taking a string, Date.
+		tDiv.textContent = new Date( Number(ts) ).toLocaleTimeString().substring(0, 5);
+        tDiv.classList.add('speechQUser');
 
+            // channel
         let chDiv = dce('div');
 		chDiv.textContent = channel;
         chDiv.classList.add('speechQUser');
 
-        let tDiv = dce('div');  // well done for not taking a string, Date.
-		tDiv.textContent = new Date( Number(ts) ).toLocaleTimeString().substring(0, 5);
-
-        msgRow.append(userDiv, msgDiv, tDiv, chDiv);
+        timeNMsgDiv.append(tDiv, chDiv);
+        msgRow.append(userDiv, msgDiv, timeNMsgDiv);
         messageT.prepend( msgRow );
     }
 

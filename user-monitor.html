@@ -17,52 +17,52 @@
       <script src="/scripts/tmi-code-common.js" defer></script>
       <script src="/scripts/event-listeners.js" defer></script>
       <script src="/scripts/form-fields-save-restore.js" defer></script>
-      <script src="/scripts/Flasher+Countdown.class.js" defer></script>
+      <!--script(src="/scripts/Flasher+Countdown.class.js" defer)-->
       <!-- script(src="/scripts/muted-alert.js" defer)-->
       <script src="/scripts/user-monitor.js" defer></script>
       <div id="flasher">
         <p>SOMEONE<br>JOINED</p>
       </div>
-      <div class="box mb-2 py-1 not-mobile-view">
+      <div class="box mb-2 py-1 not-mobile-view is-size-7-mobile">
         <form class="not-mobile-view mb-2" id="mainform">
           <label class="has-text-weight-semibold">Channels - space separated</label>
           <div class="field has-addons">
             <div class="control is-expanded">
-              <input class="input is-fullwidth form-save form-filter-spaces-to-commas" id="channels" type="text" size="50" placeholder="e.g. mst3k sues_haberdashery ferretsquabbles">
+              <input class="input is-fullwidth form-save is-small form-filter-spaces-to-commas" id="channels" type="text" size="50" placeholder="e.g. mst3k sues_haberdashery ferretsquabbles">
             </div>
             <div class="control">
-              <button class="button is-link urlpopulate" id="join">Chans</button>
+              <button class="button is-small is-link urlpopulate" id="join">Chans</button>
             </div>
           </div>
         </form>
         <label class="has-text-weight-semibold">Users to monitor - space separated</label>
         <div class="field has-addons">
           <div class="control is-expanded">
-            <input class="input is-fullwidth form-save form-filter-spaces-to-commas" id="users" type="text" size="50" data-toarraylc="users" placeholder="e.g prawnsunset dontgointhere dissapointing_steve">
+            <input class="input is-small is-fullwidth form-save form-filter-spaces-to-commas" id="users" type="text" size="50" data-toarraylc="users" placeholder="e.g prawnsunset dontgointhere dissapointing_steve">
           </div>
           <div class="control">
-            <button class="button is-link" id="usersupdate">Users</button>
+            <button class="button is-small is-link" id="usersupdate">Users</button>
           </div>
         </div>
         <label class="has-text-weight-semibold">[Optional] Search terms  - comma separated, wildcards* allowed</label>
         <div class="field has-addons">
           <div class="control is-expanded">
-            <input class="input is-fullwidth form-save" id="buzzwords" type="text" size="50" data-tocsvarray="buzzwords" placeholder="e.g. stolen turnips, Colo+r, Geoff*">
+            <input class="input is-small is-fullwidth form-save" id="buzzwords" type="text" size="50" data-tocsvarray="buzzwords" placeholder="e.g. stolen turnips, Colo+r, Geoff*">
           </div>
           <div class="control">
-            <button class="button is-link" id="termsupdate">Terms</button>
+            <button class="button is-small is-link" id="termsupdate">Terms</button>
           </div>
         </div>
       </div>
       <div class="columns is-flex-direction-row-reverse">
         <div class="column">
-          <div class="box">Users in channels
+          <div class="box is-size-7-mobile">Users in channels
             <div id="usersinchannels"></div>
           </div>
         </div>
         <div class="column is-two-thirds">
           <div class="box">Messages<span class="tag is-warning button mobile-view-btn ml-3 is-pulled-right" id="miniview">[mini view]</span><span class="tag button is-info is-light is-small ml-2 modal-trigger is-pulled-right" id="instructionsbtn" data-target="instructions">[Instructions]</span>
-            <div id="messagelog"></div>
+            <div class="is-size-7-touch" id="messagelog"></div>
           </div>
           <div class="box" id="log"></div>
         </div>
@@ -82,7 +82,7 @@
           </footer>
         </div>
       </div>
-      <div class="modal" id="instructions">
+      <div class="modal is-size-7-touch" id="instructions">
         <div class="modal-background modal-dismiss"></div>
         <div class="modal-card">
           <header class="modal-card-head">

@@ -302,12 +302,15 @@ html {
 	flex-wrap: nowrap;
 	justify-content: space-between;
 
+	column-gap: 6px;;
+
 	padding-bottom: 3px;
 	margin-bottom: 4px;
 
-	align-items: center;
+	align-items: center; /* vertically? */
 
 	border-bottom: 1px solid gray;
+
 }
 
 .speechQUser {
@@ -319,6 +322,12 @@ html {
 .speechQButtons {
 	white-space: nowrap;
 }
+.speechQButtons > div { /* for user monitor */
+	display: inline-block;
+}
+.speechQButtons > div:first-child { /* for user monitor */
+	margin-right: 6px;
+}
 
 .speechQText {
 	padding: 0 8px;
@@ -328,25 +337,15 @@ html {
 @media only screen and (max-width: 600px) {
 	.speechQRow {
 		flex-wrap: wrap;
+		align-content: flex-start;
 	}
 
-	.speechQButtons {
-		align-self: flex-end;
+	.speSechQButtons {
+		white-space: nowrap;
 	}
 
 	.speechQText {
 		order: 1;	/* standard is 0 so pushes right */
 		padding: 0;
 	}
-}
-
-#messagelog, #usersinchannels {
-	display: table;
-}
-#messagelog > div, #usersinchannels > div {
-	display: table-row;
-}
-#messagelog > div > div, #usersinchannels > div > div {
-	display: table-cell;
-	padding-left: 2px;
 }
