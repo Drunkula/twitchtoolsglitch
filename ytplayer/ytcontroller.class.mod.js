@@ -116,6 +116,11 @@ class YTController {
         f: d => {},
 
         nowandnext: d => this.now_and_next(d.data.howMany),
+
+        playlistcount: e => {
+            clog("sending count:", this.playlist,length);
+            this.send_json({action: "playlistcount", count: this.playlist.length});
+        },
     }
 
     // CPH.RunActionById("1a8f5a37-5107-420c-9dd5-4f863ce6ffd1", true);
