@@ -5,12 +5,12 @@
     Needed: channel, allowMods, allowVips, users permitted, enabled/disabled
 */
 "use strict"
-// container for the vars for this
 
+// scope container for the vars
 {
     TMIConfig.KS = {
         obs: new OBSWebSocket(),
-        connected: false,
+        isConnected: false,
     };
 
     const KS = TMIConfig.KS;
@@ -92,7 +92,7 @@
     KS.obs_connect_success = async function obs_connect_success(a) {
 		console.log("OBS connect success", a);
 
-		KS.connected = true;
+		KS.isConnected = true;
 		gid("connectresult").textContent = 'Success';
 
         set_connected_text(true);
