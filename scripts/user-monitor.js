@@ -188,14 +188,15 @@ console.log("AFTER reconnect", res);
                 // make parts of a regex, replace stars with .* and escape chars gcm
                 term = term.replace(/\\/g, "\\\\");
                 term = term.replace(/\./g, "\\.");
-                term = term.replace(/\*/g, ".*");
-                term = term.replace(/!/g, "\\s*");
-                term = term.replace(/\^/g, ".{0,10}");
-                term = term.replace(/[(]s[)]/g, "(|s|'s)");
+
+                term = term.replace(/\*/g, ".*");           // dot wildcard
+                term = term.replace(/!/g, "\\s*");          // ! optional spaces
+                term = term.replace(/\^/g, ".{0,10}");      // ^ wildcard limited to 10 chars
+                term = term.replace(/[(]s[)]/g, "(|s|'s)"); // (s) optional s, 's
                 // @&%
                     // non-space characters
-                term = term.replace(/\?/g, "\\S*");
-                term = term.replace(/\+/g, "\\S+");
+                term = term.replace(/\?/g, "\\S*");         // optional "solid" non-space chars
+                term = term.replace(/\+/g, "\\S+");         // 1 or more non optional solid chars
 
                 terms.push(term);
             }

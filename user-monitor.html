@@ -23,8 +23,8 @@
       <div id="flasher">
         <p>SOMEONE<br>JOINED</p>
       </div>
-      <div class="box mb-2 py-1 not-mobile-view is-size-7-mobile">
-        <form class="not-mobile-view mb-2" id="mainform">
+      <div class="box mb-2 py-1 not-miniview is-size-7-mobile">
+        <form class="not-miniview mb-2" id="mainform">
           <label class="has-text-weight-semibold">Channels - space separated</label>
           <div class="field has-addons">
             <div class="control is-expanded">
@@ -115,7 +115,7 @@
                   <ul class="ml-5">
                     <li><span class="has-text-weight-bold">!</span> an optional space so you!is!smel finds <i>you is smell, youissmell, youis smel</i>, etc</li>
                     <li><span class="has-text-weight-bold">?</span> optional non-space characters only so Geoff? will match <i>Geoff, Geoffry, Geoffers</i> but not <i>Geoff Dog</i>.  Colo?r will match <i>colour</i> or <i>color</i>.  book? finds <i>book, books</i> or <i>booklets</i>.</li>
-                    <li><span class="has-text-weight-bold">+</span> like ? but there must be at least one character so gin+ will match <i>ginster</i> but not <i>gin</i></li>
+                    <li><span class="has-text-weight-bold">+</span> at least one non-space character so play+ will match <i>playground</i> but not <i>play</i></li>
                   </ul>
                 </div>
               </div>
@@ -123,7 +123,7 @@
                 <div class="block">
                   <ul class="ml-5">
                     <li><span class="has-text-weight-bold">*</span> finds anything or nothing: spaces, weird characters, <b>everything</b>.  pig*sty will match <i>pigsty, pig sty, piggy be feisty, piglet wanna pasty, pig!!!! don't be hasty</i></li>
-                    <li><span class="has-text-weight-bold">^</span> 10 chars of anything. Reduces really far apart matches that * might cause. tea^pot will find <i>teapot, tea pot, team spot</i> but not <i>teacher is a tosspot</i>.  Add ++ to allow 20 chars between, etc</li>
+                    <li><span class="has-text-weight-bold">^</span> 10 chars of anything. Reduces really far apart matches that * might cause. tea^pot will find <i>teapot, tea pot, team spot</i> but not <i>teacher is a tosspot</i>.  Add ^^ to allow 20 chars between, etc</li>
                     <li><span class="has-text-weight-bold">(s)</span> optional plural/possessive after a word so Jane(s) will match <i>Jane, Janes or Jane's.</i>  Useful for name searches</li>
                     <li><span class="has-text-weight-semibold">(opt1|opt2|opt3)</span> any of the terms so (gi|wi|bo)ggle will match <i>giggle, wiggle or boggle</i></li>
                   </ul>

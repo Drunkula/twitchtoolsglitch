@@ -1,7 +1,13 @@
 "use strict"
 /*	MAIN Body for control - separated from more OBS based functions
+OBTAIN FROM:
+	https://cdn.jsdelivr.net/npm/obs-websocket-js
+	https://unpkg.com/obs-websocket-js
 
-V5 Events : https://github.com/obsproject/obs-websocket/blob/master/docs/generated/protocol.md#events
+
+
+
+V5 Events :   https://github.com/obsproject/obs-websocket/blob/master/docs/generated/protocol.md#events
    Requests : https://github.com/obsproject/obs-websocket/blob/master/docs/generated/protocol.md#requests
 
 v4 to 5 changes:

@@ -210,7 +210,7 @@
 		});
 	}
 
-	let mobViewItems = document.querySelectorAll('.not-mobile-view, .navbar');
+	let mobViewItems = document.querySelectorAll('.not-miniview, .navbar');
 	TT.mini_view_on = mini_view_on; // make function 'public'
 	// on = bool
 	function mini_view_on(on) {

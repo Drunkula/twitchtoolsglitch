@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Twitch Tools</title>
+    <meta name="description">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <script defer="" src="https://use.fontawesome.com/releases/v6.1.1/js/all.js"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+  </head>
+  <body>
+    <div class="block mx-5 my-3 main-container">
+      <script src="/scripts/backbone-common.js" defer></script>
+      <script src="/scripts/twitch-tools-init.js" defer></script>
+      <script src="/scripts/tmi.min.js" defer></script>
+      <script src="/scripts/tmi-code-common.js" defer></script>
+      <script src="/scripts/event-listeners.js" defer></script>
+      <script src="/scripts/form-fields-save-restore.js" defer></script>
+      <!--script(src="/scripts/obs-ws.v5.min.js" defer)-->
+      <!-- CDN version of the OBS websocket code-->
+      <script src="https://cdn.jsdelivr.net/npm/obs-websocket-js" defer></script>
+      <script src="/scripts/kill-switch.js" defer></script>
+      <!--script(src="/scripts/scene-switcher-obs-v5.js" defer)-->
+      <!--script(src="/scripts/scene-switcher-v5.js" defer)-->
+      <!--.box.mb-2.py-1-->
+      <div class="columns">
+        <div class="column">
+          <div class="box">
+            <div class="has-text-centered">
+              <tag class="is-size-5 has-text-centered tag is-danger" id="connectstatus">NOT CONNECTED</tag>
+            </div>
+            <!-- CHANNEL LIST-->
+            <form class="not-miniview mb-2" id="mainform">
+              <label class="label">Your Channel</label>
+              <div class="field has-addons not-miniview">
+                <div class="control is-expanded">
+                  <input class="input is-fullwidth form-save form-filter-spaces-to-commas" id="channels" type="text" size="50" placeholder="Channel names space or comma separated">
+                </div>
+                <div class="control">
+                  <button class="button is-link urlpopulate" id="join">Join</button>
+                </div>
+              </div>
+            </form>
+            <!-- END COMMAND-->
+            <label class="label not-miniview">Stream end command:</label>
+            <div class="field">
+              <div class="control">
+                <input class="input form-save" type="text" name="endcommand" id="endcommand" placeholder="e.g !terminatestream" data-tostr="KS.endCommand" value="!terminatestream">
+              </div>
+            </div>
+            <!-- ENABLED, MINIVIEW-->
+            <div class="field is-grouped is-grouped-centered mb-0">
+              <div class="control">
+                <label class="checkbox button is-link is-size-7-mobile is-small">
+                  <input id="enablekill" type="checkbox" checked data-tocheckbox="KS.killswitchEnabled"> enabled
+                </label>
+              </div>
+              <div class="control">
+                <label class="checkbox button is-link is-size-7-mobile is-small">
+                  <input class="form-save" id="startmini" type="checkbox" data-tocheckbox="miniviewOnStart"> start mini view
+                </label>
+              </div>
+              <div class="control">
+                <button class="button is-small is-primary mobile-view-btn">Mini View</button>
+              </div>
+            </div>
+            <hr class="not-miniview">
+            <div class="not-miniview">
+              <p class="label has-text-centered">Allow From:</p>
+              <div class="field is-grouped-centered is-grouped permissions">
+                <div class="control">
+                  <label class="checkbox button is-info">
+                    <input class="form-save" id="everyone" type="checkbox" data-tocheckbox="perms.allowEveryone"> everyone
+                  </label>
+                </div>
+                <div class="control">
+                  <label class="checkbox button is-info">
+                    <input class="form-save" id="mods" type="checkbox" checked data-tocheckbox="perms.allowMods"> mods
+                  </label>
+                </div>
+                <div class="control">
+                  <label class="checkbox button is-info">
+                    <input class="form-save" id="vips" type="checkbox" checked data-tocheckbox="perms.allowVips"> vips
+                  </label>
+                </div>
+              </div>
+              <label class="label">Users always allowed (even if not mods)</label>
+              <div class="field">
+                <div class="control">
+                  <input class="input form-save form-filter-spaces-to-commas" type="text" name="allownamed" id="allownamed" placeholder="allow named users, space separated" data-toarraylc="perms.allowNamed">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="column not-miniview">
+          <div class="box">
+            <label class="label">OBS Address e.g. localhost</label>
+            <div class="field">
+              <div class="control">
+                <input class="input form-save" type="text" id="obsaddress" placeholder="OBS address typically localhost or 127.0.0.1" data-tostr="KS.obsAddress" value="localhost">
+              </div>
+            </div>
+            <div class="columns is-mobile">
+              <div class="column">
+                <label class="label">OBS Port e.g. 4455</label>
+                <div class="field">
+                  <div class="control">
+                    <input class="input form-save" type="number" id="obsport" placeholder="OBS port e.g. 4455" data-tostr="KS.obsPort" value="4455">
+                  </div>
+                </div>
+              </div>
+              <div class="column">
+                <label class="label">OBS Password</label>
+                <div class="field">
+                  <div class="control">
+                    <input class="input form-save" type="text" id="obspassword" placeholder="OBS password (if authentication enabled)" data-tostr="KS.obsPassword">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="is-flex is-align-items-center">
+              <div class="mr-3">
+                <button class="button is-info is-responsive" id="obsconnect">Connect</button>
+              </div>
+              <div id="connectresult"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="not-miniview mb-2" id="logbox">
+        <div class="box">
+          <button class="delete is-pulled-right" data-target="#logbox"></button>
+          <h3 class="subtitle mb-1" id="loglabel">Log:</h3>
+          <div id="log"></div>
+        </div>
+      </div>
+      <div class="container not-miniview">
+        <div class="message is-link" id="mbnc">
+          <div class="message-header">OBS Chat Killswitch
+            <button class="delete" data-target="#mbnc"></button>
+          </div>
+          <div class="message-body">
+            <div class="block">
+              <p>Allow your stream to be ended via a chat message or whisper</p>
+              <p>enter your channel name to monitor messages and the terminate command you'd like to use.</p>
+            </div>
+            <div class="block">
+              <p><strong>Permissions:</strong> limit to mods, vips, everyone (if you're insace) and/or named users you trust</p>
+              <p><strong>Always allowed:</strong> no matter what.  E.g. regular non-mods that you trust.</p>
+            </div>
+            <div class="block">
+              <p><strong>NOTE:</strong> This script is for <strong>OBS versions 28</strong> and above.</p>
+            </div>
+            <div class="block">
+              <p>Your OBS Websocket login details wii'll be saved if you bookmark or reload the page.  Use the 'connect' button until you get the right details.</p>
+              <p>There's no security risk for typing in the password - you can check by going to the glitch page for the tools and seeing it's a static site meaning there's no backend handling.  It's all done in the browser using javascript.</p>
+            </div>
+            <div class="block">
+              <p><strong>Bookmark</strong> the page to keep the settings once you've got it setup how you like.</p>
+              <p><strong>Add the URL as an OBS custom dock</strong> and it'll automatically start working each time you use OBS.</p>Use start mini view before copying the url if you want it to be used on startup.
+              The dock can be dragged to a tab group.  It'll work even if it's not the visible tab but can't be fully closed.
+              <p><strong>Note</strong> if you change your obs socket port or password then update any settings and copy the new URL for the dock.</p>
+            </div>
+            <div class="block"></div>
+            <div class="field has-addons">
+              <div class="control is-expanded">
+                <input class="input is-small" id="linkurl" placeholder="Url to bookmark">
+              </div>
+              <div class="control">
+                <button class="button is-danger is-small is-responsive urlpopulate">Get Url</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal" id="confiXgModal">
+        <div class="modal-background modal-dismiss"></div>
+        <div class="modal-card">
+          <section class="modal-card-body">
+            <div class="tabs is-fullwidth is-toggle is-toggle-rounded is-small" data-target="#configpanels">
+              <ul>
+                <li class="is-active"><a>Permissions</a></li>
+                <li id="obssettings"><a>OBS Websocket Settings</a></li>
+              </ul>
+            </div>
+            <div class="block tab-content" id="configpanels">
+              <div class="tab-pane is-active">
+                <p>Nope</p>
+              </div>
+              <div class="tab-pane">
+                <p>NO</p>
+              </div>
+            </div>
+          </section>
+          <footer class="modal-card-foot">
+            <button class="button modal-dismiss is-success urlpopulate is-responsive">Done</button>
+          </footer>
+        </div>
+        <button class="modal-close is-large">button</button>
+      </div>
+    </div>
+  </body>
+</html>

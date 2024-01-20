@@ -56,9 +56,9 @@
       <script src="/scripts/scene-switcher-obs-v5.js" defer></script>
       <script src="/scripts/scene-switcher-v5.js" defer></script>
       <div class="box mb-2 py-1">
-        <form class="not-mobile-view mb-2" id="mainform">
+        <form class="not-miniview mb-2" id="mainform">
           <label class="label is-hidden-mobile">Your Channel</label>
-          <div class="field has-addons not-mobile-view">
+          <div class="field has-addons not-miniview">
             <div class="control is-expanded">
               <input class="input is-fullwidth form-save form-filter-spaces-to-commas" id="channels" type="text" size="50" placeholder="Channel names space or comma separated">
             </div>
@@ -80,8 +80,8 @@
             <button class="button is-small is-primary modal-trigger" data-target="configModal"><i class="fas fa-gear"></i></button>
           </div>
         </div>
-        <!--.field.is-grouped-centered.is-grouped.not-mobile-view-->
-        <div class="not-mobile-view" id="saycmds">
+        <!--.field.is-grouped-centered.is-grouped.not-miniview-->
+        <div class="not-miniview" id="saycmds">
           <div class="tabs is-fullwidth is-toggle is-small mt-2" data-target="#scenepanels">
             <ul>
               <li class="is-active"><a>Scenes</a></li>
@@ -371,21 +371,21 @@
             </div>
           </div>
         </div>
-        <hr class="not-mobile-view">
+        <hr class="not-miniview">
       </div>
       <div class="box">
         <div id="mainoutput"></div>
         <p>Sent Commands.</p>
         <div id="commandqueue"></div>
       </div>
-      <div class="not-mobile-view mb-2" id="logbox">
+      <div class="not-miniview mb-2" id="logbox">
         <div class="box">
           <button class="delete is-pulled-right" data-target="#logbox"></button>
           <h3 class="subtitle mb-1" id="loglabel">Log:</h3>
           <div id="log"></div>
         </div>
       </div>
-      <div class="container not-mobile-view">
+      <div class="container not-miniview">
         <div class="message is-link" id="mbnc">
           <div class="message-header">Scene switcher from chat
             <button class="delete" data-target="#mbnc"></button>
