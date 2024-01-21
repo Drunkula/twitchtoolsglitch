@@ -26,9 +26,14 @@
       <!--.box.mb-2.py-1-->
       <div class="columns">
         <div class="column">
+          <div class="box has-text-centered" id="killCountdownBox">
+            <div id="killMsg"></div>
+            <button class="button is-danger" id="killCountdownBtn">Cancel</button>
+          </div>
           <div class="box">
             <div class="has-text-centered">
               <tag class="is-size-5 has-text-centered tag is-danger" id="connectstatus">NOT CONNECTED</tag>
+              <div id="killMsg">...</div>
             </div>
             <!-- CHANNEL LIST-->
             <form class="not-miniview mb-2" id="mainform">
@@ -92,6 +97,13 @@
                 </div>
               </div>
             </div>
+          </div>
+          <!-- connection statuses-->
+          <div class="box has-text-centered">
+            <tag class="tag is-info">Chat</tag><span class="mx-3" id="chatconnected">?</span>
+            <tag class="tag is-info">Obs</tag><span class="mx-3" id="obsconnected">?</span>
+            <tag class="tag is-info">Streaming</tag><span class="mx-2" id="isstreaming">?</span>
+            <tag class="tag is-info">Recording</tag><span class="mx-3" id="isrecording">?</span>
           </div>
         </div>
         <div class="column not-miniview">

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Twitch Tools</title>
+    <meta name="description">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <script defer="" src="https://use.fontawesome.com/releases/v6.1.1/js/all.js"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+  </head>
+  <body>
+    <div class="block mx-5 my-3 main-container">
+      <script src="/scripts/backbone-common.js" defer></script>
+      <script src="/scripts/twitch-tools-init.js" defer></script>
+      <!--script(src="/scripts/tmi.min.js" defer)-->
+      <!--script(src="/scripts/tmi-code-common.js" defer)-->
+      <script src="/scripts/event-listeners.js" defer></script>
+      <script src="/scripts/form-fields-save-restore.js" defer></script>
+      <!--script(src="/scripts/Flasher+Countdown.class.js" defer)-->
+      <!-- script(src="/scripts/muted-alert.js" defer)-->
+      <!--script(src="/scripts/user-monitor.js" defer)-->
+      <script>
+        function clog() {
+            console.log(...arguments);
+        }
+        
+      </script>
+      <script src="./scripts/eventsub-twitch.js" type="module"></script>
+      <div id="flasher">
+        <p>SOMEONE<br>JOINED</p>
+      </div>
+      <div class="box mb-2 py-1 not-miniview is-size-7-mobile">
+        <form class="not-miniview mb-2" id="mainform">
+          <label class="has-text-weight-semibold">Channels - space separated</label>
+          <div class="field has-addons">
+            <div class="control is-expanded">
+              <input class="input is-fullwidth form-save is-small form-filter-spaces-to-commas" id="channels" type="text" size="50" placeholder="e.g. mst3k sues_haberdashery ferretsquabbles">
+            </div>
+            <div class="control">
+              <button class="button is-small is-link urlpopulate" id="join">Chans</button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="columns is-flex-direction-row-reverse">
+        <div class="column">
+          <div class="box">Users in channels
+            <div class="is-size-6-touch" id="usersinchannels"></div>
+          </div>
+        </div>
+        <div class="column is-two-thirds">
+          <div class="box">Messages<span class="tag is-warning button mobile-view-btn ml-3 is-pulled-right" id="miniview">[mini view]</span><span class="tag button is-info is-light is-small ml-2 modal-trigger is-pulled-right" id="instructionsbtn" data-target="instructions">[Instructions]</span>
+            <div class="is-size-7-touch" id="messagelog"></div>
+          </div>
+          <div class="box" id="log"></div>
+        </div>
+      </div>
+      <div class="modal" id="instructionsss">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+          <header class="modal-card-head">
+            <p class="modal-card-title">Modal title</p>
+            <button class="delete" aria-label="close"></button>
+          </header>
+          <section class="modal-card-body"></section>
+          <!-- Content ...-->
+          <footer class="modal-card-foot">
+            <button class="button is-success">Save changes</button>
+            <button class="button">Cancel</button>
+          </footer>
+        </div>
+      </div>
+      <div class="modal is-size-7-touch" id="instructions">
+        <div class="modal-background modal-dismiss"></div>
+        <div class="modal-card">
+          <header class="modal-card-head">
+            <p class="modal-card-title">Hello shitburgs!</p>
+            <button class="delete" aria-label="close"></button>
+          </header>
+          <section class="modal-card-body">
+            <!-- Content ...-->
+            <div class="tabs is-fullwidth is-toggle is-toggle-rounded is-small" data-target="#configpanels">
+              <ul>
+                <li class="is-active"><a>Do this, yeah?</a></li>
+                <!-- li: a Settings 2-->
+                <li><a>Searches</a></li>
+                <li><a>Searches 2</a></li>
+                <li><a>Settings</a></li>
+              </ul>
+            </div>
+            <div class="block tab-content" id="configpanels">
+              <div class="tab-pane is-active">
+                <div class="block">Enter channel names and users you want to monitor and it'll log anything said by them in any of those channels and they'll be added to <span class="is-italic">users in channels</span> even if they're lurking.</div>
+                <div class="block"><b>Note:</b> the <span class="is-italic">users in channels</span> pane can take up to a minute to spot lurkers.</div>
+                <div class="block">OBS dock? Do all your settings, in settings click start on miniview and copy the url for a custom dock.</div>
+                <div class="block">If you add channels, users or searches <b>BOOKMARK</b> the link again to save your settings.</div>
+                <div class="block">If you like this tool and would like to contribute to its upkeep you can donate to its creator <b><a href="https://youtu.be/hCM2qK8F9C0?t=65" target="_blank">by clicking here</a></b></div>
+              </div>
+              <div class="tab-pane">
+                <div class="block">The search terms are optional and will show messages from any users, not just those specified.  Any of the terms will cause a match.  All searches are case insensitive and can include <span class="has-text-weight-bold">wildcards</span></div>
+                <div class="block">Separate terms with commas e.g. badger fights, colo?ring book?, shit!weasel</div>
+                <div class="block">
+                  <ul class="ml-5">
+                    <li><span class="has-text-weight-bold">!</span> an optional space so you!is!smel finds <i>you is smell, youissmell, youis smel</i>, etc</li>
+                    <li><span class="has-text-weight-bold">?</span> optional non-space characters only so Geoff? will match <i>Geoff, Geoffry, Geoffers</i> but not <i>Geoff Dog</i>.  Colo?r will match <i>colour</i> or <i>color</i>.  book? finds <i>book, books</i> or <i>booklets</i>.</li>
+                    <li><span class="has-text-weight-bold">+</span> at least one non-space character so play+ will match <i>playground</i> but not <i>play</i></li>
+                  </ul>
+                </div>
+              </div>
+              <div class="tab-pane">
+                <div class="block">
+                  <ul class="ml-5">
+                    <li><span class="has-text-weight-bold">*</span> finds anything or nothing: spaces, weird characters, <b>everything</b>.  pig*sty will match <i>pigsty, pig sty, piggy be feisty, piglet wanna pasty, pig!!!! don't be hasty</i></li>
+                    <li><span class="has-text-weight-bold">^</span> 10 chars of anything. Reduces really far apart matches that * might cause. tea^pot will find <i>teapot, tea pot, team spot</i> but not <i>teacher is a tosspot</i>.  Add ^^ to allow 20 chars between, etc</li>
+                    <li><span class="has-text-weight-bold">(s)</span> optional plural/possessive after a word so Jane(s) will match <i>Jane, Janes or Jane's.</i>  Useful for name searches</li>
+                    <li><span class="has-text-weight-semibold">(opt1|opt2|opt3)</span> any of the terms so (gi|wi|bo)ggle will match <i>giggle, wiggle or boggle</i></li>
+                  </ul>
+                </div>
+                <div class="block">To test these out open a twitch chat (<b><a href="https://www.twitch.tv/popout/foofoomagoo/chat?popout=" target="_blank">use foofoomagoo</a></b>) add the channel for monitoring and type away.</div>
+              </div>
+              <div class="tab-pane">
+                <label class="label">message queue limit</label>
+                <div class="field">
+                  <div class="control">
+                    <input class="input number-input-5 form-save" type="number" id="messagelimit" min="0" max="100000" value="10000" data-toint="messageLimit">
+                  </div>
+                </div>
+                <div class="control">
+                  <label class="checkbox is-link is-responsive has-text-weight-medium">
+                    <input class="form-save" type="checkbox" data-tocheckbox="miniviewOnStart" id="miniview"> Miniview on start
+                  </label>
+                </div>
+              </div>
+            </div>
+          </section>
+          <footer class="modal-card-foot">
+            <button class="button is-success modal-dismiss">Bye then.</button>
+          </footer>
+          <!--button.button.modal-dismiss.is-small Cancel-->
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

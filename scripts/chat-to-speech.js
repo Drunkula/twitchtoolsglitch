@@ -132,6 +132,8 @@ var UserMon = UserMon || {};
         {selector: '#pausespeech', event: 'change', function: speech_pause_checkbox_onchange, params: {}},
 
         {selector: '#volumemaster', event: 'input', function: volume_master_slider_oninput, params: {}},
+
+        {selector: '#charfilter', event: 'change', function: filter_chars_onchange, params: {}},
     ];
 
         // on window load
@@ -370,7 +372,7 @@ var UserMon = UserMon || {};
         TT.cclient.on('raw_message', message_twitch_raw_clearchat_handler); // handles bans/timeouts if CLEARCHAT appears
         TT.cclient.on('notice', message_twitch_notice_handler); // currently just logs the notice
 
-        TT.cclient.on("join", (ch,usr,self) => console.log(`JOIN EVENT ${ch}: ${usr}`));
+        //TT.cclient.on("join", (ch,usr,self) => console.log(`JOIN EVENT ${ch}: ${usr}`));
         TT.cclient.on("part", (ch, usr, self) => console.log(`JOIN PART EVENT ${ch}: ${usr}`));
 
             // we can check for automod IN the message. The flags are in userstate but they're not modding, they're
@@ -450,6 +452,11 @@ var UserMon = UserMon || {};
             commandSliceOffset = sayCommand.length + 1;
             message = message.slice(commandSliceOffset).trim();
             voiceParams = ns.get_voice_settings_by_name(sayCommand);
+        }
+
+        if (TTSVars.filterCharsRegex) {
+            message = message.replace(TTSVars.filterCharsRegex, '');
+            console.log("MSG AFTER REGEX", message);
         }
 
         if ( ! TTSVars.chatReadEmotes ) {
@@ -824,6 +831,22 @@ var UserMon = UserMon || {};
 
     function volume_master_slider_oninput(e) {
         gid('volumemasterdisplay').textContent = Math.round( e.target.value * 100.0 );
+    }
+
+        // creates a regex filter for the filter chars
+
+    function filter_chars_onchange() {
+        let chars = TTSVars.filterChars;
+        // make sure no spaces
+        chars = chars.replace(/\s/g, '');
+
+        chars = chars.replace(/[\\\[\]\-^]/g, '\\$&');
+
+        //chars = chars.replace(/\[/g, '\\[');
+        //chars = chars.replace(/\]/g, '\\]');
+        TTSVars.filterChars = chars;
+        TTSVars.filterCharsRegex = new RegExp("["+chars+"]", "g");
+        console.log("CHAAAANGE");
     }
 })(UserMon);
 /*
