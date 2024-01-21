@@ -66,15 +66,8 @@
             console.log("ERROR IT HAS ERROR:", e);
         });
             // single arg outputActive in object useful
-        KS.obs.on("RecordStateChanged", function(e) {
-            console.log("RecordStateChanged args", arguments);// single argument
-            gid("isrecording").textContent = e.outputActive ? "YES" : "NO";
-        });
-
-        KS.obs.on("StreamStateChanged", function(e) {
-            console.log("StreamStateChanged args", arguments);// single argument
-            gid("isstreaming").textContent = e.outputActive ? "YES" : "NO";
-        });
+        KS.obs.on("RecordStateChanged", set_recording_status);
+        KS.obs.on("StreamStateChanged", set_streaming_status);
 
         console.log("events", KS.obs.availableEvents);
             /*
@@ -89,6 +82,16 @@
 
     }   // init ends
 
+
+    function set_streaming_status(e) {
+        console.log("StreamStateChanged args", arguments);
+        gid("isstreaming").textContent = e.outputActive ? "YES" : "NO";
+    }
+
+    function set_recording_status(e) {
+        console.log("RecordStateChanged args", arguments);
+        gid("isrecording").textContent = e.outputActive ? "YES" : "NO";
+    }
 
         // Sets connected/not connected and changes colour
 
@@ -125,9 +128,6 @@
 		let result = obs.connect('ws://' + opts.address, opts.password)	// works in 5.0.1
 			.then(async r => {
 				KS.obs_connect_success( r );
-                let res = await KS.obs.call("GetRecordStatus")
-                //.then(e => console.log("REC STATUS", e));
-                console.log("RECSTAT", res)
 				return true;
             })
 			.catch(e => {
@@ -144,13 +144,11 @@
 		KS.isConnected = true;
 		gid("connectresult").textContent = 'Success';
             // get record status
-        let res = KS.obs.call("GetRecordStatus")
-        .then(e => console.log("1. REC STATUS", e));
-            // res is a pending promise
-        console.log("1b. REC STATUS", res);
+        KS.obs.call("GetRecordStatus")
+        .then(set_recording_status);
 
-        let res2 = KS.obs.call("GetStreamStatus")
-        .then(e => console.log("1. Stream STATUS", e));
+        KS.obs.call("GetStreamStatus")
+        .then(set_streaming_status);
 
         set_connected_state(true);
 	}
@@ -195,6 +193,9 @@
         // TMI TWITCH Message listener
 
     function ks_tmi_listen() {
+
+        TT.cclient.on('connected', e => gid("chatconnected").textContent = "YES");
+        TT.cclient.on('disconnected', e => gid("chatconnected").textContent = "NO");
 
         TT.cclient.on('message', (channel, userstate, message, self) => {
             console.log("message", message);
