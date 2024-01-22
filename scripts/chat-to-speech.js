@@ -455,8 +455,12 @@ var UserMon = UserMon || {};
         }
 
         if (TTSVars.filterCharsRegex) {
-            message = message.replace(TTSVars.filterCharsRegex, '');
-            console.log("MSG AFTER REGEX", message);
+            try {
+                message = message.replace(TTSVars.filterCharsRegex, '');
+                console.log("MSG AFTER REGEX", message);
+            } catch (error) {
+                console.log("REGEX ERROR:", e);
+            }
         }
 
         if ( ! TTSVars.chatReadEmotes ) {
