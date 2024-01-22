@@ -13,6 +13,7 @@
     TMIConfig.KS = {
         obs: new OBSWebSocket(),
         isConnected: false,
+        countdownActive: false,
     };
 
     const KS = TMIConfig.KS;
@@ -212,18 +213,11 @@
 
                     if (message === KS.endCommand) {
                         log("I WOULD KILL THIS DAMNED STREAM!");
-                        gid("killMsg").textContent = "KILL MESSAGE FROM : " + userstate["display-name"] + " at " + Date.now();
+
+                        kill_msg_received(userstate);
                         // await SS.obs.send(req);
 
-                        if (KS.connected === false) return;
 
-                        KS.obs.call("StopStream", {}).then(
-                           e => console.log("STOP STREAM:", e)
-                        ).catch(e => console.log("ERROR", e));
-
-                        KS.obs.call("StopRecord", {}).then(
-                            e => console.log("STOP RECORD:", e)
-                         ).catch(e => console.log("ERROR", e));
                     }
 
                     break;
@@ -233,4 +227,68 @@
         });
     }
 
+
+    function kill_msg_received(userstate) {
+        // removed the hidden aspect from the cancel box
+        if (KS.countdownActive) return;
+
+        KS.countdownActive = true;
+
+        gid("killCountdownBox").classList.remove("is-hidden");
+        console.log(gid("killCountdownBox").classList);
+
+        gid("killMsg").textContent = userstate["display-name"] + " at " + new Date().toLocaleTimeString();
+
+            // start the countdown
+
+        let countDown = 10;
+
+        let killCountdown = gid("killCountdown");
+
+        killCountdown.textContent = countDown;
+
+        let countdownSetInterval =
+            setInterval(() => {
+                killCountdown.textContent = --countDown;
+
+                if ( countDown === 0 ) {
+                    terminate_stream();
+                    end_countdown(true);
+                }
+            }, 1000);
+
+        KS.countdownSetInterval = countdownSetInterval;
+
+        let stopBtn = replace_with_clone("stopCountdownBtn");
+        stopBtn.addEventListener('click', a => end_countdown());
+    }
+
+    function end_countdown(completed = false) {
+        clearInterval(KS.countdownSetInterval);
+        KS.countdownActive = false;
+
+        gid("killMsg").textContent = completed ? "TERMINATION APPROVED" : "CANCELLED";
+
+        if (!completed) setTimeout(a =>gid("killCountdownBox").classList.add("is-hidden"), 2000);
+    }
+
+    function replace_with_clone(elementId) {
+        var old_element = document.getElementById(elementId);
+        var new_element = old_element.cloneNode(true);
+        old_element.parentNode.replaceChild(new_element, old_element);
+
+        return new_element;
+    }
+
+    function terminate_stream() {
+        if (KS.connected === false) return;
+
+        KS.obs.call("StopStream", {}).then(
+           e => console.log("STOP STREAM:", e)
+        ).catch(e => console.log("ERROR", e));
+
+        KS.obs.call("StopRecord", {}).then(
+            e => console.log("STOP RECORD:", e)
+         ).catch(e => console.log("ERROR", e));
+    }
 }
