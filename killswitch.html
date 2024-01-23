@@ -37,27 +37,33 @@
             <div class="has-text-centered">
               <tag class="is-size-6 has-text-centered tag is-danger" id="connectstatus">NOT CONNECTED</tag>
             </div>
-            <!-- CHANNEL LIST-->
-            <form class="not-miniview mb-2" id="mainform">
-              <label class="label">Your Channel</label>
-              <div class="field has-addons not-miniview">
-                <div class="control is-expanded">
-                  <input class="input is-fullwidth form-save form-filter-spaces-to-commas" id="channels" type="text" size="50" placeholder="Channel names space or comma separated">
-                </div>
-                <div class="control">
-                  <button class="button is-link urlpopulate" id="join">Join</button>
-                </div>
+            <div class="columns is-mobile">
+              <div class="column not-miniview">
+                <!-- CHANNEL LIST-->
+                <form class="mb-2" id="mainform">
+                  <label class="label">Your Channel</label>
+                  <div class="field has-addons not-miniview">
+                    <div class="control is-expanded">
+                      <input class="input is-fullwidth form-save form-filter-spaces-to-commas" id="channels" type="text" size="50" placeholder="Channel names space or comma separated">
+                    </div>
+                    <div class="control">
+                      <button class="button is-link urlpopulate" id="join">Join</button>
+                    </div>
+                  </div>
+                </form>
               </div>
-            </form>
-            <!-- END COMMAND-->
-            <label class="label not-miniview">Stream end command:</label>
-            <div class="field">
-              <div class="control">
-                <input class="input form-save" type="text" name="endcommand" id="endcommand" placeholder="e.g !terminatestream" data-tostr="KS.endCommand" value="!terminatestream">
+              <div class="column">
+                <!-- END COMMAND-->
+                <label class="label not-miniview">End command:</label>
+                <div class="field">
+                  <div class="control">
+                    <input class="input form-save" type="text" name="endcommand" id="endcommand" placeholder="e.g !terminatestream" data-tostr="KS.endCommand" value="!terminatestream">
+                  </div>
+                </div>
               </div>
             </div>
             <!-- ENABLED, MINIVIEW-->
-            <div class="field is-grouped is-grouped-centered mb-0">
+            <div class="field is-grouped is-grouped-centered">
               <div class="control">
                 <label class="checkbox button is-link is-size-7-mobile is-small">
                   <input id="enablekill" type="checkbox" checked data-tocheckbox="KS.killswitchEnabled"> enabled
@@ -72,7 +78,6 @@
                 <button class="button is-small is-primary mobile-view-btn">Mini View</button>
               </div>
             </div>
-            <hr class="not-miniview">
             <div class="not-miniview">
               <p class="label has-text-centered">Allow From:</p>
               <div class="field is-grouped-centered is-grouped permissions">

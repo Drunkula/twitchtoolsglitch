@@ -1,10 +1,22 @@
 /*
-    Terminate an OBS stream via chat/whisper
+    Terminate an OBS stream via chat (whisper too much agro)
     Option to allow termination on a raid out
 
     Needed: channel, allowMods, allowVips, users permitted, enabled/disabled
 
-    obs.socket is undefined when not connected, a socket when connected so check socket before readyState
+    obs.socket is undefined when not connected, a socket when connected, so check socket before readyState
+
+    ConectionClosed EVENT receives on close after connection OR a failed initial connection
+        1001 = server stopping. Message: Server stopping. <-- yes, full stop
+        1006 = address wrong (no message)
+        4009 = authentication failed. Message: Authentication failed.
+        1000 = normal close. No message.
+
+    ConnectionError
+        -1 = fail on connect when address bad
+
+    .catch() on obs connect gets
+        OBS Connect Fail.  Code:12, message: Failed to construct 'WebSocket': The URL 'ws://1237.0.0.133:4455' is invalid.
 */
 "use strict"
 
@@ -14,6 +26,7 @@
         obs: new OBSWebSocket(),
         isConnected: false,
         countdownActive: false,
+        hadAConnection: false
     };
 
     const KS = TMIConfig.KS;
@@ -32,12 +45,12 @@
 
         TT.forms_init_common();	// common permissions, restores forms, no longer adds common events
 
-        TT.add_event_listeners(KS_EVENTS);	// will add onchange on forms but no common events yet means URL won't be updated
+        TT.add_event_listeners(KS_EVENTS);
 		TT.add_events_common();
             // returns a promise
-        KS.obs_connect();   // bool
+        KS.obs_connect();   // bool promise
             // will be zero, 1 if awaited but socket is undefined on failure
-        console.log("OBS AFTER CONENCT", KS.obs.socket.readyState);
+        console.log("OBS.socket.readyState AFTER obs_connect() call: ", KS.obs.socket.readyState);
             // start listening for messages
         ks_tmi_listen();
 
@@ -49,22 +62,38 @@
         if (TMIConfig.miniviewOnStart) {
             TT.mini_view_on(true);
         }
+        /*
             // don't make call requests as currently unidentified.  Wait until success
         KS.obs.on("ConnectionOpened", async function(e) {
             console.log("OPEN args", arguments);// nothing
-        });
+        });*/
 
-            // these are for actual obs events like scenes changing
+        /*
+          NOTE: Called after connect() even if the socket did not successfully connect
+            1006 = address wrong (no message)
+            4009 = Bad password. Message: Authentication failed.
+            1000 = normal close. No message.
+            1001 = Server stopping. <- message
+        */
+
         KS.obs.on("ConnectionClosed", function(e) {
-            console.log("IT CLOSED:", e);
-            console.log("CLOSED args", arguments);// single argument
-                KS.connected = false;
-                set_connected_state(false);
+            console.log("ConectionClosed CODE:", e.code, "message:", e.message);
+
+            KS.connected = false;
+            set_connected_state(false);
+
+            // RECONNECT attempt could start here
+            // don't reconnect if code is 4009, auth failed, or 1006 wrong address
+            // also don't do it of code 1000 as that's normal closure happens when I open a new socket
+            if (e.code !== 4009 && e.code && e.code !== 1000 && e.code !== 1001) {
+                console.log("Will attempt reconnect...");
+                setTimeout(a => KS.obs_connect(), 10000);
+            }
         });
 
         KS.obs.on("ConnectionError", e => {
             KS.connected = false;
-            console.log("ERROR IT HAS ERROR:", e);
+            console.log("ConnectionError: CODE:", e.code, "Message:", e.message);
         });
             // single arg outputActive in object useful
         KS.obs.on("RecordStateChanged", set_recording_status);
@@ -78,7 +107,6 @@
     ConnectionError - When connection closed due to an error (generally above is more useful)
     Hello - When server has sent Hello message (called with Hello data)
     Identified - When client has connected and identified (called with Identified data)
-
         */
 
     }   // init ends
@@ -143,6 +171,8 @@
 		console.log("OBS connect success", a);
 
 		KS.isConnected = true;
+        KS.hadAConnection = true;
+
 		gid("connectresult").textContent = 'Success';
             // get record status
         KS.obs.call("GetRecordStatus")
@@ -154,10 +184,13 @@
         set_connected_state(true);
 	}
 
-		/*  */
+		/* Called by obs.connect()...catch() */
 
 	KS.obs_connect_fail = function obs_connect_fail(e) {
 		KS.connected = false;
+        set_connected_state(false);
+            // 1006 = wrong port
+        console.log("OBS Connect Fail (catch() triggered).  Code:" + e.code + ", message: " + e.message);
 
 		let message = 'Failed to connect'
 
@@ -168,15 +201,11 @@
 
 		gid("connectresult").innerHTML = message;
 
-		console.log( y('FAIL OBS Websocket connct: ') + r(message) );
-		console.error( e );
-
-		log("OBS Websocket failed to connect:");
-
+		log("OBS Websocket failed to connect: Code " + e.code);
+            /* Logs elements in the error which are constructor and code likely 1006
 		for( let p in e)
-			log( '<span class="ml-4">' + p + " : " + e[p] + '</span>' );
+			log( '<span class="ml-4">' + p + " : " + e[p] + '</span>' ); //*/
 
-        set_connected_state(false);
 	}
 
         // gets connection details from the form
