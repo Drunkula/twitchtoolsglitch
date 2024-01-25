@@ -1,7 +1,7 @@
 /*
     JAVASCRIPT part
 */
-import { Socketty } from "./Socketty.class.js";
+import { Socketty } from "/scripts/Socketty.class.js";
 import { YTPlayer } from "./ytplayer.class.mod.js";
 
     // whether next or prev was last used
@@ -121,6 +121,8 @@ class YTController {
             clog("sending count:", this.playlist,length);
             this.send_json({action: "playlistcount", count: this.playlist.length});
         },
+
+        getwholeplaylist: e => this.send_whole_playlist()
     }
 
     // CPH.RunActionById("1a8f5a37-5107-420c-9dd5-4f863ce6ffd1", true);
@@ -331,7 +333,7 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
 
             case YT.PlayerState.PLAYING:    // sent after pause and stop
                 clog("Playing: ", e.target.getVideoData());
-                this.send_json({action: "nowplaying", data: e.target.getVideoData().video_id});
+                this.send_json({action: "currsongid", data: e.target.getVideoData().video_id});
                 break;
 
             default:
@@ -442,7 +444,7 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         let obj = { action: "nowandnext", count: ids.length, titles };
 
         if (howMany == 1) {
-            obj = { action: "nowplaying", data: titles[0] };
+            obj = { action: "currsongname", data: titles[0] };
         }
 
         this.send_json(obj);
@@ -480,7 +482,7 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
             this.playlist.splice(idx, 1);
             this.playlistMap.delete(videoItem);
         }
-
+            // not yet done
         return delCount;
     }
 
@@ -488,14 +490,26 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         return this.yt.getVideoData();
     }
 
-
     pause() {
         this.isPaused = true;
         this.yt.pauseVideo();
     }
 
-    paused() {
+    is_paused() {
         return this.isPaused;
+    }
+
+    send_whole_playlist() {
+        let pack = {
+            action: "allplaylistdata",
+            data: {
+                playlist: this.playlist,
+                playlistmap: Object.fromEntries(this.playlistMap),
+                playlistindex: this.playlistPointer,
+            }
+        }
+
+        this.send_json(pack);
     }
 }
 
@@ -503,3 +517,4 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
 //let YTP = new YTController();
 
 export default YTController;
+
