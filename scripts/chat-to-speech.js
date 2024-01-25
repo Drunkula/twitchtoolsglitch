@@ -454,13 +454,13 @@ var UserMon = UserMon || {};
         } else { // DEFAULT VOICE// remove the voice command from the message
             // console.log("MESSAGE", message);
             commandSliceOffset = sayCommand.length + 1;
-            message = message.slice(commandSliceOffset).trim();
+            message = message.slice(commandSliceOffset);
             voiceParams = ns.get_voice_settings_by_name(sayCommand);
         }
 
         if (TTSVars.filterCharsRegex) {
             try {
-                message = message.replace(TTSVars.filterCharsRegex, '');
+                message = message.replace(TTSVars.filterCharsRegex, ' ');
                 console.log("MSG AFTER REGEX", message);
             } catch (error) {
                 console.log("REGEX ERROR:", e);
@@ -470,6 +470,9 @@ var UserMon = UserMon || {};
         if ( ! TTSVars.chatReadEmotes ) {
             message = emote_filter.filter(message, userstate);
         }
+
+        message = message.trim();
+
             // any message left?  I've noticed blank messages which just contain unprintable characters
         if (message.length === 0) { //console.log("message zero returning");
             return;
