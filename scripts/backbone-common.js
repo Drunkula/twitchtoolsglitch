@@ -186,8 +186,15 @@ TT.get_restore_params = function get_restore_params() {
 
 TT.query_string_params_to_array = function get_query_string_params() {
 	let getVars = {};
-	decodeURI(window.location.href).replace(/[?&]+([^=&]+)=([^&]*)/gi,
-		function(a,name,value){getVars[name]=value;});
+	try {/*	this version is "snazzy" but I might have had problems
+		decodeURI(window.location.href).replace(/[?&]+([^=&]+)=([^&]*)/gi, function(a,name,value){getVars[name]=value;});
+		*/
+		window.location.search.substring(1).split("&").forEach(a => {
+			let [name, value] = a.split("="); getVars[decodeURIComponent(name)] = decodeURIComponent(value);
+		});
+	} catch (e) {
+		console.log("ERROR: query_string_params_to_array - ", e);
+	}
 	return getVars;
 }
 

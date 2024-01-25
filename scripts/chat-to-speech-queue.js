@@ -68,7 +68,7 @@
 		let nid = gid('sq-' + id);
 
 		if (!nid) {
-			console.log("*** ERRROR: no speech queue entry with ID : "+id);
+			console.log("*** ERROR: no speech queue entry with ID : "+id);
 			return false;
 		}
 			// insert a div

@@ -323,7 +323,7 @@ try {   // scope starts ( in case I can demodularise this )
                         return;
                     }
                     if (message.length < 4) {
-                        console.log("Message to encode", encodeURIComponent(message));
+                        console.log("Short message check: ", encodeURIComponent(message));
                         for (let i = 0; i < message.length; i++) {
                             console.log(i, message.charCodeAt(i) );
                             //console.log( message.code(i) );

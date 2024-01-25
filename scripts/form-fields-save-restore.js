@@ -43,10 +43,17 @@ TT.inputs_to_uri_string = function inputs_to_uri_string(selectors = '.form-save'
 				break;
 		}
 			// stupid field names might happen
-		uri.push(`${encodeURIComponent(name)}=${encodeURIComponent(value)}`);
+// console.log(`${name} : ${value} => ${encodeURIComponent(value)}`)
+		 try {
+			uri.push(`${encodeURIComponent(name)}=${encodeURIComponent(value)}`);
+		 } catch (e) {
+			console.error("ERROR encoding URI Component:", e);
+		 }
+		//uri.push(`${name}=${value}`);
 	});
 
 	return uri.join('&');
+	//return encodeURI(uri.join('&'));
 }
 
 
@@ -126,7 +133,14 @@ TT.restore_form_values = function restore_form_values(selector = '.form-save', o
 				break;
 			default:	// works for selects
 											//console.log(`Setting ${field.id} to ${getVars[name]}`);
-				field.value = decodeURIComponent(getVars[name]);
+				try {
+					//field.value = decodeURIComponent(getVars[name]);
+					field.value = getVars[name]; // they're decoded now
+				} catch (e) {	// this was failing because I was pre-decoding the URL causing % to be decoded twice
+					console.error("ERROR decode uri in form-fields-save-restore.js : restore_form_values", e);
+					console.error("ERROR Failed to decode : ", getVars[name]);
+				}
+
 				if (field.classList.contains('form-filter-spaces-to-commas')) {
 					field.value = TT.form_filter_commas_to_spaces(field.value);
 				}
@@ -135,12 +149,22 @@ TT.restore_form_values = function restore_form_values(selector = '.form-save', o
 	});
 }
 
-	// breaks uri string into key/value pairs
+	// breaks uri string into DECODED key/value pairs
+	// I don't like that this exists in 2 places - also in backbone common TT.query_string_params_to_array
+	// DEBUG: I should consolidate these
 
 TT.param_string_to_array = function param_string_to_array( params = window.location.search ) {
 	let getVars = [];
 	//decodeURI(params).replace(/[?&]+([^=&]+)=([^&]*)/gi, function(a,name,value){getVars[name] = value;});
-	decodeURI(params).replace(/[?&]?([^=&]+)=([^&]*)/gi, function(a,name,value){getVars[name] = value;});
+	try {
+		//decodeURI(params).replace(/[?&]?([^=&]+)=([^&]*)/gi, function(a,name,value){getVars[name] = value;});
+		if (params[0] === '?') params = params.substring(1);
+		params.split("&").forEach(a => {
+			let [name, value] = a.split("="); getVars[decodeURIComponent(name)] = decodeURIComponent(value);
+		});
+	} catch (e) {
+		console.log("ERROR: param_string_to_array -", e);
+	}
 	return getVars;
 }
 

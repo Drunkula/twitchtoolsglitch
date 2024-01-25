@@ -162,8 +162,8 @@ try {   // scope starts ( in case I can demodularise this )
                 }
             });
 
-            // SCENE SWITCHER restores form values for selects then adds common events
-                // SHOULD ADD a check to make sure the utterance starts
+                // SCENE SWITCHER restores form values for selects then adds common events
+                    // SHOULD ADD a check to make sure the utterance starts
 
             TT.forms_init_common(); // restores forms and sets up common permissions doesn't triggers ONCHANGE
 
@@ -182,7 +182,6 @@ try {   // scope starts ( in case I can demodularise this )
                 console.debug(r("Auto Joining channels..."));
                 TT.join_chans();
             }
-
                 // want to know if client is android
             log('User Agent: ' + window.navigator.userAgent);
         })  // init_speecher ends

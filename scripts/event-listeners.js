@@ -46,6 +46,7 @@
 
 		{selector: '.urlpopulate', event: 'click', function: ns.url_populate, params: {}},
 			// any change in any .form-save value updates the url
+			// it does get called like 120+ times on load, though
 		{selector: '.form-save', event: 'change', function: url_populate_onchange, params: {}},
 	]
 
@@ -236,6 +237,7 @@
 
 
 		// changes the url link and populates the thingy
+		// oh wow, this gets called 120 times on the TTS
 
 	ns.url_populate = function url_populate() {
 		let urlParams = TT.inputs_to_uri_string(TT.MAGIC_CLASS_FORM_SAVE, true);

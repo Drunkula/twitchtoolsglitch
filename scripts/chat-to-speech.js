@@ -342,20 +342,24 @@ var UserMon = UserMon || {};
     async function init_speecher() {
         log("Initialising Speech engine");
 
-        let ready = await speech.ready();
+        try {
+            let ready = await speech.ready();
 
-        if (ready) {
-            log("Engine Initialised");
+            if (ready) {
+                log("Engine Initialised");
+            }
+            else {
+                log("Speech Engine Fail")
+                return false;
+            }
+
+            TTSVars.ss = speechSynthesis;
+            TTSVars.voices = speech.getVoices();
+            return ready;
+        } catch (e) {
+            console.log("INIT_SPEECHER ERROR:", e);
         }
-        else {
-            log("Speech Engine Fail")
-            return false;
-        }
 
-        TTSVars.ss = speechSynthesis;
-        TTSVars.voices = speech.getVoices();
-
-        return ready;
     };
 
     // MAIN Twitch listener
