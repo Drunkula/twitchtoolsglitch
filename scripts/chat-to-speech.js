@@ -388,7 +388,7 @@ var UserMon = UserMon || {};
 
     function twitch_message_handler (channel, userstate, message, self) {
         //console.log("state", userstate);
-        console.log("message", message);
+        //console.log("message", message);
             // same user and channel as last message
         const username = userstate["username"];
         const sameUser = username == TTSVars.lastUser;
@@ -461,7 +461,6 @@ var UserMon = UserMon || {};
         if (TTSVars.filterCharsRegex) {
             try {
                 message = message.replace(TTSVars.filterCharsRegex, ' ');
-                console.log("MSG AFTER REGEX", message);
             } catch (error) {
                 console.log("REGEX ERROR:", e);
             }

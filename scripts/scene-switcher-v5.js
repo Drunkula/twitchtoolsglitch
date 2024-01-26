@@ -42,7 +42,7 @@ for	SS.obs.call('SetInputMute', opts)
 	This needs to grab the obs credentials so has to either passively or actively restore
 	So I need to change form restore - separate out the function that lets you fetch where
 	the restore comes from
-	Normally TMIConfig.restoredParams = TT.get_restore_params();
+	Normally TMIConfig.initialUrlParamsToArray = TT.get_restore_params();
 	Yes, that shall be our salvation
 
 */

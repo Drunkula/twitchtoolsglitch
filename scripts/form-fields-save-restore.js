@@ -69,7 +69,7 @@ let restore_opts_default = {
 	paramString: window.location.search,
 	idIfNoName: true,
 	localStorageFallback: true,
-	useCached: false	// use already parsed values
+	useCached: false	// use values in TMIConfig.initialUrlParamsToArray
 }
 
  //TT.restore_form_values = function restore_form_values(selector = '.form-save', opts = restore_opts_default) {
@@ -80,20 +80,17 @@ TT.restore_form_values = function restore_form_values(selector = '.form-save', o
 	let { paramString, idIfNoName, localStorageFallback, useCached } = optsGroup;
 	//console.log("Got Opts", optsGroup);
 
-										//function restore_form_values({selector = '.form-save', paramString = window.location.search, idIfNoName = true, localStorageFallback = true}) {
 	let inputs = document.querySelectorAll(selector);
 
 	if (!paramString && localStorageFallback) {
 		paramString = TT.localstore_load();
 	}
 
-	let getVars = TT.param_string_to_array(paramString);
-
-	console.log("used cached:", useCached, "restored length", Object.keys(TMIConfig.restoredParams).length);
-
-	if (useCached && Object.keys(TMIConfig.restoredParams).length) {
-		console.log("*********************** USING CACHED VARS OK ***************************", TMIConfig.restoredParams);
-		getVars = TMIConfig.restoredParams;
+	let getVars = TT.query_string_params_to_array(paramString);
+		// so far restored params are NEVER used
+	if (useCached && Object.keys(TMIConfig.initialUrlParamsToArray).length) {
+		console.log("*********************** USING CACHED VARS OK ***************************", TMIConfig.initialUrlParamsToArray);
+		getVars = TMIConfig.initialUrlParamsToArray;
 	}
 
 	inputs.forEach( field => {
@@ -133,13 +130,7 @@ TT.restore_form_values = function restore_form_values(selector = '.form-save', o
 				break;
 			default:	// works for selects
 											//console.log(`Setting ${field.id} to ${getVars[name]}`);
-				try {
-					//field.value = decodeURIComponent(getVars[name]);
-					field.value = getVars[name]; // they're decoded now
-				} catch (e) {	// this was failing because I was pre-decoding the URL causing % to be decoded twice
-					console.error("ERROR decode uri in form-fields-save-restore.js : restore_form_values", e);
-					console.error("ERROR Failed to decode : ", getVars[name]);
-				}
+				field.value = getVars[name]; // they're decoded now
 
 				if (field.classList.contains('form-filter-spaces-to-commas')) {
 					field.value = TT.form_filter_commas_to_spaces(field.value);
@@ -147,25 +138,6 @@ TT.restore_form_values = function restore_form_values(selector = '.form-save', o
 				break;
 		}
 	});
-}
-
-	// breaks uri string into DECODED key/value pairs
-	// I don't like that this exists in 2 places - also in backbone common TT.query_string_params_to_array
-	// DEBUG: I should consolidate these
-
-TT.param_string_to_array = function param_string_to_array( params = window.location.search ) {
-	let getVars = [];
-	//decodeURI(params).replace(/[?&]+([^=&]+)=([^&]*)/gi, function(a,name,value){getVars[name] = value;});
-	try {
-		//decodeURI(params).replace(/[?&]?([^=&]+)=([^&]*)/gi, function(a,name,value){getVars[name] = value;});
-		if (params[0] === '?') params = params.substring(1);
-		params.split("&").forEach(a => {
-			let [name, value] = a.split("="); getVars[decodeURIComponent(name)] = decodeURIComponent(value);
-		});
-	} catch (e) {
-		console.log("ERROR: param_string_to_array -", e);
-	}
-	return getVars;
 }
 
 	// simple filters, actually doesn't look for spaces

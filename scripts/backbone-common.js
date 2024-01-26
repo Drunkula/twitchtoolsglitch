@@ -35,7 +35,7 @@ TT.MAGIC_CLASS_FORM_SAVE = '.form-save';
 var TMIConfig = {	// MOST tools add their config to this to make observing easy
 	autojoin: null,
 	joinDebounceSecs: 3,
-	restoredParams: [],	// values restored from the url string or localStorage - check on
+	initialUrlParamsToArray: [],	// url INITIAL values before restore params chages
 
 	perms : {	// permissions to run commands
         allowEveryone : false,
@@ -54,16 +54,16 @@ var TMIConfig = {	// MOST tools add their config to this to make observing easy
 	 */
 
 TT.forms_init_common = function forms_init_common() {
-	TMIConfig.restoredParams = TT.get_restore_params();
+	TMIConfig.initialUrlParamsToArray = TT.get_restore_params();	// NEVER used EVER so far
+		// autojoin check
+	if (TMIConfig.initialUrlParamsToArray['autojoin'] === "true") {
+		TMIConfig.autojoin = true;
+	}
 
 	TT.forms_init_common_permissions();
 		// form values will overwrite defaults
 	TT.restore_form_values(TT.MAGIC_CLASS_FORM_SAVE);
 
-		// autojoin check
-	if (TMIConfig.restoredParams['autojoin'] === "true") {
-		TMIConfig.autojoin = true;
-	}
 	//trigger_onchange_on('input, select');
 }
 
@@ -101,7 +101,7 @@ TT.ignored_users_init_defaults = function tt_ignored_users_init_defaults() {
 
 TT.allow_named_init_defaults = function allow_named_init_defaults() {
 	let aNamed = gid('allownamed');
-	if (!aNamed) return	//if (TMIConfig.restoredParams['allownamed'] === undefined)
+	if (!aNamed) return	//if (TMIConfig.initialUrlParamsToArray['allownamed'] === undefined)
 	aNamed.value = TT.TMI_DEFAULT_ALLOW_NAMED.join(' ');
 }
 
@@ -166,13 +166,13 @@ TT.localstore_load = function page_params_get() {
 
 TT.get_restore_params = function get_restore_params() {
 	let getU = TT.query_string_params_to_array();
-
+console.log("Params from query string:",Object.keys(getU).length, "Param string length:", window.location.search.length);
 	if (Object.keys(getU).length) {
 		console.info('get_restore_params using '+ g('get'));
 		return getU;
 	}
 		// local storage?
-	let lsParams = TT.param_string_to_array( TT.localstore_load() )
+	let lsParams = TT.query_string_params_to_array( TT.localstore_load() ); // <- defined in backbone
 
 	if (Object.keys(lsParams).length) {
 		console.info('get_restore_params using ' + g('localStorage'));
@@ -184,16 +184,18 @@ TT.get_restore_params = function get_restore_params() {
 
 	// returns array from url?foo=bar parameters will be needed for minified versions
 
-TT.query_string_params_to_array = function get_query_string_params() {
+TT.query_string_params_to_array = function get_query_string_params(params = window.location.search) {
 	let getVars = {};
-	try {/*	this version is "snazzy" but I might have had problems
-		decodeURI(window.location.href).replace(/[?&]+([^=&]+)=([^&]*)/gi, function(a,name,value){getVars[name]=value;});
-		*/
-		window.location.search.substring(1).split("&").forEach(a => {
-			let [name, value] = a.split("="); getVars[decodeURIComponent(name)] = decodeURIComponent(value);
+	//decodeURI(window).replace(/[?&]+([^=&]+)=([^&]*)/gi, function(a,name,value){getVars[name]=value;});
+	try {
+		if (params[0] === '?') params = params.substring(1);
+		params.split("&").forEach(a => {
+			let [name, value] = a.split("=");
+			if (value !== undefined)
+				getVars[decodeURIComponent(name)] = decodeURIComponent(value);
 		});
 	} catch (e) {
-		console.log("ERROR: query_string_params_to_array - ", e);
+		console.log("ERROR: quert_string_params_to_array -", e);
 	}
 	return getVars;
 }
