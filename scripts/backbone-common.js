@@ -136,6 +136,7 @@ TT.user_permitted = function user_permitted(user) {
 		case TMIConfig.perms.allowEveryone:
 		case TMIConfig.perms.allowMods && user.mod:
 		case TMIConfig.perms.allowVips && user.badges && user.badges.vip === "1":
+		case TMIConfig.perms.allowSubs && user.subscriber:
 		case TMIConfig.perms.allowNamed.includes(user.username):
 		case user.badges && user.badges.broadcaster === "1":
 			allowed = true;

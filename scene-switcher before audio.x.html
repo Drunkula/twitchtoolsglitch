@@ -17,7 +17,7 @@
           <div class="navbar-menu" id="nav-links-component">
             <div class="navbar-start"><a class="navbar-item" href="/">Home.</a>
               <div class="navbar-item has-dropdown is-hoverable"><a class="navbar-link">Tools List</a>
-                <div class="navbar-dropdown is-boxed"><a class="navbar-item" href="chat-to-speech-tabs.html">Speech from chat 15 voice version</a><a class="navbar-item" href="chat-to-speech.html">Speech from chat 3 voice version</a><a class="navbar-item" href="scene-switcher.html">Scene change from chat - !brb, !game, !etc &nbsp;<strong>OBS v27</strong>&nbsp; and below</a><a class="navbar-item" href="scene-switcher-v5.html">Scene change from chat commands - &nbsp;<strong>OBS v28</strong>&nbsp; up</a><a class="navbar-item" href="new-chatter.html">New Chatters alert (say hello to new chatters easily)</a><a class="navbar-item" href="muted-alert.html">You're Muted alert</a><a class="navbar-item" href="chat-alert.html">New Message alert - don't miss chat messages (good for small channels)</a><a class="navbar-item" href="subs-gifts-cheers.html">Subs, gifts, cheers - it doesn't work yet (well it does, but it doesn't)</a><a class="navbar-item" href="localstorage.html">localstorage killer (just for my debuggin)</a><a class="navbar-item" href="#"><b>There'll be more...</b></a><a class="navbar-item" href="#">VIPs / Named chatters or WRONG 'UNS join</a><a class="navbar-item" href="#">OBS scene and mic control mod chat commands (!unmute, !brb, !game)</a><a class="navbar-item" href="#">OBS web control panel for your mods</a><a class="navbar-item" href="#">And your suggestions.</a>
+                <div class="navbar-dropdown is-boxed"><a class="navbar-item" href="chat-to-speech-tabs.html">Speech from chat TTS</a><a class="navbar-item" href="scene-switcher.html">Scene change from chat - !brb, !game, !etc &nbsp;<strong>OBS v27</strong>&nbsp; and below</a><a class="navbar-item" href="scene-switcher-v5.html">Scene change from chat commands - &nbsp;<strong>OBS v28</strong>&nbsp; up</a><a class="navbar-item" href="new-chatter.html">New Chatters alert (say hello to new chatters easily)</a><a class="navbar-item" href="muted-alert.html">You're Muted alert</a><a class="navbar-item" href="chat-alert.html">New Message alert - don't miss chat messages (good for small channels)</a><a class="navbar-item" href="subs-gifts-cheers.html">Subs, gifts, cheers - it doesn't work yet (well it does, but it doesn't)</a><a class="navbar-item" href="localstorage.html">localstorage killer (just for my debuggin)</a><a class="navbar-item" href="#"><b>There'll be more...</b></a><a class="navbar-item" href="#">VIPs / Named chatters or WRONG 'UNS join</a><a class="navbar-item" href="#">OBS scene and mic control mod chat commands (!unmute, !brb, !game)</a><a class="navbar-item" href="#">OBS web control panel for your mods</a><a class="navbar-item" href="#">And your suggestions.</a>
                   <hr class="navbar-divider is-hidden-desktop">
                 </div>
               </div>
@@ -410,6 +410,11 @@
                   <div class="control">
                     <label class="checkbox button is-info">
                       <input class="form-save" id="vips" type="checkbox" checked data-tocheckbox="perms.allowVips"> vips
+                    </label>
+                  </div>
+                  <div class="control">
+                    <label class="checkbox button is-info">
+                      <input class="form-save" id="subs" type="checkbox" checked data-tocheckbox="perms.allowSubs"> subs
                     </label>
                   </div>
                 </div>

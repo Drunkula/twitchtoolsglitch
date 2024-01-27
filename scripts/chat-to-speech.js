@@ -387,7 +387,7 @@ var UserMon = UserMon || {};
         // ****************   ., mMESSAGE HANDLER ****************
 
     function twitch_message_handler (channel, userstate, message, self) {
-        //console.log("state", userstate);
+        //console.log("userstate", userstate);
         //console.log("message", message);
             // same user and channel as last message
         const username = userstate["username"];
