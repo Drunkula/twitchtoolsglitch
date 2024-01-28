@@ -5,7 +5,7 @@ export let config = {
     width: 320,
     height: 240,
     playerDiv: "ytplayer",
-    autoplayer: false
+    //autoplayer: false
     },
 
     // socket
@@ -26,12 +26,8 @@ export let playlistDefaults = [
     "QM_kJkChgrc",
     'fqACWyzdkh8',
     "57QRuxfWkyU",
-
 ];
 
 
 //export { config };
-
-/*
-https://speaker.bot/guide/api/websocket/requests/
-*/
+//https://speaker.bot/guide/api/websocket/requests/
