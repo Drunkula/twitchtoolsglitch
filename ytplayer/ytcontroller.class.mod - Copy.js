@@ -249,6 +249,7 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
     videoItem: a singly id, a single {videoid, tltle, added}, this.playlistQueued of single ids, this.playlistQueued of {}
 */
     add(videoItem, isNext = false) {
+        console.log("ADD:", videoItem);
         switch ( true ) {
             case videoItem instanceof Array:
                 //clog("-----------adding this.playlistQueued");

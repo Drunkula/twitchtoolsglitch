@@ -73,7 +73,7 @@ class YTController {
 
     actions = {
         play:       d => this.play(),
-        playvideo:  d => this.load_video(d.videoid),
+        playvideo:  d => this.load_video(d.videoid, d.starttime),
         pause:      d => this.pause(),
         stop:       d => this.yt.stopVideo(),
         resume:     d => this.yt.playVideo(),
@@ -202,13 +202,12 @@ class YTController {
         if (this.playlistNextCount > 0) this.playlistNextCount--;
 
         let id = this.playlist[this.playlistPointer];
+        let time = ytpc.playlistMap.get(id)?.starttime;
 
         if (!this.isPaused)
-            return this.load_video(id);
+            return this.load_video(id, time);
 
-        return this.cue_video(id);
-        //clog(this.playlist[this.playlistPointer]);
-        return id;
+        return this.cue_video(id, time);
     }
 
     /*
@@ -230,12 +229,13 @@ class YTController {
         if ( this.playlistNextCount >= len )
             this.playlistNextCount = len - 1;
 
-        let id = this.playlist[this.playlistPointer]
+        let id = this.playlist[this.playlistPointer];
+        let time = ytpc.playlistMap.get(id)?.starttime;
 
         if (!this.isPaused)
-           return this.load_video(id);
+            return this.load_video(id, time);
 
-        return this.cue_video(id);
+        return this.cue_video(id, time);
     }
         // alias
     previous() {
@@ -250,33 +250,31 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
 */
     add(videoItem, isNext = false) {
         console.log("ADD:", videoItem);
-        switch ( true ) {
-            case videoItem instanceof Array:
-                //clog("-----------adding this.playlistQueued");
-                for (const entry of videoItem) {
-                    if (typeof entry === "string") {
-                        if (entry.length === 0) return; // DEBUG check for 11 really
-                        this.#add_entry(entry, null, null, isNext);
-                    }
-                    else
-                        this.#add_entry(entry.videoid, entry.title, entry.adder, isNext);
-                }
-                break;
+            // isNext should be carried, yeah?
+        let add_entry_switch = videoItem => {
+            switch(true) {
+                case videoItem instanceof Object:   // are we allowing a map like object | //clog("-----------adding object"); |  //this.#add_entry(videoItem.videoid, videoItem.title, videoItem.adder, isNext);
+                    this.#add_entry(videoItem, isNext);
+                    break;
 
-            case videoItem instanceof Object:   // are we allowing a map like object
-                //clog("-----------adding object");
-                this.#add_entry(videoItem.videoid, videoItem.title, videoItem.adder, isNext);
-                break;
+                case typeof videoItem === "string": // assume video id | //clog("----------adding string", videoItem);
+                    if (videoItem.length === 0) return;
+                    this.#add_entry({videoid: videoItem}, isNext);
+                    break;
 
+                default:
+                    console.error("add() to player list unknown type: ", videoItem, typeof videoItem);
+                    return;
+                    break;
+            }
+        }
 
-            case typeof videoItem === "string":
-                //clog("----------adding string", videoItem);
-                if (videoItem.length === 0) return;
-                this.#add_entry(videoItem, null, null, isNext);
-                break;
-
-            default:
-                console.error("add() to player list unknown type: ", videoItem, typeof videoItem);
+        if (videoItem instanceof Array) {
+            for (const entry of videoItem) {
+                add_entry_switch(entry, isNext);
+            }
+        } else {
+            add_entry_switch(videoItem, isNext);
         }
 
         // clog("QUEUED AFTER:", this.playlistQueued);
@@ -288,11 +286,13 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         // in reality I think using a "front splice" method where nexts are put at the start
         // is 'better' as less splices will happen toward the front of the array
 
-    #add_entry(videoid, title="Unknown", adder = "Unknown adder", next = false) {
+    #add_entry(entry, next = false) {
+        let {videoid, title="Unknown", adder = "Unknown adder", starttime = 0} = entry;
+
         if (this.playlistMap.has(videoid))
             return false;    // may bump this if addnext
 
-        this.playlistMap.set(videoid, {title, adder, "number": this.playlistMapCounter++});
+        this.playlistMap.set(videoid, {title, adder, starttime, "number": this.playlistMapCounter++});
 
         let len = this.playlist.length;
 
@@ -467,14 +467,14 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         return this.socket.send( JSON.stringify(obj) );
     }
 
-    load_video(id) {
+    load_video(id, time = 0) {
         this.playlistCurrentId = id;
-        this.yt.loadVideoById(id);
+        this.yt.loadVideoById(id, time);
     }
 
-    cue_video(id) {
+    cue_video(id, time) {
         this.playlistCurrentId = id;
-        this.yt.cueVideoById(id);
+        this.yt.cueVideoById(id, time);
     }
 
     play() {
