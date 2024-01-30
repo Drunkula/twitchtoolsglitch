@@ -114,6 +114,9 @@ class YTController {
         connect:    d => ytpc.socket.connect(),
         disconnect: d => ytpc.socket.close(),
         f: d => {},
+            // true = delete permanently, sends flag back to streamerbot
+        deletecurrentvideoperm: d => this.delete_current(true),
+        deletecurrentvideotemp: d => this.delete_current(false),
 
         nowandnext: d => this.now_and_next(d.data.howMany),
 
@@ -457,6 +460,29 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         }
 
         this.send_json(obj);
+    }
+
+        // delete current video and report its id back to the master
+
+    delete_current(perm = false) {
+        let videoid = this.playlistCurrentId;
+            // filter the array or splice?  Filtering 'safer'
+
+        if (this.playlist[this.playlistPointer] === videoid) {
+            let gone = this.playlist.splice( this.playlistPointer, 1 );
+            if (gone.length) {
+                let vidinfo = this.playlistMap.get(gone[0]);
+
+                this.playlistMap.delete(gone[0]);
+                this.playlistPointer--;
+                this.next();
+                    // destructure vidinfo into the returning object
+                let pack = {action: "videodeleted", id: gone[0], permanent: perm, ...vidinfo};
+                this.send_json(pack);
+            }
+        }
+
+        // this.next();
     }
 
     send(data) {
