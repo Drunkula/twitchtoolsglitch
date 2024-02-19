@@ -134,24 +134,9 @@ var UserMon = UserMon || {};
         {selector: '#volumemaster', event: 'input', function: volume_master_slider_oninput, params: {}},
 
         {selector: '#charfilter', event: 'change', function: filter_chars_onchange, params: {}},
-
             // reading text box
         {selector: '#readtextbtn', event: 'click', function: read_textbox, params: {}},
     ];
-
-        // reads the text
-
-    function read_textbox() {
-        let channel = "Fake channel";
-        let message = gid("readtext").value;
-        let displayname = gid("readtextname").value;
-        let username = displayname.toLowerCase();
-        let self = false;
-        let userstate = {username, "display-name": displayname,
-            "message-type": "chat", id: 54321, "emotes-raw": null}
-
-        twitch_message_handler (channel, userstate, message, self);
-    }
 
         // on window load
 
@@ -405,7 +390,7 @@ var UserMon = UserMon || {};
         // ****************   ., mMESSAGE HANDLER ****************
 
     function twitch_message_handler (channel, userstate, message, self) {
-        console.log("userstate", userstate);
+        //console.log("userstate", userstate);
         //console.log("message", message);
             // same user and channel as last message
         const username = userstate["username"];
@@ -875,6 +860,21 @@ var UserMon = UserMon || {};
         TTSVars.filterChars = chars;
         TTSVars.filterCharsRegex = new RegExp("["+chars+"]", "g");
         console.log("CHAAAANGE");
+    }
+
+
+        // adds the textarea to the speech queue
+
+    function read_textbox() {
+        let channel = "Fake channel";
+        let message = gid("readtext").value;
+        let displayname = gid("readtextname").value;
+        let username = displayname.toLowerCase();
+        let self = false;
+        let userstate = {username, "display-name": displayname,
+            "message-type": "chat", id: 54321, "emotes-raw": null}
+
+        twitch_message_handler (channel, userstate, message, self);
     }
 })(UserMon);
 /*
