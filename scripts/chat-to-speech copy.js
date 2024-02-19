@@ -75,10 +75,11 @@ TT.config.TTSVars = {       // more props added from forms
     voiceHashToIndex: new Map(),
 }
 
-    // allows us to change the function that causes jank.
-window.TTSMain = window.TTSMain || {};
+    // allows us to change the main function.  Yes, maybe I should have just made this a class
+var UserMon = UserMon || {};
 
 (function(ns) {
+//try {   // scope starts ( in case I can demodularise this )
     const ALL_CHAT_RANDOM_VOICE = true; // disable for server
 
     const TTSVars = TT.config.TTSVars;
@@ -108,7 +109,10 @@ window.TTSMain = window.TTSMain || {};
         // quick hashing func for voice ids in the url
     TT.quick_hash = str => str.split('').map(v=>v.charCodeAt(0)).reduce((a,v)=>a+((a<<7)+(a<<3))^v).toString(16);
 
-        // lots of buttons
+  /*   speech.addEventListener('voicessschanged', e => {
+        console.debug("VOICES HAVE CHANGED in Speech", e);
+    }) */
+
     let TTS_EVENTS = [
         {selector: '#saycmds [id^="sc-"], #saycmds input[type="range"], #saycmds select', event: 'change',
             function: update_say_commands, params: {}},
@@ -134,19 +138,29 @@ window.TTSMain = window.TTSMain || {};
         {selector: '#readtextbtn', event: 'click', function: read_textbox, params: {}},
     ];
 
-        // copying all the properties of a voice doesn't make it a voice and it can't be used to set the voice of an utterance.
-        // Even though you can't REPLACE the name in a SpeecSynthesis voice you can ADD an extra property
+        // on window load
 
     function sort_and_filter_voices(voices) {
         let voice_name_filter = (v => v.replace(/Microsoft\s*|Google\s*/, ''))
-            // array returned by speechSynthesis.getVoices() is immutable.   // let vsc = structuredClone(voices);  // nope   //voices = JSON.parse(JSON.stringify(voices));    // NOPE
-        for (let v of voices) {            //let vf = {...v};// nope //let vf = structuredClone(v);  // nope
-            v.nicename = voice_name_filter(v.name);
-        }
-        return voices.sort( (a, b) => a.nicename.localeCompare(b.nicename) );
-    }
+            // array returned by speechSynthesis.getVoices() is immutable
+        // let vsc = structuredClone(voices);  // nope
+        //voices = JSON.parse(JSON.stringify(voices));    // NOPE
+        let props = ['name', 'voiceURI', 'default', 'lang', 'localService'];
 
-        // window load
+        let vclone = []; // voices
+        for (let v of voices) {
+            let vc = {};
+            for (let p of props) {
+                vc[p] = v[p];
+            }
+            //let vf = {...v};// nope
+            //let vf = structuredClone(v);  // nope
+            vc.name = voice_name_filter(vc.name);
+            vclone.push(vc);
+        }
+console.log("AFTER CLONE", vclone);
+        return vclone.sort( (a, b) => a.name.localeCompare(b.name) );
+    }
 
     window.addEventListener('load', async (event) => {
 
@@ -172,13 +186,15 @@ window.TTSMain = window.TTSMain || {};
                 if (voices.length !== TTSVars.voices.length)
                 {  // have to do it this way because of EDGE firing onvoiceschanged events willy nilly
                     console.debug(g("Number of voices has changed:"), voices.length);
-                    TTSVars.voices = sort_and_filter_voices(voices);;
+                    voices = sort_and_filter_voices(voices);
+                    TTSVars.voices = voices;
 
                     create_speech_selects_options();
                     TT.restore_form_values(".voice-select");
                 }
             });
 
+            // SCENE SWITCHER restores form values for selects then adds common events
                 // SHOULD ADD a check to make sure the utterance starts
 
             TT.forms_init_tmi(); // BEFORE common
@@ -365,7 +381,13 @@ window.TTSMain = window.TTSMain || {};
             }
 
             TTSVars.ss = speechSynthesis;
-            TTSVars.voices = sort_and_filter_voices( speechSynthesis.getVoices() );
+            TTSVars.voices = [...speechSynthesis.getVoices()];
+            let voices = [];
+            for (let v of TTSVars.voices) {
+                voices.push(v);
+            }
+            TTSVars.voices = voices;
+            TTSVars.voices = sort_and_filter_voices(TTSVars.voices);
             return ready;
         } catch (e) {
             console.log("INIT_SPEECHER ERROR:", e);
@@ -681,6 +703,7 @@ window.TTSMain = window.TTSMain || {};
         let selects = qsa(".voice-select")
 
         log("Number of voices : " + TTSVars.voices.length)
+        console.log("Number of voices : " + TTSVars.voices.length, TTSVars.voices)
 
             // voices contains names, voiceURI, default, lang, localService
 
@@ -691,7 +714,7 @@ window.TTSMain = window.TTSMain || {};
             for (let voice of TTSVars.voices) {
                 //let voice = TTSVars.voices[voiceidx]
                 let opt = document.createElement('option');
-                opt.text =  voice.nicename;
+                opt.text =  voice.name;
                 opt.value = TT.quick_hash(voice.voiceURI);
 
                 frag.appendChild(opt);
@@ -886,7 +909,7 @@ window.TTSMain = window.TTSMain || {};
 
         twitch_message_handler (channel, userstate, message, self);
     }
-})(TTSMain);
+})(UserMon);
 /*
 }   // try / SCOPE ENDS
 catch (e) {
