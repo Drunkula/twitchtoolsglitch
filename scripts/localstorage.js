@@ -6,6 +6,8 @@
 //	log('LOADED');
 
 	TT.forms_init_common();
+	//TT.forms_init_tmi();
+
 	TT.add_events_common();
 
 	let clearChatters = () => { o('', true); };

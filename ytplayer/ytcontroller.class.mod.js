@@ -1,8 +1,9 @@
 /*
     JAVASCRIPT part
 */
-import { Socketty } from "/scripts/Socketty.class.js";
-import { YTPlayer } from "./ytplayer.class.mod.js";
+//import { Socketty } from "/scripts/Socketty.class.js";
+import YTPlayer from "./ytplayer.class.mod.js";
+import SockMsgRouter from "./sockmsgrouter.class.mod.js";
 
     // whether next or prev was last used
 const DirFwd = 1;
@@ -11,9 +12,9 @@ const DirBack = -1;
 
 // essentially {these funcs} = {this object of funcs}
 
-class YTController {
+class YTController extends SockMsgRouter {
 
-    socket = new Socketty();    // url is set in constructor
+    //socket = new Socketty();    // url is set in constructor
     ytPlayer = new YTPlayer();
     yt;  // shortut to ytPlayer.player.  Don't use until player ready event
 
@@ -33,6 +34,7 @@ class YTController {
 
     playlistLoaded = false;
 
+    /* use defaults for now
     socketEvents = [
         ['message', e => this.message_handler(e)],
         ['open',  () => { out("!!!YT VERSION Socketty opened");
@@ -55,7 +57,7 @@ class YTController {
         }],
 
         ['Xerror', x => out("!!!YT VERSION Socketty error!", x.toString())]
-    ];
+    ]; */
 
         // can only be added after ready() so onReady won't be called
         // you need to add to this
@@ -70,6 +72,7 @@ class YTController {
     ];
 
         // messages will be like a format of "action" and "data"
+        // replaces base class actions
 
     actions = {
         play:       d => this.play(),
@@ -133,6 +136,7 @@ class YTController {
     // HAS A socket systems
 
     constructor() {
+        super();    // initialise daddy
         clog("I am a YTController constructor.");
         //this.insert_ytplayer_api();   // done in player contructor
         this.add_socket_events();
@@ -147,12 +151,12 @@ class YTController {
         clog("Player ready, adding events.", this.ytPlayer.player);
         this.yt = this.ytPlayer.player;
     }
-
+/*
     add_socket_events() {
         for (const pair of this.socketEvents) {
             this.socket.addEventListener(pair[0], pair[1]);
         }
-    }
+    }*/
         // can only be called after ready()
     add_player_events() {
         for (const pair of this.playerEvents) {
@@ -252,7 +256,7 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
     videoItem: a singly id, a single {videoid, tltle, added}, this.playlistQueued of single ids, this.playlistQueued of {}
 */
     add(videoItem, isNext = false) {
-        console.log("ADD:", videoItem);
+        //console.log("ADD:", videoItem);
             // isNext should be carried, yeah?
         let add_entry_switch = videoItem => {
             switch(true) {
@@ -350,7 +354,7 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
 // -url:https://play.google.com/ -url:chrome-extension://mnjggcdmjocbbbhaepdhchncahnbgone/js/content.js -url:https://www.youtube.com
 // or use current context only
 // handler for socket messages and string actions
-
+/*
     message_handler(e) {
         let data = null, action, json = "not json";
 
@@ -380,7 +384,7 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
 
         clog("Action:", action, "JSON?", json);
             //this.send("Thanks, partner!")
-    }
+    }*/
 
     error_handler(e) {
         clog("playlist error for id", this.playlistCurrentId);
@@ -484,7 +488,7 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
 
         // this.next();
     }
-
+/*
     send(data) {
         return this.socket.send(data);
     }
@@ -492,7 +496,7 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
     send_json(obj) {
         return this.socket.send( JSON.stringify(obj) );
     }
-
+*/
     load_video(id, time = 0) {
         this.playlistCurrentId = id;
         this.yt.loadVideoById(id, time);

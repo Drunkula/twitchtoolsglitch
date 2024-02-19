@@ -65,7 +65,7 @@
 "use strict"
 
 
-TMIConfig.TTSVars = {       // more props added from forms
+TT.config.TTSVars = {       // more props added from forms
     flashSetTimeout: null,
     flashDuration: 3500,    // milliseconds
     flashFunc: x => x,      // does nothing for now
@@ -82,7 +82,7 @@ var UserMon = UserMon || {};
 //try {   // scope starts ( in case I can demodularise this )
     const ALL_CHAT_RANDOM_VOICE = true; // disable for server
 
-    const TTSVars = TMIConfig.TTSVars;
+    const TTSVars = TT.config.TTSVars;
     const TTS_MOD_COOLDOWN = 0; // THIS might have been causing problems in Flip's
     const cooldowns = new TT.Cooldowns();
     const speech = new TT.Speecher();
@@ -134,7 +134,24 @@ var UserMon = UserMon || {};
         {selector: '#volumemaster', event: 'input', function: volume_master_slider_oninput, params: {}},
 
         {selector: '#charfilter', event: 'change', function: filter_chars_onchange, params: {}},
+
+            // reading text box
+        {selector: '#readtextbtn', event: 'click', function: read_textbox, params: {}},
     ];
+
+        // reads the text
+
+    function read_textbox() {
+        let channel = "Fake channel";
+        let message = gid("readtext").value;
+        let displayname = gid("readtextname").value;
+        let username = displayname.toLowerCase();
+        let self = false;
+        let userstate = {username, "display-name": displayname,
+            "message-type": "chat", id: 54321, "emotes-raw": null}
+
+        twitch_message_handler (channel, userstate, message, self);
+    }
 
         // on window load
 
@@ -171,6 +188,7 @@ var UserMon = UserMon || {};
             // SCENE SWITCHER restores form values for selects then adds common events
                 // SHOULD ADD a check to make sure the utterance starts
 
+            TT.forms_init_tmi(); // BEFORE common
             TT.forms_init_common(); // restores forms and sets up common permissions doesn't triggers ONCHANGE
 
             if (TTSVars.voices.length) {
@@ -184,7 +202,7 @@ var UserMon = UserMon || {};
             add_chat_to_speech_tmi_listener();
             init_flasher_tech();
 
-            if (TMIConfig.autojoin) {
+            if (TT.initialUrlParamsToArray['autojoin']) {
                 console.debug(r("Auto Joining channels..."));
                 TT.join_chans();
             }
@@ -387,7 +405,7 @@ var UserMon = UserMon || {};
         // ****************   ., mMESSAGE HANDLER ****************
 
     function twitch_message_handler (channel, userstate, message, self) {
-        //console.log("userstate", userstate);
+        console.log("userstate", userstate);
         //console.log("message", message);
             // same user and channel as last message
         const username = userstate["username"];
@@ -439,7 +457,7 @@ var UserMon = UserMon || {};
             let nameIsCmd = starts_with_say_command("!" + TTSVars.usercommands[userstate['username']]);
                 // !cmd or false returned
             if (nameIsCmd) {   // sayCmds are !cmd: {rate, pitch, voice} // THIS IS THE BUG THIS IS THE BUG .text get written to the global later cos reference.
-                //sayCmdPack.params = TTSVars.sayCmds[nameIsCmd]; check TMIConfig.TTSVars.sayCmds
+                //sayCmdPack.params = TTSVars.sayCmds[nameIsCmd]; check TT.config.TTSVars.sayCmds
                 //voiceParams = {...TTSVars.sayCmds[nameIsCmd]};    // FIXED
                 voiceParams = ns.get_voice_settings_by_name(nameIsCmd); // allows "patching" the jank version back
             } else if (TTSVars.randomVoices) {

@@ -7,7 +7,7 @@
 
 	const $speechQDiv = gid('speechqueue');
 	const $speechQOldDiv = gid('speechqueueold');
-	const TTSVars = TMIConfig.TTSVars;
+	const TTSVars = TT.config.TTSVars;
 
 	TTSVars.speech_queue_list_add = function speech_queue_add_entry( data ) {
 		let { user, id, text, msgid } = data;

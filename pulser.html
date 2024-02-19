@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Twitch Tools</title>
+    <meta name="description">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <script defer="" src="https://use.fontawesome.com/releases/v6.1.1/js/all.js"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+  </head>
+  <body>
+    <div class="block mx-5 my-3 main-container">
+      <!-- need form save-->
+      <!-- TT namespace,-->
+      <script src="/scripts/backbone-common.js" defer></script>
+      <script src="/scripts/event-listeners.js" defer></script>
+      <!--script TT = {};-->
+      <!-- sets up tabs, modals, etc REQUIRES backbone common-->
+      <script src="/scripts/bulma-components-init.js" defer></script>
+      <!-- saves and restores form items with .form-save class to url-->
+      <script src="/scripts/form-fields-save-restore.js" defer></script>
+      <!-- our main script-->
+      <!--script(src="/scripts/pulser/pulser.entrypoint.mod.js" type="module")-->
+      <script src="/scripts/pulser/pulser.entrypoint.mod.js" defer></script>
+      <div class="box mb-2 py-1">
+        <div class="has-text-centered subtitle mb-0">[Slower] Intensity Sweep [Faster]</div>
+        <input class="is-small form-save" style="width: 100%" type="range" id="intensityrate" min="0.0" max="1.0" step="0.01" value="0.0" data-tofloat="Pulser.intensityrate">
+        <div class="field is-grouped-centered is-grouped">
+          <div class="control">
+            <label class="checkbox button is-link is-size-7-mobile is-responsive">
+              <input class="form-save" type="checkbox" data-tocheckbox="Pulser.lrsweep" id="lrsweep"> Left / Right Sweep
+            </label>
+          </div>
+          <div class="control">
+            <label class="checkbox button is-link is-size-7-mobile is-responsive">
+              <input class="form-save" type="checkbox" data-tocheckbox="Pulser.pulsing" id="pulsing"> Pulse
+            </label>
+          </div>
+        </div>
+        <div class="has-text-centered subtitle mb-0">Pulse Rate</div>
+        <input class="is-small form-save" style="width: 100%" type="range" id="pulserate" min="0.0" max="1.0" step="0.01" value="0.0" data-tofloat="Pulser.pulserate">
+        <div class="has-text-centered subtitle mb-0">Pulse Width</div>
+        <input class="is-small form-save" style="width: 100%" type="range" id="pulsewidth" min="0.0" max="1.0" step="0.01" value="0.0" data-tofloat="Pulser.pulsewidth">
+        <div class="columns">
+          <div class="column">
+            <div class="has-text-centered subtitle mb-0">L Min Strength</div>
+            <input class="is-small form-save" style="width: 100%" type="range" id="minstrengthl" min="0.0" max="1.0" step="0.002" value="0.0" data-tofloat="Pulser.minstrengthl">
+            <div class="has-text-centered subtitle mb-0">L Max Strength</div>
+            <input class="is-small form-save" style="width: 100%" type="range" id="maxstrengthl" min="0.0" max="1.0" step="0.002" value="0.0" data-tofloat="Pulser.maxstrengthl">
+          </div>
+          <div class="column">
+            <div class="has-text-centered subtitle mb-0">R Min Strength</div>
+            <input class="is-small form-save" style="width: 100%" type="range" id="minstrengthr" min="0.0" max="1.0" step="0.002" value="0.0" data-tofloat="Pulser.minstrengthr">
+            <div class="has-text-centered subtitle mb-0">R Max Strength</div>
+            <input class="is-small form-save" style="width: 100%" type="range" id="maxstrengthr" min="0.0" max="1.0" step="0.002" value="0.0" data-tofloat="Pulser.maxstrengthr">
+          </div>
+        </div>
+        <div class="field is-grouped-centered is-grouped">
+          <div class="control">
+            <label class="checkbox button is-link is-size-7-mobile is-responsive">
+              <input type="checkbox" data-tocheckbox="Pulser.enabled" id="enabled"> Enabled
+            </label>
+          </div>
+          <div class="control">
+            <label class="checkbox button is-link is-size-7-mobile is-responsive">
+              <input class="form-save" id="leftenabled" type="checkbox" checked data-tocheckbox="Pulser.leftenabled"> Left [strong]
+            </label>
+          </div>
+          <div class="control">
+            <label class="checkbox button is-link is-size-7-mobile is-responsive">
+              <input class="form-save" id="rightenabled" type="checkbox" checked data-tocheckbox="Pulser.rightenabled"> Right [weak]
+            </label>
+          </div>
+        </div>
+        <div class="button is-info" id="connected">No Pad</div>
+      </div>
+      <div class="box">
+        <div class="messages"></div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -11,7 +11,7 @@ Events and commands
 https://github.com/obsproject/obs-websocket/blob/4.x-current/docs/generated/protocol.md
 
 */
-TMIConfig.SceneSwitcherVars = {
+TT.config.SceneSwitcherVars = {
 	obs: new OBSWebSocket(),
 	connected: false,
 	sceneCommands: [],	// updated by onchange of command list - starts 1
@@ -21,7 +21,7 @@ TMIConfig.SceneSwitcherVars = {
 }
 
 {	// scope
-	const SS = TMIConfig.SceneSwitcherVars;
+	const SS = TT.config.SceneSwitcherVars;
 
 		/** Gets params from form, attempts login */
 

@@ -7,8 +7,27 @@ https://github.com/tmijs/docs/blob/gh-pages/_posts/v1.4.2/2019-03-03-Functions.m
 	// ******************** TMI Boilerplate ****************** //
 
 (() => {	// SCOPE START
+    // replacement for T.M.I.Config
+TT.config = {	// MOST tools add their config to this to make observing easy
+	...TT.config,
+	TMI_DEFAULT_CHANNELS: 	[],		// could put this in a different file for easy user use
+	TMI_DEFAULT_ALLOW_NAMED:[],		// these do work
+	TMI_IGNORE_DEFAULT:		["nightbot", "streamelements", "moobot", "streamlabs", "fossabot", "songlistbot"], // LOWERCASE
+
+	autojoin: null,
+	joinDebounceSecs: 3,
+}
+
+TT.config.perms = {	// permissions to run commands
+	allowEveryone : false,
+	allowMods : true,
+	allowVips : true,
+	allowNamed : TT.config.TMI_DEFAULT_ALLOW_NAMED,
+	ignoredUsers: TT.config.TMI_IGNORE_DEFAULT,
+}
 
 	// TMI options
+
 const clientOpts = 	{
 	connection: {
 		secure: true,
@@ -26,16 +45,16 @@ const cclient = new tmi.Client(clientOpts);
 
 TT.cclient = cclient;
 
-TMIConfig.tmiConnected = cclient.connect();	// don't join here if you prefill channels in clientOpts
+TT.config.tmiConnected = cclient.connect();	// don't join here if you prefill channels in clientOpts
 	// returns promise. cclient.ws.readyState = 1 when connected, ws = null before connection
 
 
 
 
-	 // joins channels in the text input, leaves those not in there if connected
+	 // joins channels in the text input, departs those not in the list if connected
 
 TT.join_chans = async function join_chans() {
-	await TMIConfig.tmiConnected;
+	await TT.config.tmiConnected;
 
 		// grab the channels from the text input
 	let channels = gid('channels').value.match(/\w+/g);
@@ -115,8 +134,85 @@ cclient.on('roomstate', (chan, state) => {
 })
 
 
+	//// ******* FORMS AND PERMISSION ******* ////
 
+	// if permissions are used you'll have allownamed, everyone, mods, vips
 
-console.debug('common tmi end.');
+	TT.forms_init_tmi = function () {
+		TT.init_channels_defaults();
+		TT.allow_named_init_defaults();
+		TT.ignored_users_init_defaults();
+	}
+
+		// if no channels were in the request then use the defaults
+
+	TT.init_channels_defaults = function init_channels_defaults () {
+		let channo = gid('channels');
+		if (channo) {
+			channo.value = TT.config.TMI_DEFAULT_CHANNELS.join(' ');
+		}
+	}
+
+		// set defaults on ignoredusers if nothing in restore
+
+	TT.ignored_users_init_defaults = function tt_ignored_users_init_defaults() {
+		let igUsrs = gid('ignoredusers');
+		if (!igUsrs) return;
+		igUsrs.value = TT.config.TMI_IGNORE_DEFAULT.join(' ');
+	}
+
+		// sets onchange event for the allowname field
+		// COULD use the mapper and grab values out of where they save to populate
+
+	TT.allow_named_init_defaults = function allow_named_init_defaults() {
+		let aNamed = gid('allownamed');
+		if (!aNamed) return	//if (TT.initialUrlParamsToArray['allownamed'] === undefined)
+		aNamed.value = TT.config.TMI_DEFAULT_ALLOW_NAMED.join(' ');
+	}
+
+		// turning these into event emits to update the input would be overkill
+
+	TT.ignored_users_add = function(user) {
+		user = user.toString().trim().toLowerCase();
+		TT.config.perms.ignoredUsers.push(user);
+		TT.config.perms.ignoredUsers = [...new Set(TT.config.perms.ignoredUsers)];
+		gid('ignoredusers').value = TT.config.perms.ignoredUsers.join(' ');
+		TT.url_populate();
+	}
+
+	TT.ignored_users_remove = function(user) {
+		user = user.toString().trim().toLowerCase();
+		let uset = new Set(TT.config.perms.ignoredUsers);
+		uset.delete(user);
+		TT.config.perms.ignoredUsers = [...uset];
+		gid('ignoredusers').value = TT.config.perms.ignoredUsers.join(' ');
+		TT.url_populate();
+	}
+
+		// user allowed to do the command?
+
+	TT.user_permitted = function user_permitted(user) {
+		let allowed = false;
+
+		switch (true) {	// block first
+			case TT.config.perms.ignoredUsers.includes(user.username):
+				allowed = false;
+				break;
+			case TT.config.perms.allowEveryone:
+			case TT.config.perms.allowMods && user.mod:
+			case TT.config.perms.allowVips && user.badges && user.badges.vip === "1":
+			case TT.config.perms.allowSubs && user.subscriber:
+			case TT.config.perms.allowNamed.includes(user.username):
+			case user.badges && user.badges.broadcaster === "1":
+				allowed = true;
+				break;
+
+			default:
+				allowed = false;
+				break;
+		}
+
+		return allowed;
+	}
 
 })(); // SCOPE END

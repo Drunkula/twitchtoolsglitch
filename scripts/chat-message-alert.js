@@ -12,7 +12,7 @@
 
         // regex's to match the input
 
-    TMIConfig.NCMVars = {
+    TT.config.NCMVars = {
         flashEnabled: true,
         playSound: true,
         cooldownDefaultMins: 5, // all set with data-to...
@@ -31,7 +31,7 @@
         countdown: new Countdown(),
     }
         // proxy me do - means observing in dev tools is easy
-    const NCMVars = TMIConfig.NCMVars;
+    const NCMVars = TT.config.NCMVars;
 
     const NCMEvents = [
         {selector: '#defaultcooldown', event: 'change', function: ncm_default_cooldown_input_onchange, params: {}},
@@ -48,6 +48,7 @@
         NCMVars.cooldownSecsDiv = gid('cooldowncountdown');
         NCMVars.alertSound = document.getElementById('ding');
 
+        TT.forms_init_tmi(); // BEFORE common
         TT.forms_init_common(); // channels populates form fields from url string
             // after init as defaults changed
         TT.add_events_common();
@@ -70,7 +71,7 @@
         }
 
             // autojoin
-        if (TMIConfig.autojoin) { console.log(r("Auto Joining channels..."));
+        if (TT.initialUrlParamsToArray['autojoin']) { console.log(r("Auto Joining channels..."));
             TT.join_chans();
         }
     });// on load ends
@@ -91,7 +92,7 @@
 
         TT.cclient.on('message', (channel, userstate, message, self) => {
             if (NCMVars.countdown.active() || self || lastMsgId === userstate['id'] || NCMVars.alertPending ||
-                NCMVars.alertEnabled === false || TMIConfig.perms.ignoredUsers.includes(userstate.username)             )
+                NCMVars.alertEnabled === false || TT.config.perms.ignoredUsers.includes(userstate.username)             )
             {
                 return;   // Don't listen to my own messages..
             }

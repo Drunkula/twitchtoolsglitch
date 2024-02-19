@@ -69,7 +69,7 @@ let restore_opts_default = {
 	paramString: window.location.search,
 	idIfNoName: true,
 	localStorageFallback: true,
-	useCached: false	// use values in TMIConfig.initialUrlParamsToArray
+	useCached: false	// use values in TT.initialUrlParamsToArray
 }
 
  //TT.restore_form_values = function restore_form_values(selector = '.form-save', opts = restore_opts_default) {
@@ -88,9 +88,9 @@ TT.restore_form_values = function restore_form_values(selector = '.form-save', o
 
 	let getVars = TT.query_string_params_to_array(paramString);
 		// so far restored params are NEVER used
-	if (useCached && Object.keys(TMIConfig.initialUrlParamsToArray).length) {
-		console.log("*********************** USING CACHED VARS OK ***************************", TMIConfig.initialUrlParamsToArray);
-		getVars = TMIConfig.initialUrlParamsToArray;
+	if (useCached && Object.keys(TT.initialUrlParamsToArray).length) {
+		console.log("*********************** USING CACHED VARS OK ***************************", TT.initialUrlParamsToArray);
+		getVars = TT.initialUrlParamsToArray;
 	}
 
 	inputs.forEach( field => {
@@ -152,6 +152,55 @@ TT.form_filter_commas_to_spaces = function form_filter_commas_to_spaces(str) {
 	return str ? str.join(' ') : '';
 }
 
+	/** Store data in localStorage called urlParams */
 
+TT.localstore_save = function page_params_set(data) {//	TT.local_store_set('urlParams', data);
+	let namePath = "urlParams" + window.location.pathname;
+	localStorage.setItem(namePath, JSON.stringify(data));
+}
+
+TT.localstore_load = function page_params_get() {
+	let namePath = 'urlParams' + window.location.pathname;
+	return JSON.parse( localStorage.getItem(namePath) );
+	//return TT.local_store_get('urlParams');
+}
+
+	// selects get or localStorage for form repopulation
+
+TT.get_restore_params = function get_restore_params() {
+	let getU = TT.query_string_params_to_array();
+console.log("Params from query string:",Object.keys(getU).length, "Param string length:", window.location.search.length);
+	if (Object.keys(getU).length) {
+		console.info('get_restore_params using '+ g('get'));
+		return getU;
+	}
+		// local storage?
+	let lsParams = TT.query_string_params_to_array( TT.localstore_load() ); // <- defined in backbone
+
+	if (Object.keys(lsParams).length) {
+		console.info('get_restore_params using ' + g('localStorage'));
+		return lsParams;
+	}
+
+	return false;
+}
+
+	// returns array from url?foo=bar parameters will be needed for minified versions
+
+TT.query_string_params_to_array = function get_query_string_params(params = window.location.search) {
+	let getVars = {};
+	//decodeURI(window).replace(/[?&]+([^=&]+)=([^&]*)/gi, function(a,name,value){getVars[name]=value;});
+	try {
+		if (params[0] === '?') params = params.substring(1);
+		params.split("&").forEach(a => {
+			let [name, value] = a.split("=");
+			if (value !== undefined)
+				getVars[decodeURIComponent(name)] = decodeURIComponent(value);
+		});
+	} catch (e) {
+		console.log("ERROR: quert_string_params_to_array -", e);
+	}
+	return getVars;
+}
 
 }	// scope

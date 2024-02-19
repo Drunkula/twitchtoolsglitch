@@ -3,7 +3,7 @@
  */
 
 console.log("########## INJECTING JANKY JANKERSON ############")
-    // this janky version references the 'global' TMIConfig.TTSVars.sayCmds
+    // this janky version references the 'global' TT.config.TTSVars.sayCmds
 TTSMain.get_voice_settings_by_name = function (name) {
-    return TMIConfig.TTSVars.sayCmds[name];
+    return TT.config.TTSVars.sayCmds[name];
 }

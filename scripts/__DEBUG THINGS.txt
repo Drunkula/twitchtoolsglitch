@@ -40,4 +40,4 @@ FLOW on.message creates
 
     TTSVars.sayCmds is the source of the problem.  .text property gets added and WRITTEN BACK TO it
 
-    TMIConfig.TTSVars.sayCmds check in browser
+    TT.config.TTSVars.sayCmds check in browser

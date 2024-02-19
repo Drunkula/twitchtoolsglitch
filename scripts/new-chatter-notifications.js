@@ -15,16 +15,17 @@
  * I could give different channels different colours, have a colour list
  */
 "use strict"
-TMIConfig.NCNChatterSet = new Set();	// first chats stored as channel+name
+TT.config.NCNChatterSet = new Set();	// first chats stored as channel+name
 
 {	// SCOPE
-let NCNChatterSet = TMIConfig.NCNChatterSet;
+let NCNChatterSet = TT.config.NCNChatterSet;
 
 	 // window onload
 
 window.addEventListener('load', () => {
 	log('LOADED');
 
+	TT.forms_init_tmi();    // BEFORE common
 	TT.forms_init_common();
 	TT.add_events_common();
 
@@ -38,7 +39,7 @@ window.addEventListener('load', () => {
 	TT.button_add_confirmed_func('.resetChatConf', resetChatters);
 
 		// url params to array
-	if (TMIConfig.autojoin === true) {
+	if (TT.initialUrlParamsToArray['autojoin'] === true) {
 		document.getElementById('join').click();			//TT.join_chans();
 	}
 });

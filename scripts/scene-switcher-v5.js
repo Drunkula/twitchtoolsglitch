@@ -42,13 +42,13 @@ for	SS.obs.call('SetInputMute', opts)
 	This needs to grab the obs credentials so has to either passively or actively restore
 	So I need to change form restore - separate out the function that lets you fetch where
 	the restore comes from
-	Normally TMIConfig.initialUrlParamsToArray = TT.get_restore_params();
+	Normally TT.initialUrlParamsToArray = TT.get_restore_params();
 	Yes, that shall be our salvation
 
 */
 {	// Scope starts
 	// proxy for typing
-const SS = TMIConfig.SceneSwitcherVars;
+const SS = TT.config.SceneSwitcherVars;
 
 docReady( () => init_scene_switcher() )
 
@@ -67,6 +67,7 @@ const SS_EVENTS = [
 	 */
 
 async function init_scene_switcher() {
+	TT.forms_init_tmi();    // BEFORE common
 	TT.forms_init_common();	// common permissions, restores forms, no longer adds common events
 	TT.add_event_listeners(SS_EVENTS);	// will add onchange on forms but no common events yet means URL won't be updated
 				 //TT.add_events_common(); // DON'T add here as it'll clear scenes in the url.  Added in obs_connect_success
@@ -75,7 +76,7 @@ async function init_scene_switcher() {
 
 	SS.tmi_listener_init();
 
-	if (TMIConfig.autojoin) {
+	if (TT.initialUrlParamsToArray['autojoin']) {
 		console.debug(r("Auto Joining channels..."));
 		TT.join_chans();
 	}

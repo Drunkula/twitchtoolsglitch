@@ -1,18 +1,19 @@
 /*
-	TT and TMIConfig will be our global repositories
+	TT and TT.config will be our global repositories
 	TT for functions, the other for each tool's vars - makes it easy to track in the console debugger
-	TT.set_conf('some.var.name', value) can be used to set values in TMIConfig so you can
+	TT.set_conf('some.var.name', value) can be used to set values in TT.config so you can
 	use set_conf('MY_MODULE.someprop', value) to store local settings
 */
 "use strict"
 
 var _____MY_SPECIAL_DEBUG_DUMMY____ = 'dummy';	// properties are placed in order in window, so skip until we hit this
-	// lets us list global vars from console to check for polluting the timelines (forgetting strict)
-function TT_DEBUG_list_window() {
+// lets us list global vars from console to check for polluting the timelines (forgetting strict)
+// SHOW GLOBALS I've added to window
+function TT_DEBUG_My_Globals() {
 	let output = false;
 	console.log('---------------------------');
-	for(let b in window) {
-		if(output && window.hasOwnProperty(b))
+	for (let b in window) {
+		if (output && window.hasOwnProperty(b))
 			console.log(b);
 		if (b === "_____MY_SPECIAL_DEBUG_DUMMY____") output = true;
 	}
@@ -20,209 +21,35 @@ function TT_DEBUG_list_window() {
 	console.log("This", this);
 }
 
-var TT = {} // OUR NAMESPACE can't be a constant for now as I've used TT = TT || {} elsewhere
 
-TT.TMI_DEFAULT_CHANNELS = 	[];		// could put this in a different file for easy user use
-TT.TMI_DEFAULT_ALLOW_NAMED =[];		// these do work
-TT.TMI_IGNORE_DEFAULT =		["nightbot", "streamelements", "moobot", "streamlabs", "fossabot", "songlistbot"]; // LOWERCASE
-
-TT.MAGIC_CLASS_FORM_SAVE = '.form-save';
-
+var TT = {  // OUR NAMESPACE can't be a constant for now as I've used TT = TT || {} elsewhere
+	initialUrlParamsToArray: [],	// url INITIAL values before restore params chages4
+	MAGIC_CLASS_FORM_SAVE: '.form-save',
+	config: {}
+}
 
 // NOTE - all .form-save items will have their onchange triggered
 // NOTE - no they don't, now it's onchange items.
 
-var TMIConfig = {	// MOST tools add their config to this to make observing easy
-	autojoin: null,
-	joinDebounceSecs: 3,
-	initialUrlParamsToArray: [],	// url INITIAL values before restore params chages
-
-	perms : {	// permissions to run commands
-        allowEveryone : false,
-        allowMods : true,
-        allowVips : true,
-        allowNamed : TT.TMI_DEFAULT_ALLOW_NAMED,
-		ignoredUsers: TT.TMI_IGNORE_DEFAULT,
-    }
-}
-
-
-	/**
-	 * Repopulates form fields from url
-	 * formats channels field
-	 * ONCHANGE triggered on all .form-save fields after - not any more
-	 */
+/**
+ * Repopulates form fields from url
+ * formats channels field
+ * ONCHANGE triggered on all .form-save fields after - not any more
+ */
 
 TT.forms_init_common = function forms_init_common() {
-	TMIConfig.initialUrlParamsToArray = TT.get_restore_params();	// NEVER used EVER so far
-		// autojoin check
-	if (TMIConfig.initialUrlParamsToArray['autojoin'] === "true") {
-		TMIConfig.autojoin = true;
-	}
-
-	TT.forms_init_common_permissions();
+	TT.initialUrlParamsToArray = TT.get_restore_params();	// checked by TMI init
 		// form values will overwrite defaults
 	TT.restore_form_values(TT.MAGIC_CLASS_FORM_SAVE);
-
 	//trigger_onchange_on('input, select');
 }
 
-TT.add_events_common = function() {
+TT.add_events_common = function () {
 	TT.add_event_listeners();
 }
 
-	// if permissions are used you'll have allownamed, everyone, mods, vips
-
-TT.forms_init_common_permissions = function forms_init_common_permissions() {
-	TT.init_channels_defaults();
-	TT.allow_named_init_defaults();
-	TT.ignored_users_init_defaults();
-}
-
-	// if no channels were in the request then use the defaults
-
-TT.init_channels_defaults = function init_channels_defaults () {
-	let channo = gid('channels');
-	if (channo) {
-		channo.value = TT.TMI_DEFAULT_CHANNELS.join(' ');
-	}
-}
-
-	// set defaults on ignoredusers if nothing in restore
-
-TT.ignored_users_init_defaults = function tt_ignored_users_init_defaults() {
-	let igUsrs = gid('ignoredusers');
-	if (!igUsrs) return;
-	igUsrs.value = TT.TMI_IGNORE_DEFAULT.join(' ');
-}
-
-	// sets onchange event for the allowname field
-	// COULD use the mapper and grab values out of where they save to populate
-
-TT.allow_named_init_defaults = function allow_named_init_defaults() {
-	let aNamed = gid('allownamed');
-	if (!aNamed) return	//if (TMIConfig.initialUrlParamsToArray['allownamed'] === undefined)
-	aNamed.value = TT.TMI_DEFAULT_ALLOW_NAMED.join(' ');
-}
-
-	// turning these into event emits to update the input would be overkill
-
-TT.ignored_users_add = function(user) {
-	user = user.toString().trim().toLowerCase();
-	TMIConfig.perms.ignoredUsers.push(user);
-	TMIConfig.perms.ignoredUsers = [...new Set(TMIConfig.perms.ignoredUsers)];
-	gid('ignoredusers').value = TMIConfig.perms.ignoredUsers.join(' ');
-	TT.url_populate();
-}
-
-TT.ignored_users_remove = function(user) {
-	user = user.toString().trim().toLowerCase();
-	let uset = new Set(TMIConfig.perms.ignoredUsers);
-	uset.delete(user);
-	TMIConfig.perms.ignoredUsers = [...uset];
-	gid('ignoredusers').value = TMIConfig.perms.ignoredUsers.join(' ');
-	TT.url_populate();
-}
-
-	// user allowed to do the command?
-
-TT.user_permitted = function user_permitted(user) {
-	let allowed = false;
-
-	switch (true) {	// block first
-		case TMIConfig.perms.ignoredUsers.includes(user.username):
-			allowed = false;
-			break;
-		case TMIConfig.perms.allowEveryone:
-		case TMIConfig.perms.allowMods && user.mod:
-		case TMIConfig.perms.allowVips && user.badges && user.badges.vip === "1":
-		case TMIConfig.perms.allowSubs && user.subscriber:
-		case TMIConfig.perms.allowNamed.includes(user.username):
-		case user.badges && user.badges.broadcaster === "1":
-			allowed = true;
-			break;
-
-		default:
-			allowed = false;
-			break;
-	}
-
-	return allowed;
-}
-
-
-	/** Store data in localStorage called urlParams */
-TT.localstore_save = function page_params_set(data) {//	TT.local_store_set('urlParams', data);
-	let namePath = "urlParams" + window.location.pathname;
-    localStorage.setItem(namePath, JSON.stringify(data));
-}
-
-TT.localstore_load = function page_params_get() {
-	let namePath = 'urlParams' + window.location.pathname;
-    return JSON.parse( localStorage.getItem(namePath) );
-	//return TT.local_store_get('urlParams');
-}
-
-	// selects get or localStorage for form repopulation
-
-TT.get_restore_params = function get_restore_params() {
-	let getU = TT.query_string_params_to_array();
-console.log("Params from query string:",Object.keys(getU).length, "Param string length:", window.location.search.length);
-	if (Object.keys(getU).length) {
-		console.info('get_restore_params using '+ g('get'));
-		return getU;
-	}
-		// local storage?
-	let lsParams = TT.query_string_params_to_array( TT.localstore_load() ); // <- defined in backbone
-
-	if (Object.keys(lsParams).length) {
-		console.info('get_restore_params using ' + g('localStorage'));
-		return lsParams;
-	}
-
-	return false;
-}
-
-	// returns array from url?foo=bar parameters will be needed for minified versions
-
-TT.query_string_params_to_array = function get_query_string_params(params = window.location.search) {
-	let getVars = {};
-	//decodeURI(window).replace(/[?&]+([^=&]+)=([^&]*)/gi, function(a,name,value){getVars[name]=value;});
-	try {
-		if (params[0] === '?') params = params.substring(1);
-		params.split("&").forEach(a => {
-			let [name, value] = a.split("=");
-			if (value !== undefined)
-				getVars[decodeURIComponent(name)] = decodeURIComponent(value);
-		});
-	} catch (e) {
-		console.log("ERROR: quert_string_params_to_array -", e);
-	}
-	return getVars;
-}
-
-	/**
-	 *	Set a property in TMIConfig - deep allowed like 'foo.bar.doo'
-	 * @param {string} path of property e.g. "someprop" or "some.deeper.prop"
-	 * @param {*} val
-	 */
-
-TT.set_conf = function set_conf(path, val) {
-	let sp = path.split('.')
-	let last = sp.pop();
-
-	let ref = sp.reduce( (prev, curr) => {
-		if (prev[curr] === undefined) {
-			prev[curr] = {}
-		}
-		return prev[curr]
-	}, TMIConfig)
-
-	ref[last] = val;
-}
-
-	// trigger onchange events to populate certain elements
-
+// trigger onchange events to populate certain elements
+/*
 TT.trigger_onchange_on = function trigger_onchange_on(selector) {
 	let ev = new Event('change');
 
@@ -231,23 +58,23 @@ TT.trigger_onchange_on = function trigger_onchange_on(selector) {
 	flds.forEach(element => {
 		element.dispatchEvent(ev);
 	});
-}
+}*/
 
 
-	// **************** GLOBAL HELPERS ***************** //
+// **************** GLOBAL HELPERS ***************** //
 
-function qsa(query, el=document) {
+function qsa(query, el = document) {
 	return [...el.querySelectorAll(query)];
 }
-	// gid could cache results, qsa not really
+// gid could cache results, qsa not really
 function gid(id, el = document) {
 	return el.getElementById(id);
 }
 
-	// colours for console output - make global, why not
+// colours for console output - make global, why not
 
-var { r, g, b, w, c, m, y, k } = [ ['r', 1], ['g', 2], ['b', 4], ['w', 7], ['c', 6], ['m', 5], ['y', 3], ['k', 0] ]
-.reduce( (cols, col) => ( {...cols,  [col[0]]: f => `\x1b[1m\x1b[3${col[1]}m${f}\x1b[0m`} ), {});
+var { r, g, b, w, c, m, y, k } = [['r', 1], ['g', 2], ['b', 4], ['w', 7], ['c', 6], ['m', 5], ['y', 3], ['k', 0]]
+	.reduce((cols, col) => ({ ...cols, [col[0]]: f => `\x1b[1m\x1b[3${col[1]}m${f}\x1b[0m` }), {});
 
 
 function sleep(ms) {		// sleep(200).then(...)
@@ -257,7 +84,7 @@ function sleep(ms) {		// sleep(200).then(...)
 }
 
 
-	// delete buttons have a data target selector
+// delete buttons have a data target selector
 
 function docReady(fn) {
 	// see if DOM is already available
@@ -270,25 +97,25 @@ function docReady(fn) {
 }
 
 
- /**
-  * Simple outputs to named divs  = real laziness
-  * @param {string} str
-  * @param {bool} clearIt
-  * @returns
-  */
+/**
+ * Simple outputs to named divs  = real laziness
+ * @param {string} str
+ * @param {bool} clearIt
+ * @returns
+ */
 
-function o(str, clearIt, after="<br/>", divId = 'mainoutput') {
+function o(str, clearIt, after = "<br/>", divId = 'mainoutput') {
 	if (clearIt)
 		document.getElementById(divId).innerHTML = '';
 
 	if (!str) return;
 
 	var ndiv = `<div onclick="this.remove()">${str + after}</div>`;
-		// https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
+	// https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
 	document.getElementById(divId).insertAdjacentHTML('afterbegin', ndiv);
 }
 
-	// as above but multi args and in order
+// as above but multi args and in order
 
 function o2(...strs) {
 	if (!strs) return;
@@ -305,7 +132,7 @@ function o2(...strs) {
   * @returns
   */
 
-function log(str, clearIt, after="<br/>") {
+function log(str, clearIt, after = "<br/>") {
 	if (clearIt)
 		return document.getElementById('log').innerHTML = str + after;
 

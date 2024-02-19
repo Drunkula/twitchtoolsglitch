@@ -22,14 +22,14 @@
 
 // scope container for the vars
 {
-    TMIConfig.KS = {
+    TT.config.KS = {
         obs: new OBSWebSocket(),
         isConnected: false,
         countdownActive: false,
         hadAConnection: false
     };
 
-    const KS = TMIConfig.KS;
+    const KS = TT.config.KS;
 
     const KS_EVENTS = [
         // connect button
@@ -43,6 +43,7 @@
     async function init_killswitch() {
         console.log( g("KILLSWITCH INITIALISING") );
 
+        TT.forms_init_tmi();    // BEFORE common
         TT.forms_init_common();	// common permissions, restores forms, no longer adds common events
 
         TT.add_event_listeners(KS_EVENTS);
@@ -54,12 +55,12 @@
             // start listening for messages
         ks_tmi_listen();
 
-        if (TMIConfig.autojoin) {
+        if (TT.initialUrlParamsToArray['autojoin']) {
             console.debug(r("Auto Joining channels..."));
             TT.join_chans();
         }
 
-        if (TMIConfig.miniviewOnStart) {
+        if (TT.config.miniviewOnStart) {
             TT.mini_view_on(true);
         }
         /*

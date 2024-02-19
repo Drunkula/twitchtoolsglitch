@@ -149,7 +149,7 @@
 	}
 
 		/**
-		 * maps to an array in TMIConfig where fields are lower cased
+		 * maps to an array in TT.config where fields are lower cased
 		 * @param {*} event
 		 */
 
@@ -225,6 +225,26 @@
 		return pairs;
 	}
 
+		/**
+	 *	Set a property in TT.config - deep allowed like 'foo.bar.doo'
+	 * @param {string} path of property e.g. "someprop" or "some.deeper.prop"
+	 * @param {*} val
+	 */
+
+	TT.set_conf = function set_conf(path, val) {
+		let sp = path.split('.')
+		let last = sp.pop();
+
+		let ref = sp.reduce( (prev, curr) => {
+			if (prev[curr] === undefined) {
+				prev[curr] = {}
+			}
+			return prev[curr]
+		}, TT.config)
+
+		ref[last] = val;
+	}
+
 
 		// populates the url but on a slight delay - lets other onchange processing happen first
 
@@ -265,7 +285,7 @@
 			return;
 
 		joinBtn.disabled = true;
-		setTimeout(()=>joinBtn.disabled = false, TMIConfig.joinDebounceSecs * 1000);
+		setTimeout(()=>joinBtn.disabled = false, TT.config.joinDebounceSecs * 1000);
 
 		TT.join_chans();
 

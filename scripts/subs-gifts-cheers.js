@@ -17,6 +17,7 @@ console.log("SUBS GIFTS CHEERS");
 docReady( () => {
 	log('LOADED');
 
+	TT.forms_init_tmi();    // BEFORE common
 	TT.forms_init_common();
 	TT.add_events_common();
 
@@ -30,7 +31,7 @@ docReady( () => {
 	TT.button_add_confirmed_func('.resetChatConf', resetChatters);
 
 		// url params to array
-	if (TMIConfig.autojoin === true) {
+	if (TT.initialUrlParamsToArray['autojoin'] === true) {
 		document.getElementById('join').click();
 	}
 

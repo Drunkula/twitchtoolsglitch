@@ -1,7 +1,7 @@
 "use strict"
 
 var UserMon = UserMon || {};
-var UserMonVars = {};
+//var UserMonVars = {};
 
 /*
     To get new join events then all tmi connected channels will have to be parted
@@ -33,6 +33,7 @@ var UserMonVars = {};
         messageT = gid("messagelog");
 
             // restores params and permissions
+        TT.forms_init_tmi();    // BEFORE common
         TT.forms_init_common();
 
         // this adds the #mainform submit handler
@@ -47,23 +48,23 @@ var UserMonVars = {};
             // JOIN events can take a while to arrive
         TT.join_chans();
 
-        if (TMIConfig.miniviewOnStart) {
+        if (TT.config.miniviewOnStart) {
             TT.mini_view_on(true);
         }
     });
 
 
-
+        // user has joined a channel
     function join_handler(channel, user, self) {
-        if ( TMIConfig.users.includes(user)  ) {
+        if ( TT.config.users.includes(user)  ) {
             user_channel_add(channel, user);
 
             console.log(`${user} JOIN ${channel}`);
         }
     }
-
+        // user has departed a channel
     function part_handler(channel, user, self) {
-        if ( TMIConfig.users.includes(user)  ) {
+        if ( TT.config.users.includes(user)  ) {
             let cuRowId = user_channel_div_id(channel, user);
             let cuRowDiv = gid(cuRowId);
                 // don't add if it's already
@@ -76,7 +77,7 @@ var UserMonVars = {};
     }
 
     function message_handler(channel, userstate, message, self) {
-        if ( TMIConfig.users.includes( userstate["username"] )  ) {
+        if ( TT.config.users.includes( userstate["username"] )  ) {
             console.log(`${userstate["username"]} in ${channel}: ${message}`);
 //console.log(userstate);
             msg_add(channel, userstate["display-name"], message, userstate["tmi-sent-ts"]);
@@ -179,15 +180,15 @@ console.log("AFTER reconnect", res);
         // search terms updated
 
     function search_terms_changed() {
-        console.log("SEARCH TERMS NOW", TMIConfig.buzzwords, TMIConfig.buzzwords.length);
+        console.log("SEARCH TERMS NOW", TT.config.buzzwords, TT.config.buzzwords.length);
 
         let terms = [];
 
-        if (TMIConfig.buzzwords.length) {
-            for (let term of TMIConfig.buzzwords) {
+        if (TT.config.buzzwords.length) {
+            for (let term of TT.config.buzzwords) {
                 // make parts of a regex, replace stars with .* and escape chars gcm
-                term = term.replace(/\\/g, "\\\\");
-                term = term.replace(/\./g, "\\.");
+                term = term.replace(/\\/g, "\\\\"); // backslash to real backslash
+                term = term.replace(/\./g, "\\.");  // dot to real dot
 
                 term = term.replace(/\*/g, ".*");           // dot wildcard
                 term = term.replace(/!/g, "\\s*");          // ! optional spaces
@@ -200,7 +201,7 @@ console.log("AFTER reconnect", res);
 
                 terms.push(term);
             }
-
+                // join with word boundaries
             let regexStr = "(\\b" + terms.join("\\b|\\b") + "\\b)";
             // backslashes ARE considered as word boundaries and \b\\b doesn't work
             searchTermRegex = new RegExp(regexStr, "i");

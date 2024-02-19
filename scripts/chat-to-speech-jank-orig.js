@@ -65,7 +65,7 @@
 "use strict"
 
 
-TMIConfig.TTSVars = {       // more props added from forms
+TT.config.TTSVars = {       // more props added from forms
     flashSetTimeout: null,
     flashDuration: 3500,    // milliseconds
     flashFunc: x => x,      // does nothing for now
@@ -79,7 +79,7 @@ TMIConfig.TTSVars = {       // more props added from forms
 try {   // scope starts ( in case I can demodularise this )
     const ALL_CHAT_RANDOM_VOICE = true; // disable for server
 
-    const TTSVars = TMIConfig.TTSVars;
+    const TTSVars = TT.config.TTSVars;
     const TTS_MOD_COOLDOWN = 0; // THIS might have been causing problems in Flip's
     const TTS_TEST_TEXT = "Testing the voice one two three";
 
@@ -165,6 +165,7 @@ try {   // scope starts ( in case I can demodularise this )
                 // SCENE SWITCHER restores form values for selects then adds common events
                     // SHOULD ADD a check to make sure the utterance starts
 
+            TT.forms_init_tmi();    // BEFORE common
             TT.forms_init_common(); // restores forms and sets up common permissions doesn't triggers ONCHANGE
 
             if (TTSVars.voices.length) {
@@ -178,7 +179,7 @@ try {   // scope starts ( in case I can demodularise this )
             add_chat_to_speech_tmi_listener();
             init_flasher_tech();
 
-            if (TMIConfig.autojoin) {
+            if (TT.initialUrlParamsToArray['autojoin']) {
                 console.debug(r("Auto Joining channels..."));
                 TT.join_chans();
             }
@@ -408,7 +409,7 @@ try {   // scope starts ( in case I can demodularise this )
                         if (nameIsCmd) {   // sayCmds are !cmd = {rate, pitch, voice}
                             sayCmdPack.params = TTSVars.sayCmds[nameIsCmd]; // THIS IS THE BUG THIS IS THE BUG .text get written to the global
                             //sayCmdPack.params = {...TTSVars.sayCmds[nameIsCmd]};    // FIXED
-                            // check TMIConfig.TTSVars.sayCmds
+                            // check TT.config.TTSVars.sayCmds
                         } else if (TTSVars.randomVoices) {
                             let vIdx = Math.floor(Math.random() * TTSVars.voices.length);
                             let voice = TTSVars.voices[vIdx]; console.log("RAND VOICE", voice.name);

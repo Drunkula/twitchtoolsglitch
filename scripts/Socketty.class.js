@@ -120,7 +120,7 @@ class Socketty {
         this.add_events();
         this.add_event_backups();
 
-        this.ping_set(true);
+        this.ping_set( this.pingActive );    // hmmmm
 
         return this.ws;
     }
@@ -161,15 +161,15 @@ class Socketty {
                 this.pingSetIntervalRef = null;
             }
 
-            this.ping = false;
+            this.pingActive = false;
             return;
         }
 
         if (!this.pingSetIntervalRef) {
-            this.pingSetIntervalRef = setInterval( this.ping.bind(this), this.pingInterval * 1000 );
+            this.pingSetIntervalRef = setInterval( this.ping_send.bind(this), this.pingInterval * 1000 );
         }
 
-        this.ping = true;
+        this.pingActive = true;
     }
 
         // can be awaited
@@ -269,12 +269,15 @@ class Socketty {
         this.addEventListener(e, h);
     }
 
-    send(d) {
-        //if (this.ws.readyState !== this.states.OPEN) return false;
+    send(d) { //if (this.ws.readyState !== this.states.OPEN) return false;
         this.ws.send(d);
     }
 
-    ping() {
+    send_json(d) { //if (this.ws.readyState !== this.states.OPEN) return false;
+        this.ws.send( JSON.stringify(d) );
+    }
+
+    ping_send() {
         if (this.connected) {
             this.ws.send('ping');
         }

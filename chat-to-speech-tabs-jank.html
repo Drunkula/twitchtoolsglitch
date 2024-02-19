@@ -47,7 +47,7 @@
         </script>
     <div class="block mx-5 my-3 main-container">
       <script src="/scripts/backbone-common.js" defer></script>
-      <script src="/scripts/twitch-tools-init.js" defer></script>
+      <script src="/scripts/bulma-components-init.js" defer></script>
       <script src="/scripts/tmi.min.js" defer></script>
       <script src="/scripts/tmi-code-common.js" defer></script>
       <script src="/scripts/event-listeners.js" defer></script>
@@ -757,7 +757,7 @@
                 <button class="button is-danger is-small is-responsive urlpopulate">Get Url</button>
               </div>
             </div>
-            <div class="block"><strong>Todo:</strong> Clear entries on mod ban / delete actions, possibly delay before speaking so entries can be vetted.</div>
+            <div class="block"><strong class="modal-trigger" id="readboxshow" data-target="readItModal">Todo:&nbsp;</strong>Clear entries on mod ban / delete actions, possibly delay before speaking so entries can be vetted.</div>
           </div>
         </div>
       </div>
@@ -885,10 +885,9 @@
                   </div>
                 </div>
                 <label class="label">Auto use voice command e.g jonathan_Bun=bun</label>
-                <div class="field">
-                  <div class="control">
-                    <textarea class="textarea form-save Xform-filter-spaces-to-commas" id="autocommands" rows="5" placeholder="username=voice command, e.g. jon_bun=jb timmo=tm" data-toequalpairslc="TTSVars.usercommands"></textarea>
-                  </div>
+                <div class="field"></div>
+                <div class="control">
+                  <textarea class="textarea form-save Xform-filter-spaces-to-commas" id="autocommands" rows="5" placeholder="username=voice command, e.g. jon_bun=jb timmo=tm" data-toequalpairslc="TTSVars.usercommands"></textarea>
                 </div>
               </div>
               <div class="tab-pane">
@@ -923,6 +922,28 @@
                 </div>
               </div>
             </div>
+          </section>
+          <footer class="modal-card-foot">
+            <button class="button modal-dismiss is-success urlpopulate is-responsive">Done</button>
+          </footer>
+        </div>
+        <button class="modal-close is-large">button</button>
+      </div>
+      <div class="modal" id="readItModal">
+        <div class="modal-background modal-dismiss"></div>
+        <div class="modal-card">
+          <section class="modal-card-body">
+            <div class="field">
+              <div class="control">
+                <input class="input is-small" type="text" id="readtextname" placeholder="read as name" value="Nobody">
+              </div>
+            </div>
+            <div class="field">
+              <div class="control">
+                <textarea class="textarea" id="readtext" rows="16" value="Some test thing to read."></textarea>
+              </div>
+            </div>
+            <button class="button is-info is-small" id="readtextbtn">Queue It</button>
           </section>
           <footer class="modal-card-foot">
             <button class="button modal-dismiss is-success urlpopulate is-responsive">Done</button>

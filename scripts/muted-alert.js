@@ -11,7 +11,7 @@
      // regex's to match the input
  const muteRegexs = [/!muted/i, /\b[you|mic].*\bmute/i, /can[']?t.*hear.*you/i]
 
- TMIConfig.MUTEDVars = {
+ TT.config.MUTEDVars = {
     alertEnabled: true, // 3 set by data-tocheckbo
     soundEnabled: true,
     flashEnabled: true,
@@ -25,13 +25,14 @@
      countdown: new Countdown(),
 }
 
-const MUTEDVars = TMIConfig.MUTEDVars;
+const MUTEDVars = TT.config.MUTEDVars;
 
      // on window load
 
 window.addEventListener('load', (event) => {
     gid('clearmainout').addEventListener('click', () => o('', true) );
 
+    TT.forms_init_tmi();    // BEFORE common
     TT.forms_init_common(); // channels populates form fields from url string
     TT.add_events_common();
 
@@ -46,7 +47,7 @@ window.addEventListener('load', (event) => {
     MUTED_init_countdown();
 
         // autojoin
-    if (TMIConfig.autojoin) { console.log(r("Auto Joining channels..."));
+    if (TT.initialUrlParamsToArray['autojoin']) { console.log(r("Auto Joining channels..."));
         TT.join_chans();
     }
 

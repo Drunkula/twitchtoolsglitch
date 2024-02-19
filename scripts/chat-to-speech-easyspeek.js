@@ -13,7 +13,7 @@
 // no, need to do this in a new speecher class
 //import EasySpeech from "./easyspeech.module.js";
 
-TMIConfig.TTSVars = {       // more props added from forms
+TT.config.TTSVars = {       // more props added from forms
     flashSetTimeout: null,
     flashDuration: 3500,    // milliseconds
     flashFunc: x => x,      // does nothing for now
@@ -27,7 +27,7 @@ TMIConfig.TTSVars = {       // more props added from forms
 try {   // scope starts ( in case I can demodularise this )
     const ALL_CHAT_RANDOM_VOICE = true; // disable for server
 
-    const TTSVars = TMIConfig.TTSVars;
+    const TTSVars = TT.config.TTSVars;
     const TTS_MOD_COOLDOWN = 5;
     const TTS_TEST_TEXT = "Testing the voice one two three";
 
@@ -110,6 +110,7 @@ try {   // scope starts ( in case I can demodularise this )
             // SCENE SWITCHER restores form values for selects then adds common events
                 // SHOULD ADD a check to make sure the utterance starts
 
+            TT.forms_init_tmi();    // BEFORE common
             TT.forms_init_common(); // restores forms and sets up common permissions doesn't triggers ONCHANGE
 
             if (TTSVars.voices.length) {
@@ -123,7 +124,7 @@ try {   // scope starts ( in case I can demodularise this )
             add_chat_to_speech_tmi_listener();
             init_flasher_tech();
 
-            if (TMIConfig.autojoin) {
+            if (TT.initialUrlParamsToArray['autojoin']) {
                 console.debug(r("Auto Joining channels..."));
                 TT.join_chans();
             }
