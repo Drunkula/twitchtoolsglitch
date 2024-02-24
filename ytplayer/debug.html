@@ -40,7 +40,7 @@
 
     </script>
 
-    <script src="./entrypoint.mod.js" type="module"></script>
+    <script src="./ytplayer.main.mod.js" type="module"></script>
     <!-- if you don't defer it doesn't work even if the controller is run first
         You pretty much have to have the callback it triggers in place
         <script src="https://www.youtube.com/iframe_api" defer></script>
@@ -64,14 +64,15 @@
                         <li data-action='{"action":"rwd", "data":5}'>rwd</li>
                         <li data-action="almostend">toward end</li>
                         <li data-action="adddefaults">adddefaults</li>
+                        <li data-action="getwholeplaylist">Sent whole playlist</li>
                     </ul>
                 </div>
             </td>
             <td>
                 <div class="controls">
                     <ul>
-                        <li data-action='{"action":"sendmessage", "data": "testaddnext"}''>add video next</li>
-                        <li data-action='{"action":"sendmessage", "data": "testaddrandom"}''>add video random pos</li>
+                        <li data-action='{"action":"sendmessage", "data": "testaddnext"}'>add video next</li>
+                        <li data-action='{"action":"sendmessage", "data": "testaddrandom"}'>add video random pos</li>
                         <li data-action="shuffle">Shuffle (not all)</li>
                         <li data-action="shuffleall">Shuffle all</li>
                         <li data-action="big">Big</li>

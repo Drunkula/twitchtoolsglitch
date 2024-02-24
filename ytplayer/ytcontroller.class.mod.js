@@ -2,8 +2,8 @@
     JAVASCRIPT part
 */
 //import { Socketty } from "/scripts/Socketty.class.js";
-import YTPlayer from "./ytplayer.class.mod.js";
-import SockMsgRouter from "./sockmsgrouter.class.mod.js";
+import YTPlayer from "../scripts/yt/ytplayer.class.mod.js";
+import SockMsgRouter from "../scripts/yt/sockmsgrouter.class.mod.js";
 
     // whether next or prev was last used
 const DirFwd = 1;
@@ -34,30 +34,19 @@ class YTController extends SockMsgRouter {
 
     playlistLoaded = false;
 
-    /* use defaults for now
-    socketEvents = [
-        ['message', e => this.message_handler(e)],
-        ['open',  () => { out("!!!YT VERSION Socketty opened");
-                    window.sockOpenTime = -Infinity;
-                    // really I should check if this is a re-open and set a loaded state
-                    // this is a fudge.  I should
+    //* use defaults for now
+    YTPSocketEvents = [
+        //['message', e => this.message_handler(e)],
+        ['open',  () => {
+            out("!!!YT VERSION Socketty opened");
+            window.sockOpenTime = -Infinity;
+            // really I should check if this is a re-open and set a loaded state
+            // this is a fudge.  I should
+            if (this.playlistLoaded) return;
 
-                    if (this.playlistLoaded) return;
-
-                    this.send("loadplaylist");
-                }],
-
-        ['close', () => {   // out first time then only every 30 seconds
-            let now = performance.now();
-            let last = window.sockOpenTime ??= -Infinity;  // doesn't exist?  Warn first time with nullish coalescing assignment
-            if (now - last > 30000) {
-                out("!!YT VERSION Oh noes, socketty closed");
-                window.sockOpenTime = now;
-            }
-        }],
-
-        ['Xerror', x => out("!!!YT VERSION Socketty error!", x.toString())]
-    ]; */
+            this.send("loadplaylist");
+        }]
+    ]; //*/
 
         // can only be added after ready() so onReady won't be called
         // you need to add to this
@@ -140,6 +129,7 @@ class YTController extends SockMsgRouter {
         clog("I am a YTController constructor.");
         //this.insert_ytplayer_api();   // done in player contructor
         this.add_socket_events();
+        this.add_socket_events(this.YTPSocketEvents);
 
         this.convenience();
     }
@@ -403,7 +393,7 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
                 this.playlistPointer--; // because next()
             }
 
-            this.send_json({action:"playlistdeleted",
+            this.send_json({action:"videoerror",
                 videoid: this.playlistCurrentId,
                 errorcode: e.data,
                 title: v.title,
@@ -542,9 +532,9 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         let pack = {
             action: "allplaylistdata",
             data: {
+                playlistindex: this.playlistPointer,
                 playlist: this.playlist,
                 playlistmap: Object.fromEntries(this.playlistMap),
-                playlistindex: this.playlistPointer,
             }
         }
 
@@ -552,6 +542,27 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
     }
 }
 
+
+function work_out_the_percents() {
+    // aria-label = 17:00, 09-02-2024 electricity: 0.06 kWh
+    let spans = document.querySelectorAll("span[data-testid='usage-table-data']");
+    let totalP = 0;
+    let  reggy = /\d+\.\d+/;
+    for (let i = 32; i <= 37; i++) {
+        let match = spans[i].innerText.match(/\d+\.\d+/)[0];
+        totalP += parseFloat(match);
+    }
+
+    console.log("kWh TOTAL: ", totalP);
+}
+
+//(() => { let spans = document.querySelectorAll("[data-testid='usage-table-data']"); let totalP = 0;for (let i = 32; i <= 37; i++) totalP += parseFloat(spans[i].innerText.match(/\d+\.\d+/)[0]); return totalP.toFixed(2); })();
+// <span data-testid="usage-table-date">12:00pm</span> 48 of these in a day want 33 to 38
+
+//(()=>{let e=document.querySelectorAll("[data-testid='usage-table-data']"),t=0;for(let a=32;a<=37;a++)t+=parseFloat(e[a].innerText);return t.toFixed(2)})();
+//(()=>{let e=document.querySelectorAll("[data-testid='usage-table-data']"),t=0;for(let a=32;a<=37;a++)t+=parseFloat(e[a].innerText);alert(t.toFixed(2))})();
+
+// <span data-testid="usage-table-data">0.19 kWh</span>
     // why don't classes hoist
 //let YTP = new YTController();
 
