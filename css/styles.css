@@ -31,7 +31,7 @@ y {	/* new chat channel name */
 }
 
 #mainoutput > div:hover {
-	cursor: cell;
+	/* cursor: cell; */
 	background-color: red;
 	color: white !important;
 }

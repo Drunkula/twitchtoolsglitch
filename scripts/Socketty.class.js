@@ -1,5 +1,7 @@
 /*
 I could add a ready() promise
+    Events added to Socketty will be backed up and reattached when a socket
+    connects / reconnects
 */
 //const socketUrl = 'ws://127.0.0.1:8081/'; // for streamerbot
 

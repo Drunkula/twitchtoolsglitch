@@ -13,10 +13,31 @@ function gid(id, el = document) {
     return el.getElementById(id);
 }
 
+function dce(i) {
+    return document.createElement(i);
+}
+
 function sleep(ms) {		// sleep(200).then(...)
 	return new Promise(res => {
 		setTimeout(res, ms)
 	});
+}
+
+    // {id:, data:} or []
+function table_row(params = {}) {
+    let row = dce("tr");
+    if (params.id) row.id = params.id;
+    let isHdr = params.isHeader ??= false;
+
+    let rdata = params instanceof Array ? params : params.data;
+
+    for (let cell of rdata) {
+        let c = isHdr ? dce("th") : dce("td");
+        c.innerText = cell;
+        row.append(c);
+    }
+
+    return row;
 }
 
 function docReady(fn) {
@@ -39,7 +60,7 @@ function form_filter_commas_to_spaces(str) {
     // setItem getItem removeItem clear
 
 function local_store_set(name, data) {
-    console.log(localStorage);
+    //console.log(localStorage);
 
     let namePath = name + window.location.pathname;
     localStorage.setItem(namePath, JSON.stringify(data));
@@ -48,7 +69,7 @@ function local_store_set(name, data) {
     // url location of current page
 
 function local_store_get (name) {
-    console.log(localStorage);
+    //console.log(localStorage);
 
     let namePath = name + window.location.pathname;
     return JSON.parse( localStorage.getItem(namePath) );
