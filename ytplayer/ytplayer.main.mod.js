@@ -12,7 +12,7 @@ YTController -
     Has the playlist
 
 */
-import { config, playlistDefaults } from "./config.mod.js";
+import { config, playlistDefaults } from "./ytconfig.mod.js";
 import YTController from "./ytcontroller.class.mod.js";
 
 
