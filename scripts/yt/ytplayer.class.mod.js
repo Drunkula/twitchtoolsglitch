@@ -10,8 +10,8 @@
 */
 class YTPlayer {
 
-    width = window.ytplayerXSize ??=  320;
-    height = window.ytplayerYSize ??= 180;
+    width = window.ytparams.XSize ??=  320;
+    height = window.ytparams.YSize ??= 180;
     player = {};    // the youtube player
     playerDivName = "ytplayer";
     states = {};    // will reverse YT.PlayerState and be indexed by number
@@ -43,7 +43,7 @@ class YTPlayer {
         "fs": 0,    // fullscreen buttons
         "rel": 0,   // related vids that channel only
         "iv_load_policy": 3, // annotations
-        "mute": window.ytplayerMuted ??= 0
+        "mute": window.ytparams.muted ??= 0
     }
     // onReady, onStateChange, onPlaybackQualityChange, onPlaybackRateChange, onError, onApiChange
     events = {

@@ -10,27 +10,41 @@
     </style>
 
     <script>
-           // this will be run before the module
-        qs = new window.URLSearchParams( window.location.search );
-        QPx = qs.get("x"); QPy = qs.get("y"); QPmuted = qs.get("muted"); QPVideo = qs.get("video");
-
-        ytplayerXSize = QPx ??= 1280;
-        ytplayerYSize = QPy ??= 720;
-        ytplayerMuted = QPmuted ??= 0;
-        ytplayerVolume = 100;
-        ytplayerVideoId = QPVideo ??= "LECSVlc6O1g";
-        ytplayerWebSock = qs.get("s");
-
-
-        function out() { return;
-            var nDiv = document.createElement("div");
-            nDiv.innerText = [...arguments].join("");
-            document.getElementById("messages").append(nDiv);
+           /* this will be run before the module
+                FLAGS in the url
+                    nan chat !nan commands make it return list
+                    add chat !add commands add to the list
+                    Is it possible to tell a player to 'nan' when it's onscreen in OBS?  Later.
+           */
+          // updated by grab_url_params
+        var ytparams =
+        {
+            playlist: "default",
+            add: false,
+            nan: false,
+            shuffle: null,  // does default of list
+            name: "Fullscreen Player",
+            XSize: 1280,
+            YSize: 720,
+            muted: 0,
+            volume: 100,
+            videoId: "LECSVlc6O1g",
+            webSock: null,
+            ytdbg: false,    // whether logging is on
         }
 
         function clog() {
-            //console.log(...arguments);
+            console.log(...arguments);
         }
+        //if (ytparams.ytdbg != true) clog = function (){};// now in ytplayer.main.mod.js
+
+        function out() { return; /*
+            var nDiv = document.createElement("div");
+            nDiv.innerText = [...arguments].join("");
+            document.getElementById("messages").append(nDiv);//*/
+        }
+
+
     </script>
     <script src="./ytplayer.main.mod.js" type="module"></script>
     <!-- if you don't defer it doesn't work even if the controller is run first

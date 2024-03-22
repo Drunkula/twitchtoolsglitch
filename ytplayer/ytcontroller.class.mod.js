@@ -13,6 +13,12 @@ const DirBack = -1;
 // essentially {these funcs} = {this object of funcs}
 
 class YTController extends SockMsgRouter {
+    myUID = (Math.random() * Date.now()).toString();
+    myName = "YTController";    // set to a 'nice' name
+    mySocketId = "";   // sent from streamerbot
+
+    reqpack = null;    // some requests will have an observer's request details copied here for easy return
+    returnto = null;
 
     //socket = new Socketty();    // url is set in constructor
     ytPlayer = new YTPlayer();
@@ -24,7 +30,7 @@ class YTController extends SockMsgRouter {
     playlistMapCounter = 1;     // each entry will have a numeric id to help with deleting, etc
 
     playlistCurrentId = null; // current id
-    playlistPointer = 0;
+    playlistPointer = 0;   // negative before playlist sent and playing the default video
     playlistNextCount = 0;  // videos queued as next - do not shuffle the last X elements of Queued
 
     isPaused = false;       // you can hard pause the player
@@ -40,24 +46,29 @@ class YTController extends SockMsgRouter {
         ['open',  () => {
             out("!!!YT VERSION Socketty opened");
             window.sockOpenTime = -Infinity;
-            // really I should check if this is a re-open and set a loaded state
-            // this is a fudge.  I should
-            if (this.playlistLoaded) return;
 
-            this.send("loadplaylist");
-        }]
+            //this.send_json({action: "iAmAPlayer", uid: this.myUID, name: this.myName});
+            this.identify();
+
+            if (this.playlistLoaded) return;
+            this.send_json({action:"loadplaylist", name: ytparams.playlist});
+        }],
+        ['message', x => this.message_handler(x)]
     ]; //*/
 
         // can only be added after ready() so onReady won't be called
         // you need to add to this
-    playerEvents = [
+    playerPostReadyEvents = [
         ['onStateChange', this.state_change_hander.bind(this)],
-        ['onError', e => this.error_handler(e)],
+        ['onError', e => this.yt_player_play_error_handler(e)],
     ]
 
-    thisEvents = [
-        ['onReady', e => { out("--- Player is Ready ---"); this.ytPlayer.player.setVolume(window.ytplayerVolume ??= 100);}],
-        ['onError', e => { out("WTF HAPPNIN BRO?"); }]
+    playerPreReadyEvents = [
+        ['onReady', e => {
+            out("--- Player is Ready ---");
+            this.ytPlayer.player.setVolume(window.ytparams.volume ??= 100);
+        }],
+        //['onError', e => { out("Error: "+e.toString()); }]
     ];
 
         // messages will be like a format of "action" and "data"
@@ -66,6 +77,7 @@ class YTController extends SockMsgRouter {
     actions = {
         play:       d => this.play(),
         playvideo:  d => this.load_video(d.videoid, d.starttime),
+        playsong:   d => this.play_song(d.id),  // sent by playlist double click
         pause:      d => this.pause(),
         stop:       d => this.yt.stopVideo(),
         resume:     d => this.yt.playVideo(),
@@ -82,42 +94,53 @@ class YTController extends SockMsgRouter {
 
         adddefaults:d => this.add(playlistDefaults),
 
-        big:        d => this.yt.setSize(640, 360),
-        small:      d => this.yt.setSize(320, 180),
-        title:      d => clog(this.yt.videoTitle),
-        qualityget: d => clog(this.yt.getAvailableQualityLevels()),
+        big:            d => this.yt.setSize(640, 360),
+        small:          d => this.yt.setSize(320, 180),
+        title:          d => clog(this.yt.videoTitle),
+        qualityget:     d => clog(this.yt.getAvailableQualityLevels()),
 
-        sendmessage:d => { this.send(d.data); },
-        playlistadd:d => { this.add(d.data, d.addnext ? true : false); },
-            // the entire thing
-        fullplaylist:d => { this.playlistLoaded = true; this.add(d.data, true); this.shuffle(true); this.playlistPointer = -1; this.next(); },
+        sendmessage:    d => { clog("Sending:" + d.data); this.send(d.data); },
+            // needs to check if it's chat added
+        playlistadd:    d => { this.add(d.data, d.addnext ? true : false); },
+            // received entire thing
+        fullplaylist:   d => this.got_full_playlist(d),
 
-        shuffle:    d => { this.shuffle(false); },
-        shuffleall: d => { this.shuffle(true); },
-        getvideoinfo: d => {clog( this.yt.getVideoData() ); },
-
-        next:       d => { this.next(); },
-        prev:       d => { this.prev(); },
+        loadplaylist:   d => this.send_json({action:"loadplaylist", name: ytparams.playlist}),
 
         clearvideos:d => { this.playlist = []; this.playlistPointer = 0; this.playlistMap.clear(); this.playlistNextCount = 0;},
+           // SENDS our playlist up, not received
+        getplayerplaylist: e => this.send_whole_playlist(e),
+
+
+        shuffle:        d => { this.shuffle(false); },
+        shuffleall:     d => { this.shuffle(true); },
+        getvideoinfo:   d => {clog( this.yt.getVideoData() ); },
+
+        next:           d => { this.next(); },
+        prev:           d => { this.prev(); },
 
         consolelog: d => {clog( window[d.colour](d.message) );},
 
-        connect:    d => ytpc.socket.connect(),
-        disconnect: d => ytpc.socket.close(),
+        connect:    d => ytpc.socketty.connect(),
+        disconnect: d => ytpc.socketty.close(),
         f: d => {},
             // true = delete permanently, sends flag back to streamerbot
         deletecurrentvideoperm: d => this.delete_current(true),
         deletecurrentvideotemp: d => this.delete_current(false),
+        deletefromplayer: d => this.delete_vids(d.videoids),
 
         nowandnext: d => this.now_and_next(d.data.howMany),
 
         playlistcount: e => {
             clog("sending count:", this.playlist,length);
-            this.send_json({action: "playlistcount", count: this.playlist.length});
+            this.send_json(this.get_reqpack({action: "playlistcount", count: this.playlist.length, to: this.returnto}));
         },
 
-        getwholeplaylist: e => this.send_whole_playlist()
+        identify: d => this.identify(), // SB broadcasts "identify" using null to go to all
+        playersidentify: d => this.identify(), // SB broadcasts to all but only players have the action
+
+        namechange: d => {this.myName = d.name; document.title = `(${d.name}) YT Player`},
+        yourinfo: d => {this.myName = d.name; this.mySocketId = d.socketid; document.title = `(${d.name}) YT Player`},
     }
 
     // CPH.RunActionById("1a8f5a37-5107-420c-9dd5-4f863ce6ffd1", true);
@@ -128,34 +151,30 @@ class YTController extends SockMsgRouter {
         super();    // initialise daddy
         clog("I am a YTController constructor.");
         //this.insert_ytplayer_api();   // done in player contructor
-        this.add_socket_events();
+        //this.add_socket_events();
         this.add_socket_events(this.YTPSocketEvents);
 
-        this.convenience();
+        this.waitPlayerReady();
     }
         // create a reference to the players player when ready
-    async convenience() {
-        this.add_this_events(); // NOT player events
+    async waitPlayerReady() {
+        this.add_player_pre_ready_events(); // NOT player events
         await this.ytPlayer.playerReady();
-        this.add_player_events();
+        this.add_player_ready_events();
         clog("Player ready, adding events.", this.ytPlayer.player);
         this.yt = this.ytPlayer.player;
     }
-/*
-    add_socket_events() {
-        for (const pair of this.socketEvents) {
-            this.socket.addEventListener(pair[0], pair[1]);
-        }
-    }*/
-        // can only be called after ready()
-    add_player_events() {
-        for (const pair of this.playerEvents) {
+
+      // can only be called after ready()
+
+    add_player_ready_events() {
+        for (const pair of this.playerPostReadyEvents) {
             this.ytPlayer.player.addEventListener(pair[0], pair[1]);
         }
     }
         // can be called before ready()
-    add_this_events() {
-        for (const pair of this.thisEvents) {
+    add_player_pre_ready_events() {
+        for (const pair of this.playerPreReadyEvents) {
             this.ytPlayer.addEventListener(pair[0], pair[1]);
         }
     }
@@ -163,7 +182,7 @@ class YTController extends SockMsgRouter {
         // splice out the current video and any nexts
         // shuffle everything
         // put curr and nexts back to the start and reset the pointer
-    shuffle(all = false) {
+    shuffle(all = false) {clog("Shuffly shuff shuff happan");
         let m, currAndNexts, t, i;
 
         if (all) {
@@ -188,10 +207,40 @@ class YTController extends SockMsgRouter {
         this.playlistPointer = 0;
     }
 
+        // play the song by the video id sent
+
+    play_song(id) {
+        let time = 0;
+        let newPlPos = this.playlist.indexOf(id);
+
+        // got to deal with playnexts.
+        if (newPlPos >= 0) {
+            let fwdOffset = newPlPos - this.playlistPointer;
+            console.log("OLD POS, NEW POS, DIFFERENCE:", this.playlistPointer, newPlPos, fwdOffset);
+            this.playlistPointer = newPlPos;
+            if (fwdOffset > 0)
+            {
+                this.playlistNextCount -= fwdOffset;
+                if (this.playlistNextCount < 0) this.playlistNextCount = 0;
+            } else {
+                this.playlistNextCount = 0
+            }
+        }
+
+        time = ytpc.playlistMap.get(id)?.starttime;
+
+        if (!this.isPaused) return this.load_video(id, time);
+
+        this.cue_video(id, time);
+    }
+
         // return pos
     next() {
         this.lastDirection = DirFwd;
-        if (this.playlist.length === 0) return false;
+        if (this.playlist.length === 0) {
+            //this.playlistPointer = 0;
+            return false;
+        }
 
         //this.playlistPointer = ++this.playlistPointer >= this.playlist.length ? 0 : this.playlistPointer;
         this.playlistPointer = ++this.playlistPointer % this.playlist.length;
@@ -214,17 +263,25 @@ class YTController extends SockMsgRouter {
 
         let len = this.playlist.length;
 
-        if (len === 0) return false;
+        if (len === 0) {
+            //this.playlistPointer = 0;
+            return false;
+        }
 
-        if (this.playlistPointer === 0) {
-            this.playlistPointer = len - 1;
+        if (this.playlistPointer <= 0) {
+            this.playlistPointer = len - 1 ;
         } else {
             this.playlistPointer--;
         }
+
+        this.playlistPointer = this.playlistPointer % this.playlist.length;
+
             // make the current video a forced next
-        this.playlistNextCount++;
-        if ( this.playlistNextCount >= len )
+        if ( this.playlistNextCount) {
+            this.playlistNextCount++;
+            if ( this.playlistNextCount >= len )
             this.playlistNextCount = len - 1;
+        }
 
         let id = this.playlist[this.playlistPointer];
         let time = ytpc.playlistMap.get(id)?.starttime;
@@ -246,12 +303,12 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
     videoItem: a singly id, a single {videoid, tltle, added}, this.playlistQueued of single ids, this.playlistQueued of {}
 */
     add(videoItem, isNext = false) {
-        //console.log("ADD:", videoItem);
+        clog("ADD next:", isNext);
             // isNext should be carried, yeah?
         let add_entry_switch = videoItem => {
             switch(true) {
                 case videoItem instanceof Object:   // are we allowing a map like object | //clog("-----------adding object"); |  //this.#add_entry(videoItem.videoid, videoItem.title, videoItem.adder, isNext);
-                    this.#add_entry(videoItem, isNext);
+                   this.#add_entry(videoItem, isNext);
                     break;
 
                 case typeof videoItem === "string": // assume video id | //clog("----------adding string", videoItem);
@@ -284,12 +341,13 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         // is 'better' as less splices will happen toward the front of the array
 
     #add_entry(entry, next = false) {
-        let {videoid, title="Unknown", adder = "Unknown adder", starttime = 0} = entry;
+        let {videoid, title="Unknown", channel = "Unknown", adder = "Unknown adder", starttime = 0} = entry;
 
-        if (this.playlistMap.has(videoid))
+        //if (this.playlistMap.has(videoid))
+        if (this.playlist.includes(videoid))
             return false;    // may bump this if addnext
 
-        this.playlistMap.set(videoid, {title, adder, starttime, "number": this.playlistMapCounter++});
+        this.playlistMap.set(videoid, {title, adder, channel, starttime, "number": this.playlistMapCounter++});
 
         let len = this.playlist.length;
 
@@ -321,8 +379,9 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         return true;
     }
 
+        // PLAYING, CUED, PAUSED, BUFFERING, UNSTARTED
+
     state_change_hander(e) {
-       // clog("STATE:", this.ytPlayer.states[e.data]);
             // DEBUG TEST
         switch (e.data) {
             case YT.PlayerState.ENDED:
@@ -330,38 +389,48 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
                 break;
 
             case YT.PlayerState.PLAYING:    // sent after pause and stop
-                clog("Playing: ", e.target.getVideoData());
-                this.send_json({action: "currsongid", data: e.target.getVideoData().video_id});
+            case YT.PlayerState.CUED:
+                //clog(this.ytPlayer.states[e.data], e.target.getVideoData());
+                let vd = e.target.getVideoData();
+                this.send_json({action: "currsongid", id: vd.video_id, title: vd.title, playlistpointer: this.playlistPointer,
+                    playstate: this.ytPlayer.states[e.data], playerinfo: this.get_player_info()});
                 break;
 
-            default:
-                //clog("state", this.ytPlayer.states[e.data]);
+            default:    // paused, buffering, unstarted
+                //clog("state", this.ytPlayer.states[e.data], e.target.getVideoData());
                 break;
         }
 
     }
+
 // debug console filter
 // -url:https://play.google.com/ -url:chrome-extension://mnjggcdmjocbbbhaepdhchncahnbgone/js/content.js -url:https://www.youtube.com
 // or use current context only
 // handler for socket messages and string actions
-/*
+//*
+
     message_handler(e) {
         let data = null, action, json = "not json";
+
+        this.returnto = null;
 
         if (typeof e === "string") {
             action = e;
         } else {
             action = e.data;
         }
-
+            // first letter { ?
         if (action[0] === '{')
         try {
-            json = JSON.parse(action);
-            action = json.action;
-            data = json;
+            data = JSON.parse(action);
+            action = data.action;
+                // WARNING: DANGEROUS ASSUMPTION that from should be return to'd
+            if (data.returnto)
+                this.returnto = data.returnto;
+            else if (data.from)
+                this.returnto = data.from.UID;
         } catch (error) {
-            clog("message_hander:", e);
-            clog("ERROR:", error.toString());
+            clog("ERROR: Local message_handler:", e);
         }
 
         if (this.actions[action]) {
@@ -372,13 +441,14 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
             return;
         }
 
-        clog("Action:", action, "JSON?", json);
+        clog("Received action:", action, "JSON?", data);
             //this.send("Thanks, partner!")
-    }*/
+    }
 
-    error_handler(e) {
-        clog("playlist error for id", this.playlistCurrentId);
-        clog(e);
+        //
+
+    yt_player_play_error_handler(e) {
+        clog(`playlist error [${e.data}] for id`, this.playlistCurrentId);
         // SHOULD check if e.data = 150 or 151 or whatever
         let deleted = false;
 
@@ -393,11 +463,13 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
                 this.playlistPointer--; // because next()
             }
 
-            this.send_json({action:"videoerror",
+            this.send_json({action:"videoplaybackerror",
                 videoid: this.playlistCurrentId,
                 errorcode: e.data,
                 title: v.title,
-                adder: v.adder});
+                adder: v.adder,
+                playerinfo: this.get_player_info(),
+            });
         }
             // zero length checked there
         if (this.lastDirection === DirFwd)
@@ -409,7 +481,12 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
 
 
     now_and_next(howMany) {
-        console.log("THEY WANT THIS MANY NOW AND NEXTS:", howMany);
+        if (!ytparams.nan) {
+            clog("I don't now and next, darling for I am " + this.myName);
+            return;
+        }
+
+        clog("THEY WANT THIS MANY NOW AND NEXTS:", howMany);
 
         if (howMany > this.playlist.length) howMany = this.playlist.length;
 
@@ -420,17 +497,17 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         let ids = this.playlist.slice( this.playlistPointer, end);
             // was end > size of list and is there enough at the start?
 
-        console.log(`Start: ${start} end: ${end} so initially have`, ids);
+        clog(`Start: ${start} end: ${end} so initially have`, ids);
 
         if (end > this.playlist.length) {
             end = end % this.playlist.length;
-//console.log("END LONG modding: ", end);
+//clog("END LONG modding: ", end);
             //if (end > start) end = start;
-//console.log(`They also need 0 to ${end} added`, this.playlist.slice(0, end));
+//clog(`They also need 0 to ${end} added`, this.playlist.slice(0, end));
             ids = [...ids, ...this.playlist.slice(0, end)];
         }
 
-        console.log("THEY GET", ids);
+        clog("THEY GET", ids);
 
         let titles = new Array(ids.length);
         let adders = new Array(ids.length);
@@ -441,7 +518,9 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
             adders[index] = this.playlistMap.has(id) ? this.playlistMap.get(id).adder : "unknown";
         }
 
-        let obj = { action: "nowandnext", count: ids.length, titles };
+        let obj = { action: "nowandnext", count: ids.length, titles,
+        playerinfo: this.get_player_info(),
+        reqpack: this.get_reqpack() };
 
         if (howMany == 1) {
             obj = { action: "currsonginfo",
@@ -449,7 +528,9 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
                 adder: adders[0],
                 duration: this.yt.getDuration(),
                 time: this.yt.getCurrentTime(),
-                queueposition: this.playlistPointer
+                queueposition: this.playlistPointer,
+                playerinfo: this.get_player_info(),
+                to: this.returnto
             };
         }
 
@@ -468,25 +549,66 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
                 let vidinfo = this.playlistMap.get(gone[0]);
 
                 this.playlistMap.delete(gone[0]);
-                this.playlistPointer--;
+                this.playlistPointer--;// these really should be replaced with play_song(this.playlist[this.playlistPointer])
                 this.next();
                     // destructure vidinfo into the returning object
-                let pack = {action: "videodeleted", id: gone[0], permanent: perm, ...vidinfo};
+                let pack = {action: "videodeleted", id: gone[0], permanent: perm, ...vidinfo, playerinfo: this.get_player_info()};
                 this.send_json(pack);
             }
         }
 
         // this.next();
     }
-/*
-    send(data) {
-        return this.socket.send(data);
+
+        // vids = array
+        // HEY HEY HEY HEY HEY HEY HEY HEY HEY HEY  Make this account for nexts
+    delete_vids(vids) {
+        let wasCurr = 0;
+        let deletes = 0;
+        for (let v of vids) {
+            let pos = this.delete(v);   // has spliced out
+            if (pos >= 0) {// -1 if video not found
+                    // is the position within the number of playnexts, if so reduce
+                deletes++;
+                let delPosDiff = pos - this.playlistPointer;
+
+                if (delPosDiff == 0) {
+                    wasCurr++;
+                } else { // is it in the group of nexts?
+                    if (delPosDiff > 0 && delPosDiff <= this.playlistNextCount)
+                        this.playlistNextCount--;
+                    else
+                        if (pos < this.playlistPointer) this.playlistPointer--;
+                }
+            }
+        }
+
+        if (wasCurr) {
+            this.playlistNextCount -= --wasCurr;// lower all but one when curr vids as next reduces by 1
+            this.playlistPointer--;
+            this.next();
+        }
+
+        // delete if it's in the next
+        //console.log("DELETES", deletes, "was curr:", wasCurr);
+        this.send_json({uid: this.myUID, name: this.myName, to: this.returnto, action:"playerdeletecount", count: deletes});
+        this.send_json({uid: this.uid, to: this.returnto, action:"toast", message: `<b>${this.myName}</b> says\n${deletes} videoes I have deleted, father.`});
     }
 
-    send_json(obj) {
-        return this.socket.send( JSON.stringify(obj) );
+        // single id, url, playlist position
+
+        delete(videoid) {
+        let idx = this.playlist.indexOf(videoid);
+
+        if (idx >= 0) {
+            this.playlist.splice(idx, 1);
+            this.playlistMap.delete(videoid);
+        }
+            // not yet done
+        return idx;
     }
-*/
+
+
     load_video(id, time = 0) {
         this.playlistCurrentId = id;
         this.yt.loadVideoById(id, time);
@@ -502,19 +624,6 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         this.isPaused = false;
     }
 
-        // single id, url, playlist position
-    delete(videoItem) {
-        let delCount = 0;
-        let idx = this.playlist.indexOf(videoItem);
-
-        if (idx >= 0) {
-            this.playlist.splice(idx, 1);
-            this.playlistMap.delete(videoItem);
-        }
-            // not yet done
-        return delCount;
-    }
-
     current_video_info() {
         return this.yt.getVideoData();
     }
@@ -528,43 +637,77 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         return this.isPaused;
     }
 
-    send_whole_playlist() {
+        // load the entire playlist
+
+    got_full_playlist(d) {
+        // if (this.playlistLoaded) return;
+        this.playlistLoaded = true;
+        this.playlist = [];
+        this.playlistMap.clear();
+        this.playlistNextCount = 0;
+        this.playlistPointer = d.playlistpos ?? 0;
+
+        this.add(d.data, true);//d.addnext);    // this addnext thing needs to change
+            // CLUDGE UPDATE
+        this.playlistNextCount=0;       // addnext adds in order
+
+            // shuffle has a force on/off for updating playlist order
+        if (d.forceshuffle !== undefined) {
+            if (d.forceshuffle === true) this.shuffle(true);
+        }
+        else
+        if (ytparams.shuffle === true || (ytparams.shuffle === null && d.shuffle === true)) {
+            console.log("I AM SHUFFLING!");
+            this.shuffle(true);
+        }
+
+            // leave current video playing if same as received
+        if (this.playlist[this.playlistPointer] !== this.playlistCurrentId) {
+            this.play_song(this.playlist[this.playlistPointer]);
+        }
+    }
+
+    send_whole_playlist(request) {
         let pack = {
             action: "allplaylistdata",
+            playerinfo: this.get_player_info(),
             data: {
                 playlistindex: this.playlistPointer,
                 playlist: this.playlist,
                 playlistmap: Object.fromEntries(this.playlistMap),
-            }
+            },
+            to: this.returnto ?? "observers"
         }
-
+        this.get_reqpack(pack);
+clog("SENDING BACK", pack);
         this.send_json(pack);
     }
-}
 
+        // copies back request pack from incoming json if present
 
-function work_out_the_percents() {
-    // aria-label = 17:00, 09-02-2024 electricity: 0.06 kWh
-    let spans = document.querySelectorAll("span[data-testid='usage-table-data']");
-    let totalP = 0;
-    let  reggy = /\d+\.\d+/;
-    for (let i = 32; i <= 37; i++) {
-        let match = spans[i].innerText.match(/\d+\.\d+/)[0];
-        totalP += parseFloat(match);
+    get_reqpack(o) {
+        if (o != undefined) { o.reqpack = this.reqpack; return o;}
+        else return this.reqpack;
     }
 
-    console.log("kWh TOTAL: ", totalP);
+        // player info could be added at the streamerbot stage from the players dictionary
+        // if done on every message that needs relaying to an observer that'll remove a stage
+        // objs passed by ref so can just run as add_reqpack(obj) or console.log(add_reqpack(obj))
+
+    get_player_info(o) { //
+        return {uid: this.myUID, name: this.myName, socketid: this.mySocketId};
+    }
+
+        // lets streamerbot know what we are
+
+    identify() {
+        let me = this.get_player_info();
+        me.type = "player";
+        me.action = "identify";
+        this.send_json(me);
+    }
 }
 
-//(() => { let spans = document.querySelectorAll("[data-testid='usage-table-data']"); let totalP = 0;for (let i = 32; i <= 37; i++) totalP += parseFloat(spans[i].innerText.match(/\d+\.\d+/)[0]); return totalP.toFixed(2); })();
-// <span data-testid="usage-table-date">12:00pm</span> 48 of these in a day want 33 to 38
-
-//(()=>{let e=document.querySelectorAll("[data-testid='usage-table-data']"),t=0;for(let a=32;a<=37;a++)t+=parseFloat(e[a].innerText);return t.toFixed(2)})();
-//(()=>{let e=document.querySelectorAll("[data-testid='usage-table-data']"),t=0;for(let a=32;a<=37;a++)t+=parseFloat(e[a].innerText);alert(t.toFixed(2))})();
-
-// <span data-testid="usage-table-data">0.19 kWh</span>
-    // why don't classes hoist
-//let YTP = new YTController();
 
 export default YTController;
 

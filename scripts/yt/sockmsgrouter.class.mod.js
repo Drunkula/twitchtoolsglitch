@@ -15,14 +15,14 @@ var SAOpenTimes = {};
 
 
 class SockMsgRouter {
-    socket = new Socketty();    // url is set in constructor
-    myId = 0;   // set in constructor
+    socketty = new Socketty();    // url is set in constructor
+    myUID = 0;   // set in constructor
 
     socketEvents = [
         ['message', e => this.message_handler(e)],
         ['open',  () => { //out("SockMsgRouter Socketty opened");
                     //SAOpenTimes[this.myId] = -Infinity;
-                    SAOpenTimes[this.myId] =performance.now();
+                    SAOpenTimes[this.myUID] =performance.now();
                 }],
                 /*
         ['close', () => {   // out first time then only every 30 seconds
@@ -47,7 +47,8 @@ class SockMsgRouter {
         // HAS A socket systems
 
     constructor() {
-        this.myId = SockMsgRouterCounter++;
+        this.myUID = SockMsgRouterCounter++;
+        window.addEventListener('beforeunload', () => this.socketty.close());
         clog("I am a SockMsgRouter constructor.");
         //this.add_socket_events();
     }
@@ -55,7 +56,7 @@ class SockMsgRouter {
     add_socket_events(events = null) {
         events??= this.socketEvents;
         for (const pair of events) {
-            this.socket.addEventListener(pair[0], pair[1]);
+            this.socketty.addEventListener(pair[0], pair[1]);
         }
     }
 
@@ -76,8 +77,7 @@ class SockMsgRouter {
             action = json.action;
             data = json;
         } catch (error) {
-            clog("message_hander:", e);
-            clog("ERROR:", error.toString());
+            clog("ERROR: SockMsgRouter message_handler:", e);
         }
 
         if (this.actions[action]) {
@@ -88,22 +88,22 @@ class SockMsgRouter {
             return;
         }
 
-        clog("Action:", action, "JSON?", json);
+        clog("Received action:", action, "JSON?", json);
             //this.send("Thanks, partner!")
     }
 
     connect(url) {
-        this.socket.connect(url);
+        this.socketty.connect(url);
     }
 
         // both of these SHOULD check they're connected
 
     send(data) {
-        return this.socket.send(data);
+        return this.socketty.send(data);
     }
 
     send_json(obj) {
-        return this.socket.send( JSON.stringify(obj) );
+        return this.socketty.send( JSON.stringify(obj) );
     }
 
 }

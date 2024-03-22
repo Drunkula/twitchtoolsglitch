@@ -25,7 +25,15 @@ async function main() {
     out("Set up watch expressions    ytpc.playlist");
     out('ptr: " + ytpc.playlistPointer + " nexts: " + ytpc.playlistNextCount + " [ptr]:" + ytpc.playlist[ytpc.playlistPointer] + " plyCurrStr: " + ytpc.playlistCurrent;');
 
+    grab_url_params();
+
+    clog =  ytparams.ytdbg === true ? console.log : function (){};
+
+
     let ytpc = new YTController();
+    ytpc.myName = ytparams.name; // got from URL params
+        // it'll send 'closing' to streamerbot
+    //window.addEventListener('beforeunload', () => ytpc.close());
 
 window.ytpc = ytpc;// debugging
 window.playlistDefaults = playlistDefaults;
@@ -35,7 +43,7 @@ window.playlistDefaults = playlistDefaults;
     // ytpc.add(playlistDefaults);
 
     // now we can init the iframe
-    let res = ytpc.ytPlayer.init_iframe( ytplayerVideoId );
+    let res = ytpc.ytPlayer.init_iframe( ytparams.videoId );
 
     console.log(res ? "Iframe create SUCCESS!" : "FAILED creating iframe");
 
@@ -45,12 +53,12 @@ window.playlistDefaults = playlistDefaults;
     out("It ready")
 
     //test_real();
-    let socket = ytplayerWebSock ??= config.socketty.socketUrl;
-    ytpc.socket.connect( socket );
+    let socket = ytparams.webSock ??= config.socketty.socketUrl;
+    ytpc.socketty.connect( socket );
 
-    let sw = await ytpc.socket.ready();
+    let sw = await ytpc.socketty.ready();
 
-    clog("Awaiting socket ready:", sw, "readystate", ytpc.socket.readyState);
+    clog("Awaiting socket ready:", sw, "readystate", ytpc.socketty.readyState);
         // if the above wait resolved false it'll still try and send
     ytpc.ytPlayer.play();   // on, it has to have emitted ready first
 
@@ -68,6 +76,24 @@ window.playlistDefaults = playlistDefaults;
     return;
 }
 
+    // updates ytparams with params passed to the url
+
+function grab_url_params() {
+    let qs = new window.URLSearchParams( window.location.search );
+    // urlparam|mapsto
+    let pList = ["x|XSize", "y|YSize", "muted", "video", "id|name", "chatadd|add", "nan", "playlist", "shuffle","debug|ytdbg"];
+
+    for (let p of pList) {
+        let [param, to] = p.split("|");
+        let u = qs.get(param); if (u === "false") u = false; else if(u === "true") u = true; else if (u === "") u = true;
+        clog("u:", param, u, to);
+        if (u !== null) {
+            param = to ? to : param;
+            ytparams[param] = u;
+        }
+    }
+}
+
 function init_controls() {
     let controls = document.querySelectorAll(".controls li");
 
@@ -79,7 +105,7 @@ function init_controls() {
 }
 
 function test_real() {
-    ytpc.socket.retryConnecting = false;
+    ytpc.socketty.retryConnecting = false;
     ytpc.add(["2mQECKOkkqk", "ed8QTKtLxKs", "QM_kJkChgrc"]);
     ytpc.add(["Next 1", "Next 2"], true);
     ytpc.add("Some Rando");
