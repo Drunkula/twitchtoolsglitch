@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Twitch Tools</title>
+    <meta name="description">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <script defer="" src="https://use.fontawesome.com/releases/v6.1.1/js/all.js"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+  </head>
+  <body>
+    <div class="block mx-5 my-3 main-container">
+      <script>window.TT = window.TT ? window.TT : {};</script>
+      <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+      <script src="/scripts/helpers.js"></script>
+      <script src="/scripts/yt/ytobserver.main.mod.js" type="module"></script>
+      <script src="/scripts/bulma-components-init.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/bulma-toast/2.4.4/bulma-toast.min.js"></script>
+      <style type="text/css">
+        li > a {background-color: white;}
+        li.insts-tab.is-active a {
+            background-color: #cf0808 !important;
+        }
+        li.pl-tab.is-active a {
+            background-color: #9900b8 !important;
+        }
+      </style>
+      <!--script document.title = "YT Observer"-->
+      <div class="mb-1 py-0 px-5 tabs is-fullwidth is-toggle is-small" data-target="#playlistpanels">
+        <ul>
+          <li class="is-active"><a>Player</a></li>
+          <li class="pl-tab"><a>Playlists</a></li>
+          <li class="insts-tab"><a>Instructions</a></li>
+        </ul>
+        <!-- scroll into view-->
+      </div>
+      <div class="block tab-content" id="playlistpanels">
+        <div class="tab-pane is-active">
+          <div class="columns is-flex-direction-row-reverse">
+            <div class="column is-4">
+              <div class="box">
+                <nav class="level is-mobile mb-3">
+                  <div class="level-left">
+                    <div class="level-item">
+                      <button class="is-small button is-success" data-send="playprev">««</button>
+                    </div>
+                    <div class="level-item">
+                      <button class="is-small button is-warning" data-send="play">Play</button>
+                    </div>
+                    <div class="level-item">
+                      <button class="is-small button is-warning" data-relay="pause">Pause</button>
+                    </div>
+                    <div class="level-item">
+                      <button class="is-small button is-success" data-send="playnext">»»</button>
+                    </div>
+                  </div>
+                </nav>
+                <nav class="level mb-3 is-hidden-mobile">
+                  <div class="level-left">
+                    <div class="level-item">
+                      <button class="is-small button is-success" data-relay="{&quot;action&quot;:&quot;rwd&quot;,&quot;data&quot;:5}">-5</button>
+                      <button class="is-small button is-success" data-relay="{&quot;action&quot;:&quot;fwd&quot;,&quot;data&quot;:30}">+30</button>
+                      <button class="is-small button is-warning" data-send="voldown">Vol -</button>
+                      <button class="is-small button is-warning" data-send="volup">Vol +</button>
+                      <button class="is-small button is-danger" data-send="mutetoggle">mute</button>
+                    </div>
+                  </div>
+                  <div class="level-right">
+                    <div class="level-item">
+                      <div class="dropdown is-right">
+                        <div class="dropdown-trigger">
+                          <button class="button">
+                            <!--span controls--><span class="icon is-small"><i class="fas fa-angle-down"></i></span>
+                          </button>
+                        </div>
+                        <div class="dropdown-menu">
+                          <div class="dropdown-content"><a class="label dropdown-item">
+                              <input class="mr-2" id="spcbxtop" type="checkbox">auto scroll top</a><hr class="dropdown-divider"><a class="label dropdown-item checkbox">
+                              <input class="mr-2" id="spcbxmiddle" type="checkbox">auto scroll middle</a><hr class="dropdown-divider"><a class="label dropdown-item checkbox">
+                              <input class="mr-2" id="spcbxnearest" type="checkbox">auto scroll nearest</a></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </nav>
+              </div>
+              <div class="box">
+                <nav class="level">
+                  <div class="level-left">
+                    <div class="level-item">
+                      <div class="field has-addons is-horizontal">
+                        <div class="control">
+                          <div class="select">
+                            <select class="playerselect" id="playerselect" name="players">
+                              <option value="players">All Players</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="control"><a class="button is-success" id="playerselectgetbtn">Get</a></div>
+                      </div>
+                    </div>
+                    <div class="level-item">
+                      <label class="checkbox" title="Auto load player's list on change.
+Disabling let's you get a player's list and send it to another.">
+                        <input class="mr-2" id="autoloadplayerlist" type="checkbox" checked="checked">auto
+                      </label>
+                    </div>
+                  </div>
+                  <div class="level-right">
+                    <div class="level-item">
+                      <div class="dropdown is-right">
+                        <div class="dropdown-trigger">
+                          <button class="button">
+                            <!--span controls--><span class="icon is-small"><i class="fas fa-angle-down"></i></span>
+                          </button>
+                        </div>
+                        <div class="dropdown-menu">
+                          <div class="dropdown-content"><a class="dropdown-item" data-get="chatlockout">Chat lockout</a><hr class="dropdown-divider"><a class="dropdown-item" data-get="chatunlock">Chat allow</a><hr class="dropdown-divider"><a class="dropdown-item" data-get="storeon">Store On</a><hr class="dropdown-divider"><a class="dropdown-item" data-get="storeoff">Store Off</a><hr class="dropdown-divider"><a class="dropdown-item" data-get="playersidentify">Reidentify Players</a></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </nav>
+              </div>
+              <div class="box is-hidden-mobile">
+                <div>table rows</div>
+                <div class="player-controls">
+                  <button class="rowsup button is-link is-small">Move Up</button>
+                  <button class="rowsdown button is-link is-small">Move down</button>
+                  <button class="clearchecks button is-link is-small">Clear</button>
+                  <button class="button is-info is-small" id="sendlisttoplayer">Update list</button>
+                </div>
+                <div>Delete :</div>
+                <div class="player-controls">
+                  <button class="delete-playeronly button is-danger is-small">player only</button>
+                </div>
+              </div>
+              <div class="box player-controls is-hidden-mobile">
+                <div class="field has-addons">
+                  <div class="control is-expanded">
+                    <input class="input" placeholder="Add video youtube link or video id" id="addvideotoplayer">
+                  </div>
+                  <div class="control"><a class="button is-info addvideobtn">add</a></div>
+                </div>
+              </div>
+              <div class="box player-controls is-hidden-mobile">
+                <div class="label">Copy selected to playlist
+                  <div class="field has-addons">
+                    <div class="control">
+                      <div class="select">
+                        <select class="playlistselect" id="copytoplaylistfromplayer">
+                          <option value="" disabled>get playlists first</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="control"><a class="button is-success savetoplaylist" data-toselectid="copytoplaylistfromplayer">Copy</a></div>
+                  </div>
+                </div>
+              </div>
+              <div class="box is-hidden-mobile">
+                <div class="level">
+                  <div class="level-left">
+                    <div class="level-item"><strong>Storage:&nbsp;</strong>
+                      <tag class="tag is-info" id="storagestatus">?</tag>
+                    </div>
+                    <div class="level-item"><strong>Chat Control:&nbsp;</strong>
+                      <tag class="tag is-info" id="chatlockoutstatus">?</tag>
+                    </div>
+                  </div>
+                </div>
+                <div class="content">
+                  <ul>
+                    <li>player playlist different colours between perm and added entries</li>
+                    <li>Player's !add and !nan flags can be adjusted in the interface</li>
+                    <li>Streamerbot config reads back partial saved data</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="column">
+              <div class="box pt-2 pb-3">
+                <div id="playerplaylist" style="overflow-y: auto; height: 90vh;">
+                  <div class="notification is-info" id="playerinstructions">
+                    <button class="delete" data-target="#playerinstructions"></button>
+                    <div class="box">Player's playlists will appear here when you select one from the dropdown on the right.</div>
+                    <div class="box">Double clicking an song will make the player play that song.</div>
+                    <div class="box">If you rearrange or delete from a list use the 'update list' button to update it in the player.</div>
+                    <div class="box">
+                      <div class="block">
+                        Disabling the <i>auto</i> option means you have to use the 'get' button to loads the player's list.&nbsp;&nbsp;This can be used to 'get' a player's list, rearrange and delete from it, select a different player and send the list to it.</div><b>NOTE:</b>&nbsp;send replaces the players entire list.
+                    </div>
+                    <p class="box">If you chose the 'All Players' option it'll be send everywhere, so be careful if you've got multiple players in your setup for things like start and end music.  The changes are not permanent.</p>
+                    <p class="box">The add video box will add to the player targetted by the select or all players.  Double click or right click the box to clear it.</p>
+                    <p class="box">Deleting videos from the player won't automatically update the list, you need to use "get" to see the result.  This lets you copy the entries to a playlist.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane">
+          <div class="columns is-flex-direction-row-reverse">
+            <div class="column">
+              <div class="box">
+                <div class="field has-addons">
+                  <div class="control">
+                    <div class="select">
+                      <select class="playlistselect" id="loadplaylistselect" name="playlists">
+                        <option value="">Get Playlists</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="control"><a class="button is-success" id="getplaylistbtn">Get</a></div>
+                  <button class="button ml-3 is-success" data-get="getplaylists">Get lists</button>
+                </div>
+              </div>
+              <div class="box">
+                <div>table rows
+                  <div class="playlist-controls">
+                    <button class="rowsup button is-link is-small">Move Up</button>
+                    <button class="rowsdown button is-link is-small">Move down</button>
+                    <button class="clearchecks button is-link is-small">Clear</button>
+                    <button class="button is-info is-small" id="updateplaylistlistbtn" disabled>Update</button>
+                  </div>
+                  <div>Delete :</div>
+                  <div class="playlist-controls">
+                    <button class="delete-permanently button is-danger is-small">Confirm
+                      <input class="ml-1" id="delplaylistconfirm" type="checkbox">
+                    </button>
+                    <button class="modal-trigger button is-danger is-small" data-target="createlistmodal">Create</button>
+                    <button class="button is-link is-small" id="editplaylistshowmodalbtn">Edit</button>
+                  </div>
+                </div>
+              </div>
+              <div class="box playlist-controls">
+                <div class="field has-addons">
+                  <div class="control is-expanded">
+                    <input class="input" placeholder="Add video youtube link or video id" id="addvideotoplaylist">
+                  </div>
+                  <div class="control"><a class="button is-info addvideobtn">add</a></div>
+                </div>
+                <div class="label">Copy to playlist</div>
+                <div class="field has-addons">
+                  <div class="control">
+                    <div class="select">
+                      <select class="playlistselect" id="playlistcopytoplaylist">
+                        <option value="" disabled>get playlists first</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="control"><a class="button is-success savetoplaylist" data-toselectid="playlistcopytoplaylist">Copy</a></div>
+                </div>
+                <div class="label">Send to player</div>
+                <div class="field has-addons">
+                  <div class="control">
+                    <div class="select">
+                      <select class="playerselect" id="playlistcopytoplayer">
+                        <option value="" disabled>get playlists first</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="control"><a class="button is-success sendtoplayer" data-toselectid="playlistcopytoplayer">Send</a></div>
+                </div>
+                <div class="box">
+                  <div class="content">
+                    <ul>
+                      <li>adder name edit</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="column">
+              <div class="box">
+                <div id="playlist" style="overflow-y: auto; height: 90vh">
+                  <p>Playlist.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane">
+          <div class="box"><b>players now can have (and need) optional paramers.</b>
+            <p>So when you add a player it'll be like this:</p>
+            <p class="pl-3">https://twitch-tools.glitch.me/ytplayer?id=Name in Observer Page&amp;nan=true&amp;addchat=true</p>
+            <p>Put a ? after the url and separate them with &amp; signs.  E.g. /?playlist=default&amp;x=1280&amp;y=720</p>
+            <p>The options are:</p>
+            <div class="content">
+              <ul>
+                <li>playlist.  playlist=Start Music</li>
+                <li>id - the name that'll show in the controller page</li>
+                <li>nan set true for the player to respond to now and next requests</li>
+                <li>chatadd - true means it'll add videos from chat with !add or !src</li>
+                <li>shuffle - true/false Override the shuffle flag for a list.  Not included uses the list's default.</li>
+                <li>video.  The id of the initial video to load e.g. video=xayd1c0wtOE</li>
+                <li>x and y to set the size of the player</li>
+                <li>muted - true/false. Whether the player starts muted. More for debugging</li>
+                <li>volume - 0 to 100.  Initial volume of player.  Default 100.</li>
+                <li>debug - true/false. Whether debug messages appear in a browser console.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="box">
+            <p>A playlists chat add option means it'll store chat !adds unless the permanent storage option is set to off.  Having a list with this set means you can copy ones you like to the other playlists later.</p>
+          </div>
+          <div class="box"><b>NOT YET DONE</b>
+            <div class="content">
+              <ul>
+                <li>the auto scroll position.  Chrome has a bug where smooth scrolling in the middle doesn't work.  It's so annoying as it's the best one.</li>
+                <li>OBS starts and pauses players by their presence in a scene.  It's coming</li>
+                <li>!next and !prev affects all players, like the above this will be fixed.</li>
+                <li>Streamerbot runs the Init() when compiling the code for the player more than once.  This isn't my fault, it'll mean you get the startup messages more than once, that's all.</li>
+                <li>shift clicking checkboxes will do all between.  It'll be there</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal is-size-7-touch" id="createlistmodal">
+        <div class="modal-background modal-dismiss"></div>
+        <div class="modal-card">
+          <header class="modal-card-head">
+            <p class="modal-card-title">Create new playlist</p>
+            <button class="delete" aria-label="close"></button>
+          </header>
+          <section class="modal-card-body">
+            <div class="block">
+              <div class="field">
+                <div class="label">name</div>
+                <div class="control is-expanded">
+                  <input class="input is-primary is-focused" id="createplaylistname" type="text" placeholder="Playlist name">
+                </div>
+              </div>
+              <div class="field">
+                <label class="checkbox">
+                  <input class="mr-2" id="createplaylistshuffle" type="checkbox">shuffle on load
+                </label>
+              </div>
+              <div class="field">
+                <label class="checkbox">
+                  <input class="mr-2" id="createplayliststoreperm" type="checkbox">chat !add stores permanently by default
+                </label>
+              </div>
+              <div class="field is-pulled-right">
+                <button class="button is-info" id="createplaylistbtn">Create</button>
+              </div>
+            </div>
+          </section>
+          <footer class="modal-card-foot">
+            <button class="button is-danger modal-dismiss is-right">Cancel</button>
+          </footer>
+        </div>
+      </div>
+      <div class="modal is-size-7-touch" id="editlistmodal">
+        <div class="modal-background modal-dismiss"></div>
+        <div class="modal-card">
+          <header class="modal-card-head">
+            <p class="modal-card-title">Edit playlist</p>
+            <button class="delete" aria-label="close"></button>
+          </header>
+          <section class="modal-card-body">
+            <div class="block">
+              <div class="field">
+                <div class="label">name</div>
+                <div class="control is-expanded">
+                  <input class="input is-primary is-focused" id="editplaylistname" type="text" placeholder="Playlist name">
+                </div>
+              </div>
+              <div class="field">
+                <label class="checkbox">
+                  <input class="mr-2" id="editplaylistshuffle" type="checkbox">shuffle on load
+                </label>
+              </div>
+              <div class="field">
+                <label class="checkbox">
+                  <input class="mr-2" id="editplayliststoreperm" type="checkbox">chat !add stores permanently by default
+                </label>
+              </div>
+              <div class="field is-pulled-right">
+                <button class="button is-danger" id="destroyplaylistbtn">DESTROY
+                  <input class="ml-1" id="destroyplaylistconfirm" type="checkbox">
+                </button>
+                <button class="button is-info" id="updateplaylistbtn">Update</button>
+              </div>
+            </div>
+          </section>
+          <footer class="modal-card-foot">
+            <button class="button is-danger modal-dismiss is-right">Cancel</button>
+          </footer>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
