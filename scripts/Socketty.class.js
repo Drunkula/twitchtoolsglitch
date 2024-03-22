@@ -38,7 +38,7 @@ class Socketty {
     retryMaxTimeTotal = 600; // want to stop after X minutes.  Not yet implemented
 
     pingActive = true;
-    pingInterval = 30;  // seconds
+    pingInterval = 300;  // seconds
     pingSetIntervalRef;  // for setInterval
 
         // if people do event listeners they'll need adding back to the socket
@@ -110,6 +110,9 @@ class Socketty {
             this.connected = false;
 
             this.ws = new WebSocket(sockUrl);
+
+            this.add_event_backups();
+            this.add_events();
         } catch(e) {
             clog("Socketty Connect Error:", e);
             return false;
@@ -117,10 +120,10 @@ class Socketty {
 
         this._readyPromise = new Promise(x => this.readyResolver = x);
 
+        // can add before connected?
+
+
         clog("Socketty connect() ws:", this.ws);
-            // can add before connected?
-        this.add_events();
-        this.add_event_backups();
 
         this.ping_set( this.pingActive );    // hmmmm
 
@@ -287,6 +290,7 @@ class Socketty {
 
     close() {
         this._retryConnectingFlag = false;
+        this.send('closing');   // for streamerbot as close event doesn't work
         this.ws.close();
     }
         // getter to make this almost invisible

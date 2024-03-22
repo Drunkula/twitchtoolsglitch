@@ -360,3 +360,22 @@ html {
 	display: table-cell;
 	padding-right: 6px;
 }
+
+/***************** OBSERVER PAGE *****************/
+/***************** OBSERVER PAGE *****************/
+/***************** OBSERVER PAGE *****************/
+
+#playertable, #playlisttable {
+	width: 100%;
+}
+
+#playertable td, #playlisttable td {
+	vertical-align: middle;
+}
+
+#playertable input[type="checkbox"], #playlisttable input[type="checkbox"] {
+	height: 1.8em; width: 1.8em; margin: 0; padding: 0;vertical-align: middle;
+}
+#playertable td:first-child, #playlisttable td:first-child {
+	margin: 0; padding: 0; text-align: center;
+}

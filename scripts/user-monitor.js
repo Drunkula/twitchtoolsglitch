@@ -1,4 +1,4 @@
-"use strict"
+"use strict"    // NOT A MODULE      NOT A MODULE       NOT A MODULE
 
 var UserMon = UserMon || {};
 //var UserMonVars = {};
@@ -14,6 +14,9 @@ var UserMon = UserMon || {};
     !"£$%^&*()[]-=_+;':@,.<>
     !^+
 */
+        // window must be interacted with to work
+window.addEventListener('beforeunload', x => x.preventDefault());
+//window.addEventListener('beforeunload', x => x.returnValue = "Are you sure about this?");
 
 (function(ns) {
     //* The user list still gets two changes
@@ -25,6 +28,8 @@ var UserMon = UserMon || {};
     var userT, messageT;
     var searchTermRegex = null;
     var msgHits = 0;
+
+
 
     window.addEventListener('load', async (event) => {
         document.title = "Twitch User Monitor";
@@ -93,18 +98,18 @@ var UserMon = UserMon || {};
     async function users_tracked_changed() {
         console.log("Users changed...");
 
-console.log("READYSTATE", TT.cclient.readyState());
+                //console.log("READYSTATE", TT.cclient.readyState());
 
         if (TT.cclient.readyState() !== "OPEN") {
             return;
         }
-console.log("Disconnecting due to user change");
+                // console.log("Disconnecting due to user change");
         await TT.cclient.disconnect();
 
         let res = await TT.cclient.connect().catch(
             e => console.log("CONNECT ERROR", e)
         );
-console.log("AFTER reconnect", res);
+                //console.log("AFTER reconnect", res);
         return;
     }
 

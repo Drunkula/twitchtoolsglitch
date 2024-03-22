@@ -18,6 +18,7 @@
 	const TT_DEBUGGING = true;
 	const html = document.getElementsByTagName('html')[0];
 	TT.show_modal = show_modal;	// add as a "global" function
+	TT.hide_modal = hide_modal;
 
 	let tt_log = TT_DEBUGGING ? console.log : () => {};	// logging function
 
@@ -81,6 +82,11 @@
 		html.classList.add('is-clipped');	// stops background scrolling with mouse
 	}
 
+	function hide_modal(id) {
+		let modal = gid(id);
+		modal.classList.remove('is-active');
+		html.classList.remove('is-clipped');	// stops background scrolling with mouse
+	}
 
 		/**
 		 * Inits tabs in panels and regular tab sets

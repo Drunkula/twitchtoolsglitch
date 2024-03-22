@@ -9,6 +9,10 @@ function qsa(query, el=document) {
 	return [...el.querySelectorAll(query)];
 }
 
+function qs(query, el=document) {
+    return el.querySelector(query);
+}
+
 function gid(id, el = document) {
     return el.getElementById(id);
 }
@@ -25,16 +29,36 @@ function sleep(ms) {		// sleep(200).then(...)
 
     // {id:, data:} or []
 function table_row(params = {}) {
+    let rdata = params instanceof Array ? params : params.data;
+    if (rdata.length <= 0) return;
+
     let row = dce("tr");
     if (params.id) row.id = params.id;
+
     let isHdr = params.isHeader ??= false;
 
-    let rdata = params instanceof Array ? params : params.data;
+    let hasCbox = params.checkbox !== undefined;
 
     for (let cell of rdata) {
         let c = isHdr ? dce("th") : dce("td");
-        c.innerText = cell;
+        c.innerHTML = cell;
         row.append(c);
+    }
+
+
+    if (hasCbox) {
+        let cboxfirst = true;
+        if (params.checkboxPos === "end") cboxfirst = false;
+        //let c = isHdr ? dce("th") : dce("td");
+        let cbx = dce("input");
+        cbx.type = "checkbox";
+        cbx.value = params.checkbox;
+        if (params.checkboxid) cbx.id = params.checkboxid;
+        //c.append(cbx);
+        let c = isHdr ? dce("th") : dce("td");
+        c.append(cbx);
+        if (cboxfirst) row.prepend(c);
+        else row.append(c);
     }
 
     return row;
