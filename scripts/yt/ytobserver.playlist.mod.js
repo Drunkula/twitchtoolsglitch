@@ -158,11 +158,19 @@ export function send_load_playlist_cmd() {
     YTO.send_json({action: "sendplaylist", uid});
 }
 
+
+    // OBS's browser doesn't allow the use of :has() so let's change things
 export function table_entries_to_array(tableId, onlyChecked = false) {
-    let chk = onlyChecked ? ":has(input:checked)" : '';
-    let q = `#${tableId} tr${chk}:not(:first-child)`;
-    let rows = qsa(q);
-//console.log("rows:", rows);
+    let rows = [];
+    if (onlyChecked) {
+        let cbxs = qsa("#playlisttable input:checked");
+        cbxs.forEach(x => rows.push(x.parentNode.parentNode));
+    } else {
+        // nope let chk = onlyChecked ? ":has(input:checked)" : '';
+        let q = `#${tableId} tr${chk}:not(:first-child)`;
+        rows = qsa(q);
+    }
+                            //console.log("rows:", rows);
     let res = [];
     for (let tr of rows) {
         let e = {...tr.dataset, title: tr.children[1].textContent, adder: tr.children[2].textContent};
