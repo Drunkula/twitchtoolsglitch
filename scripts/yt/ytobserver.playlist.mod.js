@@ -170,7 +170,7 @@ export function table_entries_to_array(tableId, onlyChecked = false) {
         });
     } else {
         // nope let chk = onlyChecked ? ":has(input:checked)" : '';
-        let q = `#${tableId} tr${chk}:not(:first-child)`;
+        let q = `#${tableId} tr:not(:first-child)`;
         rows = qsa(q);
     }
                             //console.log("rows:", rows);
