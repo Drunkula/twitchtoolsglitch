@@ -163,8 +163,11 @@ export function send_load_playlist_cmd() {
 export function table_entries_to_array(tableId, onlyChecked = false) {
     let rows = [];
     if (onlyChecked) {
-        let cbxs = qsa("#playlisttable input:checked:not(:first-child)");
-        cbxs.forEach(x => rows.push(x.parentNode.parentNode));
+        let cbxs = qsa(`#${tableId} input:checked`);
+        cbxs.forEach(x => {
+            let r = x.parentNode.parentNode;
+            if (r.dataset['videoid']) rows.push(r);
+        });
     } else {
         // nope let chk = onlyChecked ? ":has(input:checked)" : '';
         let q = `#${tableId} tr${chk}:not(:first-child)`;

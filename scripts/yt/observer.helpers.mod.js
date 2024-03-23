@@ -32,8 +32,11 @@ function move_table_rows(tableid, up = true) {
     let tbl = gid(tableid);
     // OBS browser strikes again let rows = qsa(`#${tableid} tr:has(input:checked):not(:first-child)`);
     let rows = [];
-    let cbxs = qsa(`#${tableid} input:checked:not(:first-child)`);
-    cbxs.forEach(x => rows.push(x.parentNode.parentNode));
+    let cbxs = qsa(`#${tableid} input:checked`);
+    cbxs.forEach(x => {
+        let r = x.parentNode.parentNode;
+        if (r.dataset['videoid']) rows.push(r);
+    });
 
     if (!rows.length) return false;
 
