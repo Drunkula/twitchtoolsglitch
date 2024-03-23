@@ -213,7 +213,7 @@ function get_players_list() {
 function players_select_update(d) {
     let selects = qsa(".playerselect");
 
-    toast('Number of players: ' + Object.keys(d.players).length);
+    toast('Number of players: ' + Object.keys(d.players).length, "is-info", 4000, {position: "top-left", animate: {in: "backInRight"}});
 
     for (let select of selects) {
         let currSel = select.selectedIndex >= 0 ? select.options[select.selectedIndex].value : null;
@@ -239,7 +239,7 @@ function players_select_update(d) {
 function playlist_selects_update(d) {
     let selects = qsa(".playlistselect");
 
-    toast('Number of playlists: ' + d.lists.length, 'is-link');
+    toast('Number of playlists: ' + d.lists.length, 'is-link', 4000, {position: "top-left", animate: {in: "backInRight"}});
         // update global playlists
     for (let p of d.lists) {
         playlists[p.uid] = p;
@@ -269,12 +269,14 @@ function playlist_selects_update(d) {
 }
 
 function got_chat_lockout_status(d) {
-    toast("<b>Rabble</b> chat commands are " + (d.state ? "<b>Denied</b>" : "<b>Allowed</b>"))
+    let msg = "<b>Rabble</b> chat commands are " + (d.state ? "<b>Denied</b>" : "<b>Allowed</b>");
+    toast(msg, "is-info", 4000, {position: "top-left"});
+
     gid("chatlockoutstatus").innerText = d.state ? "BLOCKED" : "ALLOWED";
 }
 
 function got_storage_status(d) {
-    toast("<b>Permanent Storage</b> is  " + (d.state ? "<b>Enabled</b>" : "<b>Disabled</b>"));
+    toast("<b>Permanent Storage</b> is  " + (d.state ? "<b>Enabled</b>" : "<b>Disabled</b>"), "is-info", 4000, {position: "top-left", animate:{in:"backInRight"}});
     gid("storagestatus").innerText = d.state ? "ON" : "OFF";
 }
 

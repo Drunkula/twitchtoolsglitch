@@ -57,8 +57,8 @@ export function delete_from_playlist() {
 
 export function add_video_to_playlist() {
     let video = gid("addvideotoplaylist").value;
-    adder =
-    YTO.send_json({action: "addvideotoplaylist", video, uid: gid("loadplaylistselect").value, adder});
+    //adder = this will be a thing
+    YTO.send_json({action: "addvideotoplaylist", video, uid: gid("loadplaylistselect").value});
 }
 
     // sends all the videos in a playlist back
