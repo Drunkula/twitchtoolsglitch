@@ -159,7 +159,7 @@ export function send_load_playlist_cmd() {
 }
 
 
-    // OBS's browser doesn't allow the use of :has() so let's change things
+    // OBS's browser doesn't allow the use of :has() so new version
 export function table_entries_to_array(tableId, onlyChecked = false) {
     let rows = [];
     if (onlyChecked) {
