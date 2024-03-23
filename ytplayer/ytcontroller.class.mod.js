@@ -347,7 +347,7 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         if (this.playlist.includes(videoid))
             return false;    // may bump this if addnext
 
-        this.playlistMap.set(videoid, {title, adder, channel, starttime, "number": this.playlistMapCounter++});
+        this.playlistMap.set(videoid, {title, adder, channel, starttime: parseInt(starttime), "number": this.playlistMapCounter++});
 
         let len = this.playlist.length;
 
