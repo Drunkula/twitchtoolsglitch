@@ -163,7 +163,7 @@ export function send_load_playlist_cmd() {
 export function table_entries_to_array(tableId, onlyChecked = false) {
     let rows = [];
     if (onlyChecked) {
-        let cbxs = qsa("#playlisttable input:checked");
+        let cbxs = qsa("#playlisttable input:checked:not(:first-child)");
         cbxs.forEach(x => rows.push(x.parentNode.parentNode));
     } else {
         // nope let chk = onlyChecked ? ":has(input:checked)" : '';

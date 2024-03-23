@@ -138,7 +138,7 @@ function delete_player_only(perm = false) {
         // get the selected playlist boxes
     // obs fix let rows = qsa("#playerplaylist tr:has(input[type=checkbox]:checked)");
     let rows = [];
-    let cbxs = qsa("#playerplaylist input:checked");
+    let cbxs = qsa("#playerplaylist input:checked:not(:first-child)");
     cbxs.forEach(x => rows.push(x.parentNode.parentNode));
 
 
