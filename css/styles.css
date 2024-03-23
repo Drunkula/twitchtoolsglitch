@@ -379,3 +379,7 @@ html {
 #playertable td:first-child, #playlisttable td:first-child {
 	margin: 0; padding: 0; text-align: center;
 }
+
+.animate__animated {
+	filter: drop-shadow(0px 6px 4px #444444);
+}
