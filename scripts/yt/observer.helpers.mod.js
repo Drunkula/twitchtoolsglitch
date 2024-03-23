@@ -30,7 +30,10 @@ window.get_select_text = function get_select_text(id) {
 
 function move_table_rows(tableid, up = true) {
     let tbl = gid(tableid);
-    let rows = qsa(`#${tableid} tr:has(input:checked):not(:first-child)`);
+    // OBS browser strikes again let rows = qsa(`#${tableid} tr:has(input:checked):not(:first-child)`);
+    let rows = [];
+    let cbxs = qsa(`#${tableid} input:checked`);
+    cbxs.forEach(x => rows.push(x.parentNode.parentNode));
 
     if (!rows.length) return false;
 

@@ -136,7 +136,12 @@ window.update_playlist_set_btn_state = update_playlist_set_btn_state;
 
 function delete_player_only(perm = false) {
         // get the selected playlist boxes
-    let rows = qsa("#playerplaylist tr:has(input[type=checkbox]:checked)");
+    // obs fix let rows = qsa("#playerplaylist tr:has(input[type=checkbox]:checked)");
+    let rows = [];
+    let cbxs = qsa("#playerplaylist input:checked");
+    cbxs.forEach(x => rows.push(x.parentNode.parentNode));
+
+
     if (!rows.length) {
         toast("No videos selected for player to delete.");
         return;
