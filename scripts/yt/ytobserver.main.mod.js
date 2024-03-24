@@ -16,8 +16,11 @@ let htmlEvents = [
     //{selector: ".player-controls .delete-permanently", event: "click", function: () => delete_vids(true)},
     {selector: ".player-controls .delete-playeronly", event: "click", function: () => delete_player_only(false)},
 
-    {selector: ".player-controls .rowsup", event: "click", function: x => move_table_rows('playertable', true)},
-    {selector: ".player-controls .rowsdown", event: "click", function: x => move_table_rows('playertable', false)},
+    {selector: ".player-controls .rowsup", event: "click", function: x => move_table_rows('playertable', "up")},
+    {selector: ".player-controls .rowsdown", event: "click", function: x => move_table_rows('playertable', "down")},
+    {selector: ".player-controls .rowstotop", event: "click", function: x => {move_table_rows('playertable', "top")}},
+    {selector: ".player-controls .rowstobottom", event: "click", function: x => {move_table_rows('playertable', "bottom")}},
+
     {selector: "#sendlisttoplayer", event: "click", function: x => send_playlist_to_player()},
     {selector: ".player-controls .addvideobtn", event: "click", function: x => add_video_to_player()},
     // select all checkbox player
@@ -42,8 +45,10 @@ let htmlEvents = [
     {selector: ".player-controls .clearchecks", event: "click", function: x => qsa('#playertable input[type=checkbox]:checked').forEach(x=>x.checked=false)},
     {selector: ".player-controls .setchecks", event: "click", function: x => qsa('#playertable input[type=checkbox]').forEach(x=>x.checked=true)},
 
-    {selector: ".playlist-controls .rowsup", event: "click", function: x => {update_playlist_set_btn_state(true); move_table_rows('playlisttable', true)}},
-    {selector: ".playlist-controls .rowsdown", event: "click", function: x => {update_playlist_set_btn_state(true); move_table_rows('playlisttable', false)}},
+    {selector: ".playlist-controls .rowsup", event: "click", function: x => {update_playlist_set_btn_state(true); move_table_rows('playlisttable', "up")}},
+    {selector: ".playlist-controls .rowsdown", event: "click", function: x => {update_playlist_set_btn_state(true); move_table_rows('playlisttable', "down")}},
+    {selector: ".playlist-controls .rowstotop", event: "click", function: x => {update_playlist_set_btn_state(true); move_table_rows('playlisttable', "top")}},
+    {selector: ".playlist-controls .rowstobottom", event: "click", function: x => {update_playlist_set_btn_state(true); move_table_rows('playlisttable', "bottom")}},
 
     {selector: ".playlist-controls .delete-permanently", event: "click", function: () => l.delete_from_playlist(true)},
     {selector: ".playlist-controls .addvideobtn", event: "click", function: x => l.add_video_to_playlist()},
