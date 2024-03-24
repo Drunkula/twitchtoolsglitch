@@ -7,29 +7,32 @@ export let playlists = {};// uid keyed playlists
 window.clog = console.log;
 document.title = "YT Observer";
     // https://www.npmjs.com/package/bulma-toast BULMA TOAST BULMA TOAST is messing with my scrollIntoView
-dataset_click_events_assign(); // adds send actions to button
+    dataset_click_events_assign(); // adds send actions to button
 
-//document.getElementsByTagName("html")[0].style["position"]="relative";
+    //document.getElementsByTagName("html")[0].style["position"]="relative";
 
-let htmlEvents = [
+    let htmlEvents = [
     // playER page
     //{selector: ".player-controls .delete-permanently", event: "click", function: () => delete_vids(true)},
     {selector: ".player-controls .delete-playeronly", event: "click", function: () => delete_player_only(false)},
-
+    {selector: "#sendlisttoplayer", event: "click", function: x => send_playlist_to_player()},
+    {selector: ".player-controls .addvideobtn", event: "click", function: x => add_video_to_player()},
+    // MOVING ROWS
     {selector: ".player-controls .rowsup", event: "click", function: x => move_table_rows('playertable', "up")},
     {selector: ".player-controls .rowsdown", event: "click", function: x => move_table_rows('playertable', "down")},
     {selector: ".player-controls .rowstotop", event: "click", function: x => {move_table_rows('playertable', "top")}},
     {selector: ".player-controls .rowstobottom", event: "click", function: x => {move_table_rows('playertable', "bottom")}},
 
-    {selector: "#sendlisttoplayer", event: "click", function: x => send_playlist_to_player()},
-    {selector: ".player-controls .addvideobtn", event: "click", function: x => add_video_to_player()},
     // select all checkbox player
     {selector: "#checkallplayer", event: "click", function: x => {
         let c = x.target.checked; qsa("#playertable input[type='checkbox']").forEach(e => e.checked = c);}
     },
+    {selector: ".player-controls .clearchecks", event: "click", function: x => qsa('#playertable input[type=checkbox]:checked').forEach(x=>x.checked=false)},
+    {selector: ".player-controls .setchecks", event: "click", function: x => qsa('#playertable input[type=checkbox]').forEach(x=>x.checked=true)},
 
-     {selector: "#playerselect", event: "change", function: x => {if (gid("autoloadplayerlist").checked) get_players_list();}, params: {}},
-     {selector: "#playerselectgetbtn", event: "click", function: get_players_list, params: {}},
+
+    {selector: "#playerselect", event: "change", function: x => {if (gid("autoloadplayerlist").checked) get_players_list();}, params: {}},
+    {selector: "#playerselectgetbtn", event: "click", function: get_players_list, params: {}},
 
     ////////// PLAYLIST //////////
     ////////// PLAYLIST //////////
@@ -40,10 +43,6 @@ let htmlEvents = [
 
     {selector: ".playlist-controls .clearchecks", event: "click", function: x => qsa('#playlisttable input[type=checkbox]:checked').forEach(x=>x.checked=false)},
     {selector: ".playlist-controls .setchecks", event: "click", function: x => qsa('#playlisttable input[type=checkbox]').forEach(x=>x.checked=true)},
-
-
-    {selector: ".player-controls .clearchecks", event: "click", function: x => qsa('#playertable input[type=checkbox]:checked').forEach(x=>x.checked=false)},
-    {selector: ".player-controls .setchecks", event: "click", function: x => qsa('#playertable input[type=checkbox]').forEach(x=>x.checked=true)},
 
     {selector: ".playlist-controls .rowsup", event: "click", function: x => {update_playlist_set_btn_state(true); move_table_rows('playlisttable', "up")}},
     {selector: ".playlist-controls .rowsdown", event: "click", function: x => {update_playlist_set_btn_state(true); move_table_rows('playlisttable', "down")}},
@@ -80,6 +79,8 @@ class YTObserver extends SockMsgRouter {
     myName = "YTObserver Default";  // sent to Streamerbot for id purposed.  It might send a replacement back
     mySocketId = null;
 
+    defaultAdderSet = false;
+
     actions = {
         allplayerlistdata: received_player_playlist,
         currsongid: received_songid,
@@ -102,6 +103,7 @@ class YTObserver extends SockMsgRouter {
 
         chatlockoutstate: got_chat_lockout_status,
         permstorestate: got_storage_status,
+        defaultadder:   d => {if (this.defaultAdderSet) return; this.defaultAdderSet = true; gid("videoadder").value = d.name;},
 
         toast: d => toast_raw(d.data)
     };
@@ -135,7 +137,7 @@ window.YTO = YTO;// so console debug
 
 function add_video_to_player() {
     let video = gid("addvideotoplayer").value;
-    YTO.send_json({action: "addvideotoplayer", video, to: gid("playerselect").value});
+    YTO.send_json({action: "addvideotoplayer", video, to: gid("playerselect").value, adder: gid("videoadder").value});
 }
 
 function update_playlist_set_btn_state(on = true) {

@@ -67,11 +67,9 @@ function move_table_rows(tableid, direction="up") {
             break;
         case "top":
             tbl.firstChild.after(...rows);
-            //rows[0].scrollIntoView({behavior: "smooth", block: "center", inline: "start"});
             break;
         case "bottom":
             tbl.lastChild.after(...rows);
-            //rows[rows.length - 1].scrollIntoView({behavior: "smooth", block: "center", inline: "start"});
             break;
     }
 
