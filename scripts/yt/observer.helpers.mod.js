@@ -46,7 +46,7 @@ function move_table_rows(tableid, up = true) {
         } else {
             rows[0].previousSibling.before(...rows);
         }
-        rows[0].scrollIntoView({behavior: "smooth", block: "center"});
+        rows[0].scrollIntoView({behavior: "smooth", block: "center", inline: "start"});
     } else {
         let last = rows.length - 1;
         if (rows[last].nextSibling) {
@@ -54,7 +54,7 @@ function move_table_rows(tableid, up = true) {
         } else {
             rows[last].after(...rows);
         }
-        rows[last].scrollIntoView({behavior: "smooth", block: "center"});
+        rows[last].scrollIntoView({behavior: "smooth", block: "center", inline: "start"});
     }
 
     return true;

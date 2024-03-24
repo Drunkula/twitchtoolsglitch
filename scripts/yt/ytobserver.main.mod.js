@@ -36,7 +36,12 @@ let htmlEvents = [
     {selector: "#getplaylistbtn", event: "click", function: x => l.send_load_playlist_cmd(x), params: {}},
 
     {selector: ".playlist-controls .clearchecks", event: "click", function: x => qsa('#playlisttable input[type=checkbox]:checked').forEach(x=>x.checked=false)},
+    {selector: ".playlist-controls .setchecks", event: "click", function: x => qsa('#playlisttable input[type=checkbox]').forEach(x=>x.checked=true)},
+
+
     {selector: ".player-controls .clearchecks", event: "click", function: x => qsa('#playertable input[type=checkbox]:checked').forEach(x=>x.checked=false)},
+    {selector: ".player-controls .setchecks", event: "click", function: x => qsa('#playertable input[type=checkbox]').forEach(x=>x.checked=true)},
+
     {selector: ".playlist-controls .rowsup", event: "click", function: x => {update_playlist_set_btn_state(true); move_table_rows('playlisttable', true)}},
     {selector: ".playlist-controls .rowsdown", event: "click", function: x => {update_playlist_set_btn_state(true); move_table_rows('playlisttable', false)}},
 
@@ -195,10 +200,13 @@ function received_songid(d) {
     currRows.forEach(element => {
         if (element.dataset["videoid"] == d.id) {
             element.classList.add("is-selected");
+            /*
             setTimeout(() =>
                     // block center+smooth not working too well brave
                 element.scrollIntoView({behavior: "smooth", block: "start"})// start end center nearest SONG ID ONE
             , 1); // block: start center end nearest
+            //*/
+            //element.parentNode.scrollTop = element.offsetTop;
         } else  // inline also start end nearest center
             element.classList.remove('is-selected');
     });

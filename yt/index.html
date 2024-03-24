@@ -43,27 +43,38 @@
                 <nav class="level is-mobile mb-3">
                   <div class="level-left">
                     <div class="level-item">
-                      <button class="is-small button is-success" data-send="playprev">««</button>
+                      <button class="is-small button is-success" data-send="playprev"><span class="icon"><i class="fas fa-backward"></i></span></button>
                     </div>
                     <div class="level-item">
-                      <button class="is-small button is-warning" data-send="play">Play</button>
+                      <button class="is-small button is-info" data-send="play"><span class="icon"><i class="fas fa-play"></i></span></button>
                     </div>
                     <div class="level-item">
-                      <button class="is-small button is-warning" data-relay="pause">Pause</button>
+                      <button class="is-small button is-info" data-relay="pause"><span class="icon"><i class="fas fa-pause"></i></span></button>
                     </div>
                     <div class="level-item">
-                      <button class="is-small button is-success" data-send="playnext">»»</button>
+                      <button class="is-small button is-success" data-send="playnext"><span class="icon"><i class="fas fa-forward"></i></span></button>
                     </div>
                   </div>
                 </nav>
                 <nav class="level mb-3 is-hidden-mobile">
                   <div class="level-left">
                     <div class="level-item">
-                      <button class="is-small button is-success" data-relay="{&quot;action&quot;:&quot;rwd&quot;,&quot;data&quot;:5}">-5</button>
-                      <button class="is-small button is-success" data-relay="{&quot;action&quot;:&quot;fwd&quot;,&quot;data&quot;:30}">+30</button>
-                      <button class="is-small button is-warning" data-send="voldown">Vol -</button>
-                      <button class="is-small button is-warning" data-send="volup">Vol +</button>
-                      <button class="is-small button is-danger" data-send="mutetoggle">mute</button>
+                      <button class="is-small button is-success" data-relay="{&quot;action&quot;:&quot;rwd&quot;,&quot;data&quot;:5}" title="-5s"><span class="icon"><i class="fas fa-backward-step"></i></span></button>
+                    </div>
+                    <div class="level-item">
+                      <button class="is-small button is-success" data-relay="{&quot;action&quot;:&quot;fwd&quot;,&quot;data&quot;:30}" title="+30s"><span class="icon"><i class="fas fa-forward-fast"></i></span></button>
+                    </div>
+                    <div class="level-item">
+                      <button class="is-small button is-warning" data-send="voldown" title="vol down"><span class="icon"><i class="fas fa-arrow-down-short-wide"></i></span></button>
+                    </div>
+                    <div class="level-item">
+                      <button class="is-small button is-warning" data-send="volup" title="vol up"><span class="icon"><i class="fas fa-arrow-up-wide-short"></i></span></button>
+                    </div>
+                    <div class="level-item">
+                      <button class="is-small button is-danger" data-relay="mute"><span class="icon"><i class="fas fa-volume-xmark"></i></span></button>
+                    </div>
+                    <div class="level-item">
+                      <button class="is-small button is-danger" data-relay="unmute"><span class="icon"><i class="fas fa-volume-high"></i></span></button>
                     </div>
                   </div>
                   <div class="level-right">
@@ -126,9 +137,10 @@ Disabling let's you get a player's list and send it to another.">
               <div class="box is-hidden-mobile">
                 <div>table rows</div>
                 <div class="player-controls">
-                  <button class="rowsup button is-link is-small">Move Up</button>
-                  <button class="rowsdown button is-link is-small">Move down</button>
-                  <button class="clearchecks button is-link is-small">Clear</button>
+                  <button class="rowsup button is-link is-small"><span class="icon"><i class="fas fa-angles-up"></i></span></button>
+                  <button class="rowsdown button is-link is-small"><span class="icon"><i class="fas fa-angles-down"></i></span></button>
+                  <button class="setchecks button is-link is-small"><span class="icon is-medium"><i class="fas fa-square-check"></i></span></button>
+                  <button class="clearchecks button is-link is-small"><span class="icon is-medium"><i class="fas fa-square"></i></span></button>
                   <button class="button is-info is-small" id="sendlisttoplayer">Update list</button>
                 </div>
                 <div>Player Only :</div>
@@ -219,9 +231,10 @@ Disabling let's you get a player's list and send it to another.">
               <div class="box">
                 <div>table rows
                   <div class="playlist-controls">
-                    <button class="rowsup button is-link is-small">Move Up</button>
-                    <button class="rowsdown button is-link is-small">Move down</button>
-                    <button class="clearchecks button is-link is-small">Clear</button>
+                    <button class="rowsup button is-link is-small"><span class="icon"><i class="fas fa-angles-up"></i></span></button>
+                    <button class="rowsdown button is-link is-small"><span class="icon"><i class="fas fa-angles-down"></i></span></button>
+                    <button class="setchecks button is-link is-small"><span class="icon is-medium"><i class="fas fa-square-check"></i></span></button>
+                    <button class="clearchecks button is-link is-small"><span class="icon is-medium"><i class="fas fa-square"></i></span></button>
                     <button class="button is-info is-small" id="updateplaylistlistbtn" disabled>Update</button>
                   </div>
                   <div>Delete :</div>

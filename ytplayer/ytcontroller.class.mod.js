@@ -91,6 +91,8 @@ class YTController extends SockMsgRouter {
         volup:      d => {let v = this.yt.getVolume(); this.yt.setVolume(v + 5); clog(v);},
         voldown:    d => {let v = this.yt.getVolume(); this.yt.setVolume(v - 5); clog(v);},
         mutetoggle: d => this.yt.isMuted() ? this.yt.unMute() : this.yt.mute(),
+        mute:       d => this.yt.mute(),
+        unmute:     d => this.yt.unMute(),
 
         adddefaults:d => this.add(playlistDefaults),
 
