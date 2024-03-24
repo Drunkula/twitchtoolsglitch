@@ -207,13 +207,16 @@ function received_songid(d) {
     currRows.forEach(element => {
         if (element.dataset["videoid"] == d.id) {
             element.classList.add("is-selected");
-            //*
-            setTimeout(() =>
-                    // block center+smooth not working too well brave
-                element.scrollIntoView({behavior: "smooth", block: "nearest", inline: "start"})// start end center nearest SONG ID ONE
-            , 1); // block: start center end nearest
-            //*/
-            //element.parentNode.scrollTop = element.offsetTop;
+                // block: start center end nearest
+                //element.scrollIntoView({behavior: "smooth", block: "nearest", inline: "start"})// start end center nearest SONG ID ONE
+            let holder = gid('playerplaylist');//element.parentNode.parentNode.parentNode;
+                // manually as scrollIntoView center smooth is busted on Chroms
+            holder.scrollTo(
+            {
+                top: element.offsetTop - holder.clientHeight / 4,   // need to work out viewheight / 2
+                left: 0,
+                behavior: "smooth",
+            })
         } else  // inline also start end nearest center
             element.classList.remove('is-selected');
     });
@@ -336,7 +339,7 @@ function received_player_playlist(d) {
     }
 
     gid("playerplaylist").replaceChildren(t);
-    if (selectedRow) selectedRow.scrollIntoView({behavior: "smooth", block: "center"});
+    if (selectedRow) selectedRow.scrollIntoView({behavior: "smooth", block: "nearest"});
 
     gid("checkallplayer").addEventListener('change', x => {
         let c = x.target.checked;
