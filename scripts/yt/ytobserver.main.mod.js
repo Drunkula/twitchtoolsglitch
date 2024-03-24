@@ -200,7 +200,7 @@ function received_songid(d) {
     currRows.forEach(element => {
         if (element.dataset["videoid"] == d.id) {
             element.classList.add("is-selected");
-            /*
+            //*
             setTimeout(() =>
                     // block center+smooth not working too well brave
                 element.scrollIntoView({behavior: "smooth", block: "start"})// start end center nearest SONG ID ONE
