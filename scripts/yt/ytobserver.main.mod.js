@@ -210,7 +210,7 @@ function received_songid(d) {
             //*
             setTimeout(() =>
                     // block center+smooth not working too well brave
-                element.scrollIntoView({behavior: "smooth", block: "start"})// start end center nearest SONG ID ONE
+                element.scrollIntoView({behavior: "smooth", block: "nearest", inline: "start"})// start end center nearest SONG ID ONE
             , 1); // block: start center end nearest
             //*/
             //element.parentNode.scrollTop = element.offsetTop;

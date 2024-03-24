@@ -11,7 +11,11 @@
   </head>
   <body>
     <div class="block mx-5 my-3 main-container">
-      <script>window.TT = window.TT ? window.TT : {};</script>
+      <script>
+        window.TT = window.TT ? window.TT : {};
+        //document.body.classList.add("has-navbar-fixed-top");
+        
+      </script>
       <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
       <script src="/scripts/helpers.js"></script>
       <script src="/scripts/yt/ytobserver.main.mod.js" type="module"></script>
@@ -26,14 +30,13 @@
             background-color: #9900b8 !important;
         }
       </style>
-      <!--script document.title = "YT Observer"-->
-      <div class="mb-1 py-0 px-5 tabs is-fullwidth is-toggle is-small" data-target="#playlistpanels">
+      <div class="navbar-item mb-1 py-0 px-5 tabs is-fullwidth is-toggle is-small" data-target="#playlistpanels">
         <ul>
           <li class="is-active"><a>Player</a></li>
           <li class="pl-tab"><a>Playlists</a></li>
-          <li class="insts-tab"><a>Instructions</a></li>
+          <li class="insts-tab"><a>Instructions
+              <!-- scroll into view--></a></li>
         </ul>
-        <!-- scroll into view-->
       </div>
       <div class="block tab-content" id="playlistpanels">
         <div class="tab-pane is-active">
