@@ -211,12 +211,10 @@ function received_songid(d) {
                 //element.scrollIntoView({behavior: "smooth", block: "nearest", inline: "start"})// start end center nearest SONG ID ONE
             let holder = gid('playerplaylist');//element.parentNode.parentNode.parentNode;
                 // manually as scrollIntoView center smooth is busted on Chroms
-            holder.scrollTo(
-            {
+            holder.scrollTo({
                 top: element.offsetTop - holder.clientHeight / 4,   // need to work out viewheight / 2
-                left: 0,
-                behavior: "smooth",
-            })
+                left: 0, behavior: "smooth",
+            });
         } else  // inline also start end nearest center
             element.classList.remove('is-selected');
     });

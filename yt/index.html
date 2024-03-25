@@ -46,7 +46,10 @@
                 <nav class="level is-mobile mb-3">
                   <div class="level-left">
                     <div class="level-item">
-                      <button class="is-small button is-success" data-send="playprev"><span class="icon"><i class="fas fa-backward"></i></span></button>
+                      <button class="is-small button is-success" data-send="playprev"><span class="icon"><i class="fas fa-backward-fast"></i></span></button>
+                    </div>
+                    <div class="level-item">
+                      <button class="is-small button is-success" data-relay="{&quot;action&quot;:&quot;rwd&quot;,&quot;data&quot;:5}" title="-5s"><span class="icon"><i class="fas fa-backward"></i></span></button>
                     </div>
                     <div class="level-item">
                       <button class="is-small button is-info" data-send="play"><span class="icon"><i class="fas fa-play"></i></span></button>
@@ -55,18 +58,15 @@
                       <button class="is-small button is-info" data-relay="pause"><span class="icon"><i class="fas fa-pause"></i></span></button>
                     </div>
                     <div class="level-item">
-                      <button class="is-small button is-success" data-send="playnext"><span class="icon"><i class="fas fa-forward"></i></span></button>
+                      <button class="is-small button is-success" data-relay="{&quot;action&quot;:&quot;fwd&quot;,&quot;data&quot;:30}" title="+30s"><span class="icon"><i class="fas fa-forward"></i></span></button>
+                    </div>
+                    <div class="level-item">
+                      <button class="is-small button is-success" data-send="playnext"><span class="icon"><i class="fas fa-forward-fast"></i></span></button>
                     </div>
                   </div>
                 </nav>
                 <nav class="level mb-3 is-hidden-mobile">
                   <div class="level-left">
-                    <div class="level-item">
-                      <button class="is-small button is-success" data-relay="{&quot;action&quot;:&quot;rwd&quot;,&quot;data&quot;:5}" title="-5s"><span class="icon"><i class="fas fa-backward-step"></i></span></button>
-                    </div>
-                    <div class="level-item">
-                      <button class="is-small button is-success" data-relay="{&quot;action&quot;:&quot;fwd&quot;,&quot;data&quot;:30}" title="+30s"><span class="icon"><i class="fas fa-forward-fast"></i></span></button>
-                    </div>
                     <div class="level-item">
                       <button class="is-small button is-warning" data-send="voldown" title="vol down"><span class="icon"><i class="fas fa-arrow-down-short-wide"></i></span></button>
                     </div>

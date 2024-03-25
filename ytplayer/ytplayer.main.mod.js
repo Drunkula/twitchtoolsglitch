@@ -32,6 +32,7 @@ async function main() {
 
     let ytpc = new YTController();
     ytpc.myName = ytparams.name; // got from URL params
+    ytpc.myObsSourceName = ytparams.obs;
         // it'll send 'closing' to streamerbot
     //window.addEventListener('beforeunload', () => ytpc.close());
 
@@ -81,7 +82,7 @@ window.playlistDefaults = playlistDefaults;
 function grab_url_params() {
     let qs = new window.URLSearchParams( window.location.search );
     // urlparam|mapsto
-    let pList = ["x|XSize", "y|YSize", "muted", "video", "id|name", "chatadd|add", "nan", "playlist", "shuffle","debug|ytdbg"];
+    let pList = ["x|XSize", "y|YSize", "muted", "video", "id|name", "chatadd|add", "nan", "playlist", "shuffle","debug|ytdbg","obs"];
 
     for (let p of pList) {
         let [param, to] = p.split("|");
