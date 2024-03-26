@@ -88,6 +88,16 @@ class YTController extends SockMsgRouter {
         "next()":       d => {this.yt.nextVideo()},
         "prev()":       d => {this.yt.previousVideo()},
 
+        allplayersplaypause: d => {
+            console.log("GOT THE MESSSAGE TO DO THE THING!!!!!!!!!!!!");
+            console.log("My obs source name : " + this.myObsSourceName);
+
+            if ( d.players.includes(this.myObsSourceName) )
+                this.play();
+            else
+                this.pause();
+        },
+
         volup:      d => {let v = this.yt.getVolume(); this.yt.setVolume(v + 5); clog(v);},
         voldown:    d => {let v = this.yt.getVolume(); this.yt.setVolume(v - 5); clog(v);},
         mutetoggle: d => this.yt.isMuted() ? this.yt.unMute() : this.yt.mute(),

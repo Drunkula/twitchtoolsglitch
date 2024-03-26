@@ -84,6 +84,8 @@ class YTObserver extends SockMsgRouter {
     actions = {
         allplayerlistdata: received_player_playlist,
         currsongid: received_songid,
+
+        consoleclear: d => console.clear(),
         consolelog: d => {clog( ccols[d.colour](d.message) );},
             // never used
         setid: x => this.myUID = x.id,
