@@ -17,6 +17,7 @@ class YTController extends SockMsgRouter {
     myName = "YTController";    // set to a 'nice' name
     mySocketId = "";   // sent from streamerbot
 
+
     reqpack = null;    // some requests will have an observer's request details copied here for easy return
     returnto = null;
 
@@ -75,24 +76,41 @@ class YTController extends SockMsgRouter {
         // replaces base class actions
 
     actions = {
-        play:       d => this.play(),
         playvideo:  d => this.load_video(d.videoid, d.starttime),
         playsong:   d => this.play_song(d.id),  // sent by playlist double click
+            // have chat ones and normal
+        play:       d => this.play(),
         pause:      d => this.pause(),
         stop:       d => this.yt.stopVideo(),
         resume:     d => this.yt.playVideo(),
-        restart:    d => { this.yt.seekTo(0); this.play();},
         fwd:        d => {clog("=========== fwd", d); this.yt.seekTo( this.yt.getCurrentTime() + d.data);},
         rwd:        d => {this.yt.seekTo( this.yt.getCurrentTime() - d.data);},
+        next:       d => { this.next(); },
+        prev:       d => { this.prev(); },
+
+        chatplay:   d => { if (this.chatcmds) this.play() },
+        chatpause:  d => { if (this.chatcmds) this.pause() },
+        chatstop:   d => { if (this.chatcmds) this.yt.stopVideo() },
+        chatresume: d => { if (this.chatcmds) this.yt.playVideo() },
+        chatfwd:    d => { if (this.chatcmds) this.yt.seekTo( this.yt.getCurrentTime() + d.data);},
+        chatrwd:    d => { if (this.chatcmds) this.yt.seekTo( this.yt.getCurrentTime() - d.data);},
+        chatnext:   d => { if (this.chatcmds) this.next(); },
+        chatprev:   d => { if (this.chatcmds) this.prev(); },
+        chatshuffle:d => { if (this.chatcmds) this.shuffle(false); },
+
+        shuffle:        d => { this.shuffle(false); },
+        shuffleall:     d => { this.shuffle(true); },
+
+            // needs to check if it's chat added
+        playlistadd:    d => { this.add(d.data, d.addnext ? true : false); },
+
+        restart:    d => { this.yt.seekTo(0); this.play();},
         almostend:  d => { this.yt.seekTo( this.yt.getDuration() - 5); },
         "next()":       d => {this.yt.nextVideo()},
         "prev()":       d => {this.yt.previousVideo()},
 
         allplayersplaypause: d => {
-            console.log("GOT THE MESSSAGE TO DO THE THING!!!!!!!!!!!!");
-            console.log("My obs source name : " + this.myObsSourceName);
-
-            if ( d.players.includes(this.myObsSourceName) )
+            if ( d.players.includes(this.myObsSourceName) )// IDEA && !thisIgnorePlayPause
                 this.play();
             else
                 this.pause();
@@ -104,7 +122,7 @@ class YTController extends SockMsgRouter {
         mute:       d => this.yt.mute(),
         unmute:     d => this.yt.unMute(),
 
-        adddefaults:d => this.add(playlistDefaults),
+        adddefaults:d => this.add(playlistDefaults),// REDUNDANT
 
         big:            d => this.yt.setSize(640, 360),
         small:          d => this.yt.setSize(320, 180),
@@ -112,8 +130,7 @@ class YTController extends SockMsgRouter {
         qualityget:     d => clog(this.yt.getAvailableQualityLevels()),
 
         sendmessage:    d => { clog("Sending:" + d.data); this.send(d.data); },
-            // needs to check if it's chat added
-        playlistadd:    d => { this.add(d.data, d.addnext ? true : false); },
+
             // received entire thing
         fullplaylist:   d => this.got_full_playlist(d),
 
@@ -123,13 +140,8 @@ class YTController extends SockMsgRouter {
            // SENDS our playlist up, not received
         getplayerplaylist: e => this.send_whole_playlist(e),
 
-
-        shuffle:        d => { this.shuffle(false); },
-        shuffleall:     d => { this.shuffle(true); },
         getvideoinfo:   d => {clog( this.yt.getVideoData() ); },
 
-        next:           d => { this.next(); },
-        prev:           d => { this.prev(); },
 
         consolelog: d => {clog( window[d.colour](d.message) );},
 

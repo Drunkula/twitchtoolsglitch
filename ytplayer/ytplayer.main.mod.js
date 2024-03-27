@@ -33,6 +33,8 @@ async function main() {
     let ytpc = new YTController();
     ytpc.myName = ytparams.name; // got from URL params
     ytpc.myObsSourceName = ytparams.obs;
+    ytpc.chatcmds = ytparams.chatcmds;
+
         // it'll send 'closing' to streamerbot
     //window.addEventListener('beforeunload', () => ytpc.close());
 
@@ -81,18 +83,23 @@ window.playlistDefaults = playlistDefaults;
 
 function grab_url_params() {
     let qs = new window.URLSearchParams( window.location.search );
-    // urlparam|mapsto
-    let pList = ["x|XSize", "y|YSize", "muted", "video", "id|name", "chatadd|add", "nan", "playlist", "shuffle","debug|ytdbg","obs"];
+    // url var | maps to param[that]
+    let pList = ["x|XSize", "y|YSize", "muted", "video", "id|name", "chatadd", "nan", "nowandnext|nan", "playlist", "pl|playlist", "shuffle",
+        "debug|ytdbg", "obs", "chatcmds", "chatcommands|chatcmds"];
 
     for (let p of pList) {
         let [param, to] = p.split("|");
-        let u = qs.get(param); if (u === "false") u = false; else if(u === "true") u = true; else if (u === "") u = true;
+        let u = qs.get(param);
+        // no value means true e.g &nan means nan is true
+        if (u === "false") u = false; else if(u === "true") u = true; else if (u === "") u = true;
         clog("u:", param, u, to);
         if (u !== null) {
-            param = to ? to : param;
+            param = to ? to : param; // to exists after param|to split
             ytparams[param] = u;
         }
     }
+
+    return ytparams;// they're global anyway
 }
 
 function init_controls() {
@@ -116,8 +123,6 @@ function test_real() {
 .reduce(
     (cols, col) => window[col[0]] = f => `\x1b[1m\x1b[3${col[1]}m${f}\x1b[0m`, []
 );
-
-//main();   // this makes it work, and the player load
 
     // add it after you've added the api ready function or you'll miss the boat
 /*
