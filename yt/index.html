@@ -186,13 +186,6 @@ Disabling let's you get a player's list and send it to another.">
                       <tag class="tag is-info" id="chatlockoutstatus">?</tag>
                     </div>
                   </div>
-                </div><b>to do:</b>
-                <div class="content">
-                  <ul>
-                    <li>player playlist different colours between perm and added entries</li>
-                    <li>Player's !add and !nan flags can be adjusted in the interface</li>
-                    <li>OBS pause/plays targets player in the scene</li>
-                  </ul>
                 </div>
               </div>
             </div>
@@ -292,7 +285,7 @@ Disabling let's you get a player's list and send it to another.">
               </div>
             </div>
             <div class="column">
-              <div class="box">
+              <div class="box pb-3">
                 <div id="playlist" style="overflow-y: auto; height: 90vh">
                   <p>Playlist.</p>
                 </div>
@@ -303,15 +296,16 @@ Disabling let's you get a player's list and send it to another.">
         <div class="tab-pane">
           <div class="box"><b>players now can have (and need) optional paramers.</b>
             <p>So when you add a player it'll be like this:</p>
-            <p class="pl-6"><a href="https://twitch-tools.glitch.me/ytplayer/?id=Main%20Obs%20Player&amp;addchat=true" target="_blank">https://twitch-tools.glitch.me/ytplayer/?debug=false&amp;id=Name in Observer Page&amp;nan=true&amp;addchat=true</a></p>
+            <p class="pl-6"><a href="https://twitch-tools.glitch.me/ytplayer/?id=Test%20Player&amp;chatadd=true&amp;chatcmds=true&amp;debug" target="_blank">https://twitch-tools.glitch.me/ytplayer/?debug=true&amp;id=Name in Observer Page&amp;nan=true&amp;chatadd=true</a></p>
             <p>Put a ? after the url and separate them with &amp; signs.  E.g. /?playlist=default&amp;x=1280&amp;y=720</p>
             <p>The options are:</p>
             <div class="content">
               <ul>
-                <li>playlist.  playlist=Start Music</li>
+                <li>playlist - default = default.  Set with playlist=Start Music</li>
                 <li>id - the name that'll show in the controller page</li>
-                <li>nan set true for the player to respond to now and next requests</li>
-                <li>chatadd - true means it'll add videos from chat with !add or !src</li>
+                <li>nan - default: false. Set true for the player to respond to now and next requests</li>
+                <li>chatadd - default: false. true means it'll add videos from chat with !add or !src</li>
+                <li>chatcmds - default: false. true allows !next !prev !play !pause, etc from chat unless locked out</li>
                 <li>shuffle - true/false Override the shuffle flag for a list.  Not included uses the list's default.</li>
                 <li>video.  The id of the initial video to load e.g. video=xayd1c0wtOE</li>
                 <li>x and y to set the size of the player</li>
@@ -327,11 +321,11 @@ Disabling let's you get a player's list and send it to another.">
           <div class="box"><b>NOT YET DONE</b>
             <div class="content">
               <ul>
-                <li>the auto scroll position.  Chrome has a bug where smooth scrolling in the middle doesn't work.  It's so annoying as it's the best one.</li>
-                <li>OBS starts and pauses players by their presence in a scene.  It's coming</li>
-                <li>!next and !prev affects all players, like the above this will be fixed.</li>
                 <li>Streamerbot runs the Init() when compiling the code for the player more than once.  This isn't my fault, it'll mean you get the startup messages more than once, that's all.</li>
                 <li>shift clicking checkboxes will do all between.  It'll be there</li>
+                <li>player playlist different colours between perm and added entries</li>
+                <li>Player's !add and !nan flags can be adjusted in the interface</li>
+                <li>Option to auto update Player/Playlists on add rather than pressing get</li>
               </ul>
             </div>
           </div>

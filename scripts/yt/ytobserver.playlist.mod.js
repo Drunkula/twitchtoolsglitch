@@ -29,6 +29,14 @@ console.log("", select);
     YTO.send_json(pack);
 }
 
+    // sends a SINGLE video FROM ADD TEXT FIELD to the player
+
+export function add_video_to_playlist() {
+    let video = gid("addvideotoplaylist").value;
+    //adder = this will be a thing
+    YTO.send_json({action: "addvideotoplaylist", video, uid: gid("loadplaylistselect").value, adder: gid("videoadder").value});
+}
+
     // deletes from selected playLIST
 
 export function delete_from_playlist() {
@@ -53,13 +61,6 @@ export function delete_from_playlist() {
     gid('delplaylistconfirm').checked = false;
 }
 
-    // sends a video to the player
-
-export function add_video_to_playlist() {
-    let video = gid("addvideotoplaylist").value;
-    //adder = this will be a thing
-    YTO.send_json({action: "addvideotoplaylist", video, uid: gid("loadplaylistselect").value, adder: gid("videoadder").value});
-}
 
     // sends all the videos in a playlist back
 
@@ -182,6 +183,8 @@ export function table_entries_to_array(tableId, onlyChecked = false) {
 //console.log("e", res);
     return res;
 }
+
+    // create table make sure name filled
 
 export function create_playlist_verify() {
     let pack = {};

@@ -16,7 +16,6 @@ document.title = "YT Observer";
     //{selector: ".player-controls .delete-permanently", event: "click", function: () => delete_vids(true)},
     {selector: ".player-controls .delete-playeronly", event: "click", function: () => delete_player_only(false)},
     {selector: "#sendlisttoplayer", event: "click", function: x => send_playlist_to_player()},
-    {selector: ".player-controls .addvideobtn", event: "click", function: x => add_video_to_player()},
     // MOVING ROWS
     {selector: ".player-controls .rowsup", event: "click", function: x => move_table_rows('playertable', "up")},
     {selector: ".player-controls .rowsdown", event: "click", function: x => move_table_rows('playertable', "down")},
@@ -55,20 +54,23 @@ document.title = "YT Observer";
     {selector: "#delplaylistconfirm, #destroyplaylistconfirm", event: "click", function: x => x.stopPropagation()},
 
     {selector: ".playlist-controls .savetoplaylist", event: "click", function: e => l.copy_to_playlist("playlisttable", e)},
-    {selector: ".player-controls .savetoplaylist", event: "click", function: e => l.copy_to_playlist("playertable", e)},
-    // updateplaylistlist sends the list back to the playlist
     {selector: "#updateplaylistlistbtn", event: "click", function: l.update_playlist_list},
-    // updateplaylist updates name, shuffle, store !add
-
     {selector: "#updateplaylistbtn", event: "click", function: l.update_playlist_verify},   // inside modal
     {selector: "#createplaylistbtn", event: "click", function: l.create_playlist_verify},   // inside modal
     {selector: "#destroyplaylistbtn", event: "click", function: l.delete_playlist_verify}, // inside modal
 
     {selector: "#editplaylistshowmodalbtn", event: "click", function: l.edit_modal_show}, // inside modal
 
-    // entries in playlist send to player
-    {selector: ".sendtoplayer", event: "click", function: l.send_entries_to_player},
 
+    {selector: ".player-controls .savetoplaylist", event: "click", function: e => l.copy_to_playlist("playertable", e)},
+    // updateplaylistlist sends the list back to the playlist
+    // updateplaylist updates name, shuffle, store !add
+
+        // SEND ALL CHECKED in a playist to player
+    {selector: ".sendtoplayer", event: "click", function: l.send_entries_to_player},
+        // SEND single entr in ADD VIDEO  to player
+    {selector: ".player-controls .addvideobtn", event: "click", function: x => add_video_to_player()},
+        // clear add video button
     {selector: "#addvideotoplayer, #addvideotoplaylist", event: "contextmenu", function: e => e.target.value=""},
     {selector: "#addvideotoplayer, #addvideotoplaylist", event: "dblclick", function: e => e.target.value=""},
 

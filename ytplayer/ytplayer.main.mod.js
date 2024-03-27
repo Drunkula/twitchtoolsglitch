@@ -34,6 +34,7 @@ async function main() {
     ytpc.myName = ytparams.name; // got from URL params
     ytpc.myObsSourceName = ytparams.obs;
     ytpc.chatcmds = ytparams.chatcmds;
+    ytpc.chatadds = ytparams.chatadds;
 
         // it'll send 'closing' to streamerbot
     //window.addEventListener('beforeunload', () => ytpc.close());
@@ -70,8 +71,7 @@ window.playlistDefaults = playlistDefaults;
         // socket open will try and load video by id so player has to be ready
         // it's not worth worrying about.
         // hang on, have a socket ready promise and we're all good
-
-    // SO DO THIS: await ytpc.socket.ready or something
+        // SO DO THIS: await ytpc.socket.ready or something
 
         // make those text links sing
     init_controls();
@@ -84,15 +84,15 @@ window.playlistDefaults = playlistDefaults;
 function grab_url_params() {
     let qs = new window.URLSearchParams( window.location.search );
     // url var | maps to param[that]
-    let pList = ["x|XSize", "y|YSize", "muted", "video", "id|name", "chatadd", "nan", "nowandnext|nan", "playlist", "pl|playlist", "shuffle",
-        "debug|ytdbg", "obs", "chatcmds", "chatcommands|chatcmds"];
+    let pList = ["x|XSize", "y|YSize", "muted", "video", "id|name", "chatadd", "add|chatadd", "nan", "nowandnext|nan", "playlist", "pl|playlist", "shuffle",
+        "debug|ytdbg", "obs", "chatcmds", "chatcommands|chatcmds", "cmds|chatcmds"];
 
     for (let p of pList) {
         let [param, to] = p.split("|");
         let u = qs.get(param);
         // no value means true e.g &nan means nan is true
         if (u === "false") u = false; else if(u === "true") u = true; else if (u === "") u = true;
-        clog("u:", param, u, to);
+clog(`${param} maps to ${to} value : `, u);
         if (u !== null) {
             param = to ? to : param; // to exists after param|to split
             ytparams[param] = u;

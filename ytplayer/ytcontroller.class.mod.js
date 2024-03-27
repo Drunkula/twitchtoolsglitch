@@ -17,6 +17,7 @@ class YTController extends SockMsgRouter {
     myName = "YTController";    // set to a 'nice' name
     mySocketId = "";   // sent from streamerbot
 
+    chatadds = false;   // do we add from chat !add commands
 
     reqpack = null;    // some requests will have an observer's request details copied here for easy return
     returnto = null;
@@ -101,8 +102,16 @@ class YTController extends SockMsgRouter {
         shuffle:        d => { this.shuffle(false); },
         shuffleall:     d => { this.shuffle(true); },
 
-            // needs to check if it's chat added
-        playlistadd:    d => { this.add(d.data, d.addnext ? true : false); },
+        // needs to check if it's chat added
+        playlistadd:    d => {
+            if (d.chatadded == false || this.chatadds)
+                this.add(d.data, d.addnext ? true : false);
+        },
+            // received entire thing
+        fullplaylist:   d => this.got_full_playlist(d),
+        loadplaylist:   d => this.send_json({action:"loadplaylist", name: ytparams.playlist}),
+        // SENDS our playlist up, not received
+        getplayerplaylist: e => this.send_whole_playlist(e),
 
         restart:    d => { this.yt.seekTo(0); this.play();},
         almostend:  d => { this.yt.seekTo( this.yt.getDuration() - 5); },
@@ -131,14 +140,7 @@ class YTController extends SockMsgRouter {
 
         sendmessage:    d => { clog("Sending:" + d.data); this.send(d.data); },
 
-            // received entire thing
-        fullplaylist:   d => this.got_full_playlist(d),
-
-        loadplaylist:   d => this.send_json({action:"loadplaylist", name: ytparams.playlist}),
-
         clearvideos:d => { this.playlist = []; this.playlistPointer = 0; this.playlistMap.clear(); this.playlistNextCount = 0;},
-           // SENDS our playlist up, not received
-        getplayerplaylist: e => this.send_whole_playlist(e),
 
         getvideoinfo:   d => {clog( this.yt.getVideoData() ); },
 
