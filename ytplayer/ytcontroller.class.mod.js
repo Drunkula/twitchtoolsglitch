@@ -1,5 +1,5 @@
 /*
-    JAVASCRIPT part
+    JAVASCRIPT part returnto = string, from = object YTSock
 */
 //import { Socketty } from "/scripts/Socketty.class.js";
 import YTPlayer from "../scripts/yt/ytplayer.class.mod.js";
@@ -104,8 +104,27 @@ class YTController extends SockMsgRouter {
 
         // needs to check if it's chat added
         playlistadd:    d => {
-            if (d.chatadded == false || this.chatadds)
-                this.add(d.data, d.addnext ? true : false);
+            if (d.chatadded !== true || this.chatadds) {
+                let result = this.add_video_items(d.data, d.addnext ? true : false);
+
+                console.log("RESULT OF THE CHAT ADDED THING: ", result);
+// chatadded or d.data === object = single, d.data == array = multiples
+                if (d.chatadded) {
+                    this.send_json({action: "chataddresult", result, data: d.data, player: this.get_player_info()});
+                } else {
+                    if (d.data instanceof Array) { // array of entries
+                        this.send_json({
+                            action: "relay", to: this.returnto,
+                            data: {action: "entriestoplayerresult", result, player: this.get_player_info()}
+                        });
+                    } else {
+                        this.send_json({
+                            action: "relay", to: this.returnto,
+                            data: {action: "playeraddresult", result, player: this.get_player_info(), data: d.data}
+                        });
+                    }
+                }
+            }
         },
             // received entire thing
         fullplaylist:   d => this.got_full_playlist(d),
@@ -131,7 +150,7 @@ class YTController extends SockMsgRouter {
         mute:       d => this.yt.mute(),
         unmute:     d => this.yt.unMute(),
 
-        adddefaults:d => this.add(playlistDefaults),// REDUNDANT
+        adddefaults:d => this.add_video_items(playlistDefaults),// REDUNDANT
 
         big:            d => this.yt.setSize(640, 360),
         small:          d => this.yt.setSize(320, 180),
@@ -328,34 +347,45 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
 
     videoItem: a singly id, a single {videoid, tltle, added}, this.playlistQueued of single ids, this.playlistQueued of {}
 */
-    add(videoItem, isNext = false) {
-        clog("ADD next:", isNext);
+    add_video_items(videoItem, isNext = false) {
+        //clog("ADD next:", isNext);
             // isNext should be carried, yeah?
+        let res = {};
+        let addCount = 0;
+
         let add_entry_switch = videoItem => {
             switch(true) {
                 case videoItem instanceof Object:   // are we allowing a map like object | //clog("-----------adding object"); |  //this.#add_entry(videoItem.videoid, videoItem.title, videoItem.adder, isNext);
-                   this.#add_entry(videoItem, isNext);
+                    return this.#add_entry(videoItem, isNext);
                     break;
 
                 case typeof videoItem === "string": // assume video id | //clog("----------adding string", videoItem);
                     if (videoItem.length === 0) return;
-                    this.#add_entry({videoid: videoItem}, isNext);
+                    return this.#add_entry({videoid: videoItem}, isNext);
                     break;
 
                 default:
-                    console.error("add() to player list unknown type: ", videoItem, typeof videoItem);
-                    return;
+                    console.error("add_video_items() to player list unknown type: ", videoItem, typeof videoItem);
+                    return {success: false, error: "Parameter passed unknown type, neither object nor string.", position: -1, relative: -1};
                     break;
             }
         }
-
+            // if array pass each individually
         if (videoItem instanceof Array) {
             for (const entry of videoItem) {
-                add_entry_switch(entry, isNext);
+                res = add_entry_switch(entry, isNext);
+                if (res.success) addCount++;
+                console.log(res);
             }
         } else {
-            add_entry_switch(videoItem, isNext);
+            res = add_entry_switch(videoItem, isNext);
+            if (res.success) addCount++;
+            console.log(res);
         }
+
+        res.addCount = addCount;
+
+        return res;
 
         // clog("QUEUED AFTER:", this.playlistQueued);
         //console.clear();
@@ -370,8 +400,13 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         let {videoid, title="Unknown", channel = "Unknown", adder = "Unknown adder", starttime = 0} = entry;
 
         //if (this.playlistMap.has(videoid))
-        if (this.playlist.includes(videoid))
+        let posnA = this.playlist.indexOf(videoid);
+        if (posnA >= 0) {//this.playlist.includes(videoid)) {
+            let relative = posnA - this.playlistPointer;
+            if (relative < 0) relative += this.playlist.length;
+            return {success: false, error: "Already in playlist", position: posnA, relative};
             return false;    // may bump this if addnext
+        }
 
         this.playlistMap.set(videoid, {title, adder, channel, starttime: parseInt(starttime), "number": this.playlistMapCounter++});
 
@@ -379,30 +414,34 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
 
         if (len === 0) {
             this.playlist.push(videoid);
-            return;
+            return {success: true, position: 0, relative: 1};
         }
 
         if (next) {// this might go wrong if prevved to rear of list
             let posn = this.playlistPointer + this.playlistNextCount + 1;
             this.playlist.splice(posn, 0, videoid);
             this.playlistNextCount++;
-            //clog("posn next", posn);
-        } else {    // random position, let's do it the "cool" way without a front splice
+            let relative = posn - this.playlistPointer;
+            if (relative < 0) relative += this.playlist.length;
+            return {success: true, position: posn, relative};
+        }
+        else
+        {    // random position, let's do it the "cool" way without a front splice
             let avail = len - this.playlistNextCount;
             let posn = 1 + this.playlistPointer + this.playlistNextCount + Math.floor(Math.random() * avail);
                 // ^ +1 so you never splice into position zero, instead use the end; functionally equivalent
             if (posn > len) {
                 posn = posn - len;
                 this.playlistPointer++; // it must move forward, wouldn't get that with a front splice
-                //clog("POSI b4", t, "to", posn);
-            }/*  else {
-                clog("POSI b4", posn);
-            } */
+            }
 
             this.playlist.splice(posn, 0, videoid);
+            let relative = posn - this.playlistPointer;
+            if (relative < 0) relative += this.playlist.length;
+            return {success: true, position: posn, relative};
         }
 
-        return true;
+        return {success: false, error: "Unknown", position: -1, relative: -1};
     }
 
         // PLAYING, CUED, PAUSED, BUFFERING, UNSTARTED
@@ -452,9 +491,9 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
             action = data.action;
                 // WARNING: DANGEROUS ASSUMPTION that from should be return to'd
             if (data.returnto)
-                this.returnto = data.returnto;
+                this.returnto = data.returnto;  // UID or "observers", "players" etc
             else if (data.from)
-                this.returnto = data.from.UID;
+                this.returnto = data.from.UID;  // from is a YTSock UID, socket, name
         } catch (error) {
             clog("ERROR: Local message_handler:", e);
         }
@@ -673,7 +712,7 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         this.playlistNextCount = 0;
         this.playlistPointer = d.playlistpos ?? 0;
 
-        this.add(d.data, true);//d.addnext);    // this addnext thing needs to change
+        this.add_video_items(d.data, true);//d.addnext);    // this addnext thing needs to change
             // CLUDGE UPDATE
         this.playlistNextCount=0;       // addnext adds in order
 
@@ -697,16 +736,17 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         let pack = {
             action: "allplaylistdata",
             playerinfo: this.get_player_info(),
+            to: this.returnto ?? "observers",
             data: {
                 playlistindex: this.playlistPointer,
                 playlist: this.playlist,
                 playlistmap: Object.fromEntries(this.playlistMap),
-            },
-            to: this.returnto ?? "observers"
+            }
         }
-        this.get_reqpack(pack);
+        //this.get_reqpack(pack);
 clog("SENDING BACK", pack);
         this.send_json(pack);
+        //this.send_json({action: "relay", to: pack.to, data: pack});
     }
 
         // copies back request pack from incoming json if present

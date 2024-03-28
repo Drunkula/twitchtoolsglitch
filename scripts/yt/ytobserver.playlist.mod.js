@@ -20,6 +20,8 @@ console.log("", select);
     let pack = {
         action: "playlistadd",
         to: uid,
+        //from: {UID: YTO.myUID, name: YTO.name, socketid: YTO.mySocketId},
+        returnto: YTO.myUID,
         data,
         addnext: true,
         shuffle: false

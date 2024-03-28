@@ -141,7 +141,8 @@ window.YTO = YTO;// so console debug
 
 function add_video_to_player() {
     let video = gid("addvideotoplayer").value;
-    YTO.send_json({action: "addvideotoplayer", video, to: gid("playerselect").value, adder: gid("videoadder").value});
+    YTO.send_json({action: "addvideotoplayer", video, to: gid("playerselect").value,
+        adder: gid("videoadder").value, from: YTO.myUID});
 }
 
 function update_playlist_set_btn_state(on = true) {
