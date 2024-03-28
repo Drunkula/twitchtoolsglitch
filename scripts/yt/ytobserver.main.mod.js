@@ -114,7 +114,7 @@ class YTObserver extends SockMsgRouter {
             else toast(`<b>${d.player.name}</b> rejected the video, reason: ${d.result.error}`, "is-danger");
         },
 
-        "entriestoplayerresult":d => {
+        entriestoplayerresult :d => {
             toast(`<b>${d.player.name}</b> added ${d.result.addCount}/${d.result.totalEntries} entries.`);
         },
 
