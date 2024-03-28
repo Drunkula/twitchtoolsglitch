@@ -19,7 +19,6 @@ class YTController extends SockMsgRouter {
 
     chatadds = false;   // do we add from chat !add commands
 
-    reqpack = null;    // some requests will have an observer's request details copied here for easy return
     returnto = null;
 
     //socket = new Socketty();    // url is set in constructor
@@ -103,29 +102,7 @@ class YTController extends SockMsgRouter {
         shuffleall:     d => { this.shuffle(true); },
 
         // needs to check if it's chat added
-        playlistadd:    d => {
-            if (d.chatadded !== true || this.chatadds) {
-                let result = this.add_video_items(d.data, d.addnext ? true : false);
-
-                console.log("RESULT OF THE CHAT ADDED THING: ", result);
-// chatadded or d.data === object = single, d.data == array = multiples
-                if (d.chatadded) {
-                    this.send_json({action: "chataddresult", result, data: d.data, player: this.get_player_info()});
-                } else {
-                    if (d.data instanceof Array) { // array of entries
-                        this.send_json({
-                            action: "relay", to: this.returnto,
-                            data: {action: "entriestoplayerresult", result, player: this.get_player_info()}
-                        });
-                    } else {
-                        this.send_json({
-                            action: "relay", to: this.returnto,
-                            data: {action: "playeraddresult", result, player: this.get_player_info(), data: d.data}
-                        });
-                    }
-                }
-            }
-        },
+        playlistadd:    d =>this.playlist_add_handler(d),
             // received entire thing
         fullplaylist:   d => this.got_full_playlist(d),
         loadplaylist:   d => this.send_json({action:"loadplaylist", name: ytparams.playlist}),
@@ -175,11 +152,11 @@ class YTController extends SockMsgRouter {
         deletefromplayer: d => this.delete_vids(d.videoids),
 
         nowandnext: d => this.now_and_next(d.data.howMany),
-
+/*
         playlistcount: e => {
             clog("sending count:", this.playlist,length);
             this.send_json(this.get_reqpack({action: "playlistcount", count: this.playlist.length, to: this.returnto}));
-        },
+        },*/
 
         identify: d => this.identify(), // SB broadcasts "identify" using null to go to all
         playersidentify: d => this.identify(), // SB broadcasts to all but only players have the action
@@ -188,15 +165,12 @@ class YTController extends SockMsgRouter {
         yourinfo: d => {this.myName = d.name; this.mySocketId = d.socketid; document.title = `(${d.name}) YT Player`},
     }
 
-    // CPH.RunActionById("1a8f5a37-5107-420c-9dd5-4f863ce6ffd1", true);
     // HAS A ytplayer
     // HAS A socket systems
 
     constructor() {
         super();    // initialise daddy
         clog("I am a YTController constructor.");
-        //this.insert_ytplayer_api();   // done in player contructor
-        //this.add_socket_events();
         this.add_socket_events(this.YTPSocketEvents);
 
         this.waitPlayerReady();
@@ -341,11 +315,44 @@ class YTController extends SockMsgRouter {
         return this.prev();
     }
 
+
+
+        /**
+         * "playlistadd" can receive
+         *   1 entry from chat with chatadded: true
+         *   1 entry from observer, data is object vidinfo
+         *   array of entries from observer, data is array
+         */
+
+    playlist_add_handler(d) {
+        if (d.chatadded === true && this.chatadds === false) return;
+
+        let result = this.add_video_items(d.data, d.addnext ? true : false);
+
+        console.log("RESULT OF THE CHAT ADDED THING: ", result);
+// chatadded or d.data === object = single, d.data == array = multiples
+        if (d.chatadded) {
+            this.send_json({action: "chataddresult", result, data: d.data, player: this.get_player_info()});
+            return;
+        }
+            // observer has sent 1 or many
+        if (d.data instanceof Array) { // array of entries
+            let r = {addCount: result.addCount, totalEntries: d.data.length}
+            this.send_json({
+                action: "relay", to: this.returnto,
+                data: {action: "entriestoplayerresult", result: r, player: this.get_player_info()}
+            });
+        } else {
+            this.send_json({
+                action: "relay", to: this.returnto,
+                data: {action: "playeraddresult", result, player: this.get_player_info(), data: d.data}
+            });
+        }
+    }
+
 /*
 https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJXC18b_bf6PIIUYFrkRwlGjK6P4&fields=items.snippet.description,items.snippet.title,items.snippet.channelTitle&id=Ks-_Mh1QhMc
 https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJXC18b_bf6PIIUYFrkRwlGjK6P4&fields=items.snippet.description,items.snippet.title,items.snippet.channelTitle&id=%videoid%
-
-    videoItem: a singly id, a single {videoid, tltle, added}, this.playlistQueued of single ids, this.playlistQueued of {}
 */
     add_video_items(videoItem, isNext = false) {
         //clog("ADD next:", isNext);
@@ -355,11 +362,11 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
 
         let add_entry_switch = videoItem => {
             switch(true) {
-                case videoItem instanceof Object:   // are we allowing a map like object | //clog("-----------adding object"); |  //this.#add_entry(videoItem.videoid, videoItem.title, videoItem.adder, isNext);
+                case videoItem instanceof Object:   // vidInfo obj
                     return this.#add_entry(videoItem, isNext);
                     break;
 
-                case typeof videoItem === "string": // assume video id | //clog("----------adding string", videoItem);
+                case typeof videoItem === "string": // assume video id
                     if (videoItem.length === 0) return;
                     return this.#add_entry({videoid: videoItem}, isNext);
                     break;
@@ -373,24 +380,19 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
             // if array pass each individually
         if (videoItem instanceof Array) {
             for (const entry of videoItem) {
-                res = add_entry_switch(entry, isNext);
+                res = add_entry_switch(entry);
                 if (res.success) addCount++;
-                console.log(res);
+                //console.log(res);
             }
         } else {
-            res = add_entry_switch(videoItem, isNext);
+            res = add_entry_switch(videoItem);
             if (res.success) addCount++;
-            console.log(res);
+            //console.log(res);
         }
 
         res.addCount = addCount;
 
         return res;
-
-        // clog("QUEUED AFTER:", this.playlistQueued);
-        //console.clear();
-        //clog("QUEUED AFTER:", this.playlistMap);
-
     }
 
         // in reality I think using a "front splice" method where nexts are put at the start
@@ -399,13 +401,12 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
     #add_entry(entry, next = false) {
         let {videoid, title="Unknown", channel = "Unknown", adder = "Unknown adder", starttime = 0} = entry;
 
-        //if (this.playlistMap.has(videoid))
         let posnA = this.playlist.indexOf(videoid);
-        if (posnA >= 0) {//this.playlist.includes(videoid)) {
-            let relative = posnA - this.playlistPointer;
+            // already present, return relative position
+        if (posnA >= 0) {
+            let relative = posnA - this.playlistPointer;    // (posn - ptr + len) % len if you want to be 'like that' and avoid the if
             if (relative < 0) relative += this.playlist.length;
             return {success: false, error: "Already in playlist", position: posnA, relative};
-            return false;    // may bump this if addnext
         }
 
         this.playlistMap.set(videoid, {title, adder, channel, starttime: parseInt(starttime), "number": this.playlistMapCounter++});
@@ -414,7 +415,7 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
 
         if (len === 0) {
             this.playlist.push(videoid);
-            return {success: true, position: 0, relative: 1};
+            return {success: true, position: 0, relative: 1};// yes 1 as unlisted video may be playing
         }
 
         if (next) {// this might go wrong if prevved to rear of list
@@ -584,8 +585,8 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         }
 
         let obj = { action: "nowandnext", count: ids.length, titles,
-        playerinfo: this.get_player_info(),
-        reqpack: this.get_reqpack() };
+            playerinfo: this.get_player_info(),
+        };
 
         if (howMany == 1) {
             obj = { action: "currsonginfo",
@@ -657,7 +658,12 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         // delete if it's in the next
         //console.log("DELETES", deletes, "was curr:", wasCurr);
         this.send_json({uid: this.myUID, name: this.myName, to: this.returnto, action:"playerdeletecount", count: deletes});
-        this.send_json({uid: this.uid, to: this.returnto, action:"toast", message: `<b>${this.myName}</b> says\n${deletes} videoes I have deleted, father.`});
+        console.log("RETURN TO: ", this.returnto);
+        this.send_json({action: "relay", to: this.returnto,
+            data: {action:"playerdeletecount", count: deletes, player: this.get_player_info()}});
+
+        this.send_json({uid: this.uid, to: this.returnto, action:"toast",
+            message: `<b>${this.myName}</b> says\n${deletes} videoes I have deleted, father.`});
     }
 
         // single id, url, playlist position
@@ -743,22 +749,14 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
                 playlistmap: Object.fromEntries(this.playlistMap),
             }
         }
-        //this.get_reqpack(pack);
-clog("SENDING BACK", pack);
+// clog("SENDING BACK", pack);
         this.send_json(pack);
-        //this.send_json({action: "relay", to: pack.to, data: pack});
-    }
-
-        // copies back request pack from incoming json if present
-
-    get_reqpack(o) {
-        if (o != undefined) { o.reqpack = this.reqpack; return o;}
-        else return this.reqpack;
     }
 
         // player info could be added at the streamerbot stage from the players dictionary
         // if done on every message that needs relaying to an observer that'll remove a stage
         // objs passed by ref so can just run as add_reqpack(obj) or console.log(add_reqpack(obj))
+        // [long time later.... ummm, what?]
 
     get_player_info(o) { //
         return {uid: this.myUID, name: this.myName, socketid: this.mySocketId};

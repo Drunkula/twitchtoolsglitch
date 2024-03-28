@@ -29,7 +29,6 @@ async function main() {
 
     clog =  ytparams.ytdbg === true ? console.log : function (){};
 
-
     let ytpc = new YTController();
     ytpc.myName = ytparams.name; // got from URL params
     ytpc.myObsSourceName = ytparams.obs;

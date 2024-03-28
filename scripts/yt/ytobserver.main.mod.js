@@ -109,6 +109,15 @@ class YTObserver extends SockMsgRouter {
         permstorestate: got_storage_status,
         defaultadder:   d => {if (this.defaultAdderSet) return; this.defaultAdderSet = true; gid("videoadder").value = d.name;},
 
+        playeraddresult:d => {
+            if (d.result.success) toast(`<b>${d.player.name}</b> added the video position ${d.result.relative}`);
+            else toast(`<b>${d.player.name}</b> rejected the video, reason: ${d.result.error}`, "is-danger");
+        },
+
+        "entriestoplayerresult":d => {
+            toast(`<b>${d.player.name}</b> added ${d.result.addCount}/${d.result.totalEntries} entries.`);
+        },
+
         toast: d => toast_raw(d.data)
     };
         // identify myself to SB
