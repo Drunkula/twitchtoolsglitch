@@ -1,7 +1,7 @@
 import SockMsgRouter from "./sockmsgrouter.class.mod.js";
 import {move_table_rows} from "./observer.helpers.mod.js";
 import * as l from "./ytobserver.playlist.mod.js";
-import * as pl from "./ytobserver.getytpl.mod.js";
+
 
 export let playlists = {};// uid keyed playlists
 

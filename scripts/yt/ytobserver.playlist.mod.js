@@ -15,7 +15,7 @@ export function send_entries_to_player(x) {
     let select = gid(x.target.dataset['toselectid']);
     let uid = select.selectedIndex >= 0 ? select.options[select.selectedIndex].value : "players";
     let toName = select.selectedOptions[0].text;
-console.log("", select);
+
     //let entries = table_entries_to_array('playlisttable');
     let data = table_entries_to_array('playlist', true);
     let pack = {

@@ -226,7 +226,7 @@ Disabling let's you get a player's list and send it to another.">
                   <button class="button ml-3 is-success" data-get="saveplaylist"><span class="icon"><i class="fas fa-floppy-disk"></i></span></button>
                   <button class="button ml-3 is-success" data-get="getplaylists">Get lists</button>
                 </div>
-                <div class="columns is-vcentered is-mobile is-gapless">
+                <div class="columns is-vcentered is-gapless is-mobile">
                   <div class="column is-four-fifths">
                     <div class="field has-addons">
                       <div class="control is-expanded">
@@ -236,11 +236,9 @@ Disabling let's you get a player's list and send it to another.">
                     </div>
                   </div>
                   <div class="column">
-                    <div class="field">
-                      <label class="checkbox">
-                        <input class="mx-2" id="pladdlinkisplaylist" type="checkbox">playlist
-                      </label>
-                    </div>
+                    <label class="checkbox">
+                      <input class="mx-2" id="pladdlinkisplaylist" type="checkbox">playlist
+                    </label>
                   </div>
                 </div>
                 <div class="field">
@@ -306,9 +304,9 @@ Disabling let's you get a player's list and send it to another.">
           </div>
         </div>
         <div class="tab-pane">
-          <div class="box"><b>players now can have (and need) optional paramers.</b>
-            <p>So when you add a player it'll be like this:</p>
-            <p class="pl-6"><a href="https://twitch-tools.glitch.me/ytplayer/?id=Test%20Player&amp;chatadd=true&amp;chatcmds=true&amp;debug" target="_blank">https://twitch-tools.glitch.me/ytplayer/?debug=true&amp;id=Name in Observer Page&amp;nan=true&amp;chatadd=true</a></p>
+          <div class="box"><b>players now can have (and need) optional paramers.  Most default to off</b>
+            <p>For a chat controlled list you'd want nan, chatadd, chatcmds to be on</p>
+            <p class="pl-6"><a href="https://twitch-tools.glitch.me/ytplayer/?id=Test%20Player&amp;chatadd=true&amp;chatcmds=true&amp;nan=true" target="_blank">https://twitch-tools.glitch.me/ytplayer/?id=Name in Observer Page&amp;nan=true&amp;chatadd=true&amp;chatcmds=true</a></p>
             <p>Put a ? after the url and separate them with &amp; signs.  E.g. /?playlist=default&amp;x=1280&amp;y=720</p>
             <p>The options are:</p>
             <div class="content">

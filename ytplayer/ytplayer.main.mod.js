@@ -83,8 +83,8 @@ window.playlistDefaults = playlistDefaults;
 function grab_url_params() {
     let qs = new window.URLSearchParams( window.location.search );
     // url var | maps to param[that]
-    let pList = ["x|XSize", "y|YSize", "muted", "video", "id|name", "chatadd", "add|chatadd", "nan", "nowandnext|nan", "playlist", "pl|playlist", "shuffle",
-        "debug|ytdbg", "obs", "chatcmds", "chatcommands|chatcmds", "cmds|chatcmds"];
+    let pList = ["x|XSize", "y|YSize", "muted", "video", "id|name", "chatadd", "add|chatadd", "chatadds|chatadd", "nan", "nowandnext|nan",
+    "playlist", "pl|playlist", "shuffle", "debug|ytdbg", "obs", "chatcmds", "chatcommands|chatcmds", "cmds|chatcmds"];
 
     for (let p of pList) {
         let [param, to] = p.split("|");
