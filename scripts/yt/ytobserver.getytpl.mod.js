@@ -75,6 +75,11 @@ export async function fetch_yt_playlist_entries(d) {
         let res = await fetch(rUrl);
         res = await res.json();
 
+        if (res.error) {
+            toast("<b>Error:</b> " + res.error.message + " - Basically the playlist id is a load of tripe.", "is-danger");
+            return;
+        }
+
 fetchedResults += res.items.length;
 
         for(let vi of res.items) {
