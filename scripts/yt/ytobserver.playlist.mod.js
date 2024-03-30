@@ -1,4 +1,5 @@
 import {playlists, YTO, add_event_listeners} from "./ytobserver.main.mod.js"
+import * as pl from "./ytobserver.getytpl.mod.js";
 
 let editingUID = "", editingName = "";    // stored while editing
 
@@ -34,6 +35,8 @@ console.log("", select);
     // sends a SINGLE video FROM ADD TEXT FIELD to the player
 
 export function add_video_to_playlist() {
+    if (gid("pladdlinkisplaylist").checked) return pl.add_ytplaylist_to_playlist();
+
     let video = gid("addvideotoplaylist").value;
     //adder = this will be a thing
     YTO.send_json({action: "addvideotoplaylist", video, uid: gid("loadplaylistselect").value, adder: gid("videoadder").value});

@@ -1,6 +1,7 @@
 import SockMsgRouter from "./sockmsgrouter.class.mod.js";
 import {move_table_rows} from "./observer.helpers.mod.js";
 import * as l from "./ytobserver.playlist.mod.js";
+import * as pl from "./ytobserver.getytpl.mod.js";
 
 export let playlists = {};// uid keyed playlists
 
@@ -80,6 +81,7 @@ class YTObserver extends SockMsgRouter {
     myUID = (Math.random() * Date.now()).toString();
     myName = "YTObserver Default";  // sent to Streamerbot for id purposed.  It might send a replacement back
     mySocketId = null;
+    ytApiKey = null;
 
     defaultAdderSet = false;
 
@@ -96,6 +98,8 @@ class YTObserver extends SockMsgRouter {
         identify: d => this.identify(),
         yourinfo: d => {this.myName = d.name; this.mySocketId = d.socketid; document.title = `(${d.name}) YT Observer`},
         namechange: d => {this.myName = d.name; document.title = `({d.name}) YT Observer`},
+        apikey: d => this.ytApiKey = d.apikey,
+
         players: d => players_select_update(d),
         playlists: d => playlist_selects_update(d),
         playlistdata: d => l.received_playlist(d.data),

@@ -199,11 +199,11 @@ Disabling let's you get a player's list and send it to another.">
                     <div class="box">If you rearrange or delete from a list use the 'update list' button to update it in the player.</div>
                     <div class="box">
                       <div class="block">
-                        Disabling the <i>auto</i> option means you have to use the 'get' button to loads the player's list.&nbsp;&nbsp;This can be used to 'get' a player's list, rearrange and delete from it, select a different player and send the list to it.</div><b>NOTE:</b>&nbsp;send replaces the players entire list.
+                        Disabling the <i>auto</i> option means you have to use the reload button to loads the player's list.&nbsp;&nbsp;This can be used to 'get' a player's list, rearrange and delete from it, select a different player and send the list to it.</div><b>NOTE:</b>&nbsp;send replaces the players entire list.
                     </div>
                     <p class="box">If you chose the 'All Players' option it'll be send everywhere, so be careful if you've got multiple players in your setup for things like start and end music.  The changes are not permanent.</p>
                     <p class="box">The add video box will add to the player targetted by the select or all players.  Double click or right click the box to clear it.</p>
-                    <p class="box">Deleting videos from the player won't automatically update the list, you need to use "get" to see the result.  This lets you copy the entries to a playlist.</p>
+                    <p class="box">Deleting videos from the player won't automatically update the list, you need to refresh to see the result.  This lets you copy the entries to a playlist after if needed.</p>
                   </div>
                 </div>
               </div>
@@ -226,11 +226,22 @@ Disabling let's you get a player's list and send it to another.">
                   <button class="button ml-3 is-success" data-get="saveplaylist"><span class="icon"><i class="fas fa-floppy-disk"></i></span></button>
                   <button class="button ml-3 is-success" data-get="getplaylists">Get lists</button>
                 </div>
-                <div class="field has-addons">
-                  <div class="control is-expanded">
-                    <input class="input" placeholder="Add video youtube link or video id" id="addvideotoplaylist">
+                <div class="columns is-vcentered is-mobile is-gapless">
+                  <div class="column is-four-fifths">
+                    <div class="field has-addons">
+                      <div class="control is-expanded">
+                        <input class="input" placeholder="Add video youtube link or video id" id="addvideotoplaylist">
+                      </div>
+                      <div class="control"><a class="button is-info addvideobtn">add</a></div>
+                    </div>
                   </div>
-                  <div class="control"><a class="button is-info addvideobtn">add</a></div>
+                  <div class="column">
+                    <div class="field">
+                      <label class="checkbox">
+                        <input class="mx-2" id="pladdlinkisplaylist" type="checkbox">playlist
+                      </label>
+                    </div>
+                  </div>
                 </div>
                 <div class="field">
                   <div class="label">Video adder - also used in player page</div>
@@ -304,7 +315,7 @@ Disabling let's you get a player's list and send it to another.">
               <ul>
                 <li>playlist - default = default.  Set with playlist=Start Music</li>
                 <li>id - the name that'll show in the controller page</li>
-                <li>nan - default: false. Set true for the player to respond to now and next requests</li>
+                <li>nan - default: false. Set true for the player to respond to now and next requests and !added videos.</li>
                 <li>chatadd - default: false. true means it'll add videos from chat with !add or !src</li>
                 <li>chatcmds - default: false. true allows !next !prev !play !pause, etc from chat unless locked out</li>
                 <li>shuffle - true/false Override the shuffle flag for a list.  Not included uses the list's default.</li>
@@ -313,6 +324,8 @@ Disabling let's you get a player's list and send it to another.">
                 <li>muted - true/false. Whether the player starts muted. More for debugging</li>
                 <li>volume - 0 to 100.  Initial volume of player.  Default 100.</li>
                 <li>debug - true/false. Whether debug messages appear in a browser console.</li>
+                <li><b>NOTE:</b> if you delete items from a playlist, don't refresh then rearrange and update the list the deleted entries will be resaved.</li>
+                <li>The yt_playlist_default length value in the variables table shows you the data length as the variable itself looks blank.</li>
               </ul>
             </div>
           </div>
@@ -322,11 +335,12 @@ Disabling let's you get a player's list and send it to another.">
           <div class="box"><b>NOT YET DONE</b>
             <div class="content">
               <ul>
-                <li>Streamerbot runs the Init() when compiling the code for the player more than once.  This isn't my fault, it'll mean you get the startup messages more than once, that's all.</li>
-                <li>shift clicking checkboxes will do all between.  It'll be there</li>
-                <li>player playlist different colours between perm and added entries</li>
-                <li>Player's !add and !nan flags can be adjusted in the interface</li>
-                <li>Option to auto update Player/Playlists on add rather than pressing get</li>
+                <li>Streamerbot compiles and runs Init() more than once.  Not my fault, startup messages may be seen more than once, that's all.</li>
+                <li>Add: Shift clicking checkboxes will do all between.</li>
+                <li>Add: player playlist different colours between perm and added entries</li>
+                <li>Add: Player's !add and !nan flags can be adjusted in the interface</li>
+                <li>Add: Option to auto update Player/Playlists on add rather than having to refresh.  Players could send a 'playlistchanged' message.</li>
+                <li>Playlist not changing on fwd?  Hit Play/pause as cueing doesn't send a song id. (low priority)</li>
               </ul>
             </div>
           </div>

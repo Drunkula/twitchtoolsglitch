@@ -332,7 +332,9 @@ class YTController extends SockMsgRouter {
         console.log("RESULT OF THE CHAT ADDED THING: ", result);
 // chatadded or d.data === object = single, d.data == array = multiples
         if (d.chatadded) {
-            this.send_json({action: "chataddresult", result, data: d.data, player: this.get_player_info()});
+            // ytparams.nan can be used to mute this.
+            if (ytparams.nan === true)
+                this.send_json({action: "chataddresult", result, data: d.data, player: this.get_player_info()});
             return;
         }
             // observer has sent 1 or many
@@ -662,13 +664,13 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         this.send_json({action: "relay", to: this.returnto,
             data: {action:"playerdeletecount", count: deletes, player: this.get_player_info()}});
 
-        this.send_json({uid: this.uid, to: this.returnto, action:"toast",
-            message: `<b>${this.myName}</b> says\n${deletes} videoes I have deleted, father.`});
+        this.send_json({action:"toast", uid: this.uid, to: this.returnto,
+            message: `<b>${this.myName}</b> says\n${deletes} videos I have deleted, father.`});
     }
 
         // single id, url, playlist position
 
-        delete(videoid) {
+    delete(videoid) {
         let idx = this.playlist.indexOf(videoid);
 
         if (idx >= 0) {
