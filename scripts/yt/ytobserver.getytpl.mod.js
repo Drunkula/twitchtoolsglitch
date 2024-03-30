@@ -76,7 +76,7 @@ export async function fetch_yt_playlist_entries(d) {
         res = await res.json();
 
         if (res.error) {
-            toast("<b>Error:</b> " + res.error.message + " - Basically the playlist id is a load of tripe.", "is-danger");
+            toast("<b>Error:</b> " + res.error.message + " - Basically the playlist id is a load of tripe.  Maybe it's private or something.", "is-danger");
             return;
         }
 
