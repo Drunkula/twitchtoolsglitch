@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Twitch Tools</title>
     <meta name="description">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <!--link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css')-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
     <script defer="" src="https://use.fontawesome.com/releases/v6.1.1/js/all.js"></script>
     <link rel="stylesheet" href="/css/styles.css">
   </head>
@@ -40,9 +41,9 @@
       </div>
       <div class="block tab-content" id="playlistpanels">
         <div class="tab-pane is-active">
-          <div class="columns is-flex-direction-row-reverse">
+          <div class="columns is-flex-direction-row-reverse is-variable is-1">
             <div class="column is-4-desktop is-5-tablet">
-              <div class="box">
+              <div class="box mb-2">
                 <div class="columns is-mobile is-gapless is-multiline">
                   <div class="column is-7-mobile is-12-tablet">
                     <button class="is-small button is-success mr-1" data-send="playprev"><span class="icon"><i class="fas fa-backward-fast"></i></span></button>
@@ -61,7 +62,7 @@
                   </div>
                 </div>
               </div>
-              <div class="box">
+              <div class="box mb-0">
                 <div class="level is-mobile">
                   <div class="level-left">
                     <div class="level-item">
@@ -99,7 +100,8 @@ Disabling let's you get a player's list and send it to another.">
                   </div>
                 </div>
               </div>
-              <div class="box is-hidden-mobile">
+              <div class="mb-3 is-hidden-mobile"></div>
+              <div class="box is-hidden-mobile mb-2">
                 <div>table rows</div>
                 <div class="player-controls">
                   <button class="rowsup button is-link is-small"><span class="icon"><i class="fas fa-angles-up"></i></span></button>
@@ -116,7 +118,7 @@ Disabling let's you get a player's list and send it to another.">
                   <button class="button is-danger is-small" data-relay="shuffle">Shuffle</button>
                 </div>
               </div>
-              <div class="box player-controls is-hidden-mobile">
+              <div class="box player-controls is-hidden-mobile mb-2">
                 <div class="field has-addons">
                   <div class="control is-expanded">
                     <input class="input" placeholder="Add video youtube link or video id" id="addvideotoplayer">
@@ -124,7 +126,7 @@ Disabling let's you get a player's list and send it to another.">
                   <div class="control"><a class="button is-info addvideobtn">add</a></div>
                 </div>
               </div>
-              <div class="box player-controls is-hidden-mobile">
+              <div class="box player-controls is-hidden-mobile mb-2">
                 <div class="label">Copy selected to playlist
                   <div class="field has-addons">
                     <div class="control">
