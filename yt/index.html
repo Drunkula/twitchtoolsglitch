@@ -158,17 +158,21 @@ Disabling let's you get a player's list and send it to another.">
                 <div id="playerplaylist" style="overflow-y: auto; height: 90vh;">
                   <div class="notification" id="playerinstructions">
                     <button class="delete" data-target="#playerinstructions"></button>
-                    <div class="box">A player's playlist will appear here when you select one from the dropdown on the right.</div>
-                    <div class="box">Shift clicking works on checkboxes.</div>
-                    <div class="box">Double clicking an song will make the player play that song.</div>
-                    <div class="box">If you rearrange or delete from a list use the 'update list' button to update it in the player.</div>
+                    <div class="box">Playlists will appear here when you select a player from the dropdown on the right.</div>
+                    <div class="box">
+                      <p>Double click a video to play it.</p>
+                      <p>Shift clicking works on checkboxes.</p>
+                    </div>
+                    <div class="box">
+                      <p>Deleting videos from the player won't automatically update the displayed list, you need to refresh to see the result.  This lets you copy the entries to a playlist after if needed.</p>
+                      <p>If you rearrange a list use the 'update list' button to send it to the player.  If you haven't refreshed after previous deletes they will be restored.</p>
+                    </div>
                     <div class="box">
                       <div class="block">
-                        Disabling the <i>auto</i> option means you have to use the reload button to loads the player's list.&nbsp;&nbsp;This can be used to 'get' a player's list, rearrange and delete from it, select a different player and send the list to it.</div><b>NOTE:</b>&nbsp;send replaces the players entire list.
+                        Disabling the <i>auto</i> option means you have to use the reload button view a player's list.&nbsp;&nbsp;This can be used to 'get' a player's list, rearrange it, and update send it to a different or all players.</div><b>NOTE:</b>&nbsp;update replaces a player's entire list.
                     </div>
-                    <p class="box">If you chose the 'All Players' option it'll be send everywhere, so be careful if you've got multiple players in your setup for things like start and end music.  The changes are not permanent.</p>
+                    <p class="box">'All Players' will send adds and deletes everywhere, so be careful if you've got multiple players in your setup for things like start and end music.  The changes are not permanent.</p>
                     <p class="box">The add video box will add to the player targetted by the select or all players.  Double click or right click the box to clear it.</p>
-                    <p class="box">Deleting videos from the player won't automatically update the list, you need to refresh to see the result.  This lets you copy the entries to a playlist after if needed.</p>
                   </div>
                 </div>
               </div>
@@ -245,16 +249,27 @@ Disabling let's you get a player's list and send it to another.">
                 </div>
               </div>
               <div class="box playlist-controls">
-                <div class="label">Copy to playlist</div>
-                <div class="field has-addons">
-                  <div class="control">
-                    <div class="select">
-                      <select class="playlistselect" id="playlistcopytoplaylist">
-                        <option value="" disabled>get playlists first</option>
-                      </select>
+                <div class="label">Copy selected to / Delete from playlist</div>
+                <div class="level is-mobile">
+                  <div class="level-left is-flex-direction-row">
+                    <div class="level-item">
+                      <div class="field has-addons">
+                        <div class="control">
+                          <div class="select">
+                            <select class="playlistselect" id="playlistcopytoplaylist">
+                              <option value="" disabled>get playlists first</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="control"><a class="button is-success savetoplaylist" data-toselectid="playlistcopytoplaylist">Copy</a></div>
+                      </div>
+                    </div>
+                    <div class="level-item">
+                      <button class="button is-danger" id="del-sel-from-pl">Del
+                        <input class="ml-2 mr-0" type="checkbox" id="del-sel-from-pl-confirm">
+                      </button>
                     </div>
                   </div>
-                  <div class="control"><a class="button is-success savetoplaylist" data-toselectid="playlistcopytoplaylist">Copy</a></div>
                 </div>
                 <div class="label">Send to player</div>
                 <div class="field has-addons">
@@ -311,8 +326,8 @@ Disabling let's you get a player's list and send it to another.">
                 <li>Player sources must start YTPlayer in OBS for them to be automatically paused/resumed on scene changes.</li>
                 <li>Players must be in the root of a scene for them to automatically pause/resume OR...</li>
                 <li>Player proxies can be used for players that are in groups or nested scenes or even not in the scene. e.g. for a hidden player used for background music.</li>
-                <li>Proxies are any sources called the player's source name with Proxy after and be in the scene's root. e.g</li>
-                <li>YTPlayerStartMusicProxy for YTPlayerStartMusic.  No space. YTPlayer CartoonsProxy for YTPlayer Cartoons.  Any source type can be used for a proxy.</li>
+                <li>Proxies are any sources called the player's source name with Proxy after.  They need to be in a scene's root. e.g.</li>
+                <li>YTPlayerStartMusic Proxy for YTPlayerStartMusic.  YTPlayer Cartoons Proxy for YTPlayer Cartoons.  Any source type can be used for a proxy.</li>
                 <li>The visibility of a player doesn't affect playing/resuming.  If you've got a player hidden in a scene and don't want it to play then put it in a group.</li>
               </div>
             </div>
@@ -326,6 +341,7 @@ Disabling let's you get a player's list and send it to another.">
                 <li>Add: Option to auto update Player/Playlists on adds/deletes rather than having to refresh.  Players could send a 'playlistchanged' message.</li>
                 <li>Playlist not changing on fwd?  Hit Play/pause as cueing doesn't send a song id. (low priority)</li>
                 <li>Delete from playlist items in another playlist. A vanity letting me move wathched items to a 'Watched' list, then update the playlist from youtube if there are new videos and then remove the watched.</li>
+                <li>Seeker bar / goto time if using the player for long videos.</li>
               </ul>
             </div>
           </div>

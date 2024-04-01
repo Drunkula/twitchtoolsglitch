@@ -52,7 +52,7 @@ document.title = "YT Observer";
     {selector: ".playlist-controls .delete-permanently", event: "click", function: () => l.delete_from_playlist(true)},
     {selector: ".playlist-controls .addvideobtn", event: "click", function: x => l.add_video_to_playlist()},
 
-    {selector: "#delplaylistconfirm, #destroyplaylistconfirm", event: "click", function: x => x.stopPropagation()},
+    {selector: "#delplaylistconfirm, #destroyplaylistconfirm, #del-sel-from-pl-confirm", event: "click", function: x => x.stopPropagation()},
 
     {selector: ".playlist-controls .savetoplaylist", event: "click", function: e => l.copy_to_playlist("playlisttable", e)},
     {selector: "#updateplaylistlistbtn", event: "click", function: l.update_playlist_list},
@@ -74,6 +74,11 @@ document.title = "YT Observer";
         // clear add video button
     {selector: "#addvideotoplayer, #addvideotoplaylist", event: "contextmenu", function: e => e.target.value=""},
     {selector: "#addvideotoplayer, #addvideotoplaylist", event: "dblclick", function: e => e.target.value=""},
+
+        // delete items from a playlist
+    {selector: "#del-sel-from-pl", event: "click", function: l.delete_from_other_playlist},
+
+
 
 ];  add_event_listeners(htmlEvents);
 

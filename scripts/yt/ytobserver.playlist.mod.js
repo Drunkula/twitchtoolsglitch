@@ -66,6 +66,48 @@ export function delete_from_playlist() {
     gid('delplaylistconfirm').checked = false;
 }
 
+    // deletes selected entries from playlist in the other <select>
+
+export function delete_from_other_playlist() {
+    let table = gid("playlisttable");
+    if (!table) {
+        toast("Load a playlist up.", 'is-danger');        return;
+    }
+
+    // confirm set98
+    if (gid('del-sel-from-pl-confirm').checked !== true) {
+        toast("Confirm deleting these from the other playlist.", 'is-danger', 5000);
+        return;
+    }
+
+    let delSrce = gid("playlisttable").dataset["uid"];
+    let delFromListUid = gid("playlistcopytoplaylist").value;
+
+console.log("source and dest uids", delSrce, delFromListUid);
+
+    if (delSrce === delFromListUid) {
+        toast("No.  I'm not deleting from the same table like that, do it like a normal person.", "is-warning"); return;
+    }
+    if ("" === delFromListUid) {
+        toast("Select a playlist to delete the entries from, bonehead.", "is-warning"); return;
+    }
+
+    let entries = table_entries_to_array("playlisttable", true);
+    let videoids = [];
+    entries.forEach(x => videoids.push(x.videoid));
+
+    console.log("videoids", videoids);
+    if (!entries.length) {
+        toast("Deleting nothing is soooo much fun.", 'is-warning', 3000); return;
+    }
+
+    //
+    //let uid =
+//return;
+    YTO.send_json({action: "deletefromplaylist", uid: delFromListUid, videoids});
+    gid('del-sel-from-pl-confirm').checked = false;
+}
+
 
     // sends all the videos in a playlist back
 
