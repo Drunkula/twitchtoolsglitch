@@ -360,6 +360,22 @@ function received_player_playlist(d) {
     gid("checkallplayer").addEventListener('change', x => {
         let c = x.target.checked;
         qsa("#playertable input[type='checkbox']").forEach(e => e.checked = c);});
+
+    // shift clicking handler
+    let clickIndex = 0; // <-- closure will use this
+    let cBxs = qsa("#playertable input[type='checkbox']").slice(1);
+        // shift clicking
+    qsa("#playertable input[type='checkbox']").slice(1).forEach(x => x.addEventListener("click", x => {
+        let newClickIndex = cBxs.indexOf(x.target);
+        if (x.shiftKey === true) {
+            let checkState = cBxs[newClickIndex].checked;//tRows[from].checked === tRows[to].checked ? true : false;
+            let [from, to] = newClickIndex > clickIndex ? [clickIndex, newClickIndex] : [newClickIndex, clickIndex];
+            for (let i = from; i <= to; i++) {
+                cBxs[i].checked = checkState;
+            }
+        }
+        clickIndex = newClickIndex;
+    }));
 }
 
     // adds events like click, change to elements

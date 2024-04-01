@@ -144,10 +144,10 @@ Disabling let's you get a player's list and send it to another.">
                 <div class="level">
                   <div class="level-left">
                     <div class="level-item"><strong>Storage:&nbsp;</strong>
-                      <tag class="tag is-info" id="storagestatus">?</tag>
+                      <tag class="tag is-link" id="storagestatus">?</tag>
                     </div>
                     <div class="level-item"><strong>Chat Control:&nbsp;</strong>
-                      <tag class="tag is-info" id="chatlockoutstatus">?</tag>
+                      <tag class="tag is-link" id="chatlockoutstatus">?</tag>
                     </div>
                   </div>
                 </div>
@@ -156,7 +156,7 @@ Disabling let's you get a player's list and send it to another.">
             <div class="column is-8-desktop is-7-tablet">
               <div class="box pt-2 pb-3">
                 <div id="playerplaylist" style="overflow-y: auto; height: 90vh;">
-                  <div class="notification is-info" id="playerinstructions">
+                  <div class="notification" id="playerinstructions">
                     <button class="delete" data-target="#playerinstructions"></button>
                     <div class="box">Player's playlists will appear here when you select one from the dropdown on the right.</div>
                     <div class="box">Double clicking an song will make the player play that song.</div>
@@ -178,7 +178,7 @@ Disabling let's you get a player's list and send it to another.">
           <div class="columns is-flex-direction-row-reverse">
             <div class="column is-4-desktop is-6-tablet">
               <div class="box playlist-controls">
-                <div class="field has-addons">
+                <div class="field has-addons is-horizontal">
                   <div class="control">
                     <div class="select">
                       <select class="playlistselect" id="loadplaylistselect" name="playlists">
@@ -196,7 +196,7 @@ Disabling let's you get a player's list and send it to another.">
                       <div class="control is-expanded">
                         <input class="input" placeholder="Add video youtube link or video id" id="addvideotoplaylist">
                       </div>
-                      <div class="control"><a class="button is-info addvideobtn">add</a></div>
+                      <div class="control"><a class="button is-success addvideobtn">add</a></div>
                     </div>
                   </div>
                   <div class="column">
@@ -298,7 +298,6 @@ Disabling let's you get a player's list and send it to another.">
             <div class="content">
               <ul>
                 <li>Streamerbot compiles and runs Init() more than once.  Not my fault, startup messages may be seen more than once, that's all.</li>
-                <li>Add: Shift clicking checkboxes will do all between.</li>
                 <li>Add: player playlist different colours between perm and added entries</li>
                 <li>Add: Player's !add and !nan flags can be adjusted in the interface</li>
                 <li>Add: Option to auto update Player/Playlists on add rather than having to refresh.  Players could send a 'playlistchanged' message.</li>

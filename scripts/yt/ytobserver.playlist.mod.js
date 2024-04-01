@@ -154,6 +154,21 @@ export function received_playlist(d) {
     gid("checkallplaylist").addEventListener('change', x => {
         let c = x.target.checked;
         qsa("#playlisttable input[type='checkbox']").forEach(e => e.checked = c);});
+
+        // shift clicking
+    let clickIndex = 0; // <-- closure will use this
+    let cBxs = qsa("#playlisttable input[type='checkbox']").slice(1);
+    qsa("#playlisttable input[type='checkbox']").slice(1).forEach(x => x.addEventListener("click", x => {
+        let newClickIndex = cBxs.indexOf(x.target);
+        if (x.shiftKey === true) {
+            let checkState = cBxs[newClickIndex].checked;//tRows[from].checked === tRows[to].checked ? true : false;
+            let [from, to] = newClickIndex > clickIndex ? [clickIndex, newClickIndex] : [newClickIndex, clickIndex];
+            for (let i = from; i <= to; i++) {
+                cBxs[i].checked = checkState;
+            }
+        }
+        clickIndex = newClickIndex;
+    }));
 }
 
     // sends the load playlist command
@@ -258,6 +273,7 @@ export function edit_modal_show() {
 
     nameI.disabled = disabled; destroyBtn.disabled = disabled;
 
+    gid('destroyplaylistconfirm').checked = false;
     gid("editplaylistname").value = pl.name;
     gid("editplaylistshuffle").checked = pl.shuffle;
     gid("editplayliststoreperm").checked = pl.storePerm;
