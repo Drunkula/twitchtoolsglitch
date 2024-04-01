@@ -66,12 +66,12 @@ export function delete_from_playlist() {
     gid('delplaylistconfirm').checked = false;
 }
 
-    // deletes selected entries from playlist in the other <select>
+    // deletes selected entries from onscreen selections in the other <select>
 
 export function delete_from_other_playlist() {
     let table = gid("playlisttable");
     if (!table) {
-        toast("Load a playlist up.", 'is-danger');        return;
+        toast("Load a playlist up.  Chivvy chivvy!", 'is-danger');        return;
     }
 
     // confirm set98
@@ -82,8 +82,6 @@ export function delete_from_other_playlist() {
 
     let delSrce = gid("playlisttable").dataset["uid"];
     let delFromListUid = gid("playlistcopytoplaylist").value;
-
-console.log("source and dest uids", delSrce, delFromListUid);
 
     if (delSrce === delFromListUid) {
         toast("No.  I'm not deleting from the same table like that, do it like a normal person.", "is-warning"); return;
@@ -98,12 +96,9 @@ console.log("source and dest uids", delSrce, delFromListUid);
 
     console.log("videoids", videoids);
     if (!entries.length) {
-        toast("Deleting nothing is soooo much fun.", 'is-warning', 3000); return;
+        toast("Nothing delete-eddddd, cos you selected nuttthinggg.  Breeep broop zwwweeeep.", 'is-warning', 5000); return;
     }
 
-    //
-    //let uid =
-//return;
     YTO.send_json({action: "deletefromplaylist", uid: delFromListUid, videoids});
     gid('del-sel-from-pl-confirm').checked = false;
 }
