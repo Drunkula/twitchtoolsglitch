@@ -7,8 +7,7 @@ let spx=0;
 let url = "https://smartpaymapi.ovoenergy.com/usage/api/half-hourly/";
 let errLgin = x => o('<b>ERROR:</b> [<a href="https://account.ovoenergy.com/">CLICK HERE to sign into your Ovo account first.</a>]');
 let errLoc = x => o('<b>ERROR:</b> <a href="https://smartpaymapi.ovoenergy.com/">CLICK HERE to go to the website</a> then ignore the onscreen message and use the bookmark again.');
-
-const MONTHS_TO_CALC = 4;
+const e = trustedTypes.createPolicy("x", { createHTML: x => x });
 
 (async ()=>{
     setup();
@@ -33,7 +32,7 @@ const MONTHS_TO_CALC = 4;
     }
 
     o("Press F12 for more info");
-    for(let m=0; m<MONTHS_TO_CALC; m++)
+    for(let m=0; m<6; m++)
         await main(m);
 })();
 
@@ -43,50 +42,41 @@ async function main(mPast=0) {
     let total427 = 0; total = 0;
     let dow=fdld.fdom;
     let year=fdld.year;
-    let month=pad(fdld.month);
+    let mth=pad(fdld.month);
     let bhDays = 0;
     let bhShow = [];
-    //let daysUsedToCalc = 0;
+    let daysUsedToCalc = 0;
     let daysFailed = 0;
     let dataContinues = true;   // next field of result specifies if there are remaining days
 
     l("Month: ", fdld.mthName);
-    o("Month: "+fdld.mthName+" "+fdld.year+ ",  peak hours : " + fdld.peakTimeStart + " to " + fdld.peakTimeEnd);
+    o("Month: "+fdld.mthName);
 
     for (i = 1; i <= fdld.ldom && dataContinues; i++, dow = ++dow%7) {
-        if (new Date(fdld.year, fdld.month-1, i) >= Date.now()) {
-            console.log("Ending calcs for the month.  Date is >= today", Date.now(), new Date(fdld.year, fdld.month-1, i));
-            break;
-        }
-
-        dts = `${year}-${month}-`+pad(i);
-
-        let furl=url+dts;
-        data = await fetch(furl);   // ok: true or status: 200 check
-        if (data.ok !== true) {
-            daysFailed++;
-            l("bad response for", furl)
-            continue;
-        }
-
-        spin();
-        let json = await data.json();
-
-        dataContinues = (json.electricity !== undefined && json.electicity !== null && undefined !== json.electricity.next) ? json.electricity.next : false;
-        if (!dataContinues) console.log("DATA ENDS for the month "+dts);
-
         if (dow>0 && dow<6) {
+            dts = `${year}-${mth}-`+pad(i);
             if (bhdates.includes(dts)) {
                 l(dts + " bank holiday " + bhEvents[dts]);
                 bhDays++;
                 bhShow.push(bhEvents[dts]);
-                // javascript STILL NEEDS to be checked for next
                 continue;
             }
-            //daysUsedToCalc++;
+            daysUsedToCalc++;
+
+            let furl=url+dts;
+            data = await fetch(furl);   // ok: true or status: 200 check
+            if (data.ok !== true) {
+                daysFailed++;
+                l("bad response for", furl)
+                continue;
+            }
+
+            spin();
+            let json = await data.json();
 
             if (json.electricity) {
                 let ed = json.electricity.data;
+                dataContinues = json.electricity.next;
 
                 if (ed instanceof Array == false) {
                     daysFailed++;
@@ -102,7 +92,7 @@ async function main(mPast=0) {
                     let d2d = new Date(ed[hh].interval.start);
                     let tsh = d2d.getHours();
                     if (d2d.getTimezoneOffset() != 0) tsh++;
-                    if (tsh >= fdld.peakTimeStart && tsh < fdld.peakTimeEnd)
+                    if (tsh >= 16 && tsh < 19)
                         e427Tot+=ed[hh].consumption;
                 }
                 total += dayTot; total427+=e427Tot;
@@ -112,28 +102,20 @@ async function main(mPast=0) {
             } else l("Nooo for " + dts);
         }
     }
-    let mPercent = total > 0 ? (total427/total * 100).toFixed(2) + "%": "Not enough data yet...";
-    let lm = `TOTAL = ${mPercent}  [${total427.toFixed(3)} / ${total.toFixed(3)}]kWh - bank holidays: ${bhDays} `+bhShow.join(", ");
+    let lm = `TOTAL ${(total427/total * 100).toFixed(2)}%  [${total427.toFixed(3)} / ${total.toFixed(3)}] - bank holidays: ${bhDays} `+bhShow.join(", ");
     l(lm);l();
     o(lm); o("&nbsp;");
 }
 
-function firstday_lastday(mthOffset = 0) {
+function firstday_lastday(mthOffset=0) {
     let date = new Date();
-        // note zero based, 3 is April
-    let first = new Date(date.getFullYear(), date.getMonth() - mthOffset, 1);
-    let last = new Date(date.getFullYear(), date.getMonth() - mthOffset + 1, 0);
-
-    let [peakTimeStart, peakTimeEnd] = first >= new Date(2024,3) ? [18,21] : [16,19];
-
+    let first = new Date(date.getFullYear(), date.getMonth() -mthOffset, 1);
+    let last = new Date(date.getFullYear(), date.getMonth() -mthOffset + 1, 0);
     let p =  {
         fdom: first.getDay(),
         ldom: last.getDate(),
         month: first.getMonth() + 1,
-        mthName: first.toLocaleString('default', { month: 'long' }), year: first.getFullYear(),
-        peakTimeStart,
-        peakTimeEnd
-    }
+        mthName: first.toLocaleString('default', { month: 'long' }), year: first.getFullYear()}
     return p;
 }
 
@@ -151,13 +133,13 @@ function set_acct_num(){
 
 function o() {
     for(let q of arguments){
-        nd=document.createElement("div"); nd.innerHTML=q;
-        msgs.append(nd);
+        let nd = e.createHTML(document.body.innerHTML + "<div>"+q+"</div>");
+        document.body.innerHTML = nd;
     }
 }
 
 function setup(){
-    document.body.innerHTML = '<div>Working: [<span id="X">+</span>]<p><div id="msgs"></div></div>';
+    document.body.innerHTML = e.createHTML('<div>Working: [<span id="X">+</span>]<p><div id="msgs"></div></div>');
     mDiv=gid("msgs");
     xDiv=gid("X");
 }

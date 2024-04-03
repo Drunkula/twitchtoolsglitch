@@ -13,6 +13,9 @@ var UserMon = UserMon || {};
 
     !"£$%^&*()[]-=_+;':@,.<>
     !^+
+
+    a filter
+    qsa('#messagelog > div > div > div:nth-child(2)').forEach(x => {if (!x.innerText.includes("NAME OF CHANNEL")) x.parentNode.parentNode.style.display="none"})
 */
         // window must be interacted with to work
 window.addEventListener('beforeunload', x => x.preventDefault());
