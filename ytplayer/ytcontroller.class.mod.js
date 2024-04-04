@@ -178,7 +178,7 @@ class YTController extends SockMsgRouter {
         // create a reference to the players player when ready
     async waitPlayerReady() {
         this.add_player_pre_ready_events(); // NOT player events
-        await this.ytPlayer.playerReady();
+        await this.ytPlayer.ytPlayerReady();
         this.add_player_ready_events();
         clog("Player ready, adding events.", this.ytPlayer.player);
         this.yt = this.ytPlayer.player;

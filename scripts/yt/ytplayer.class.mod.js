@@ -28,24 +28,25 @@ class YTPlayer {
     #playerReadyPromise = new Promise((res, rej) => {this.$playerReadyResolve = res; this.$playerReadyReject = rej;});
 
         // the youtube api has called onYouTubeIframeAPIReady
-    ready() {
+    ytIframeReady() {
         return this.#readyPromise;
     }
         // when the player in the youtube iframe is ready to play
-    playerReady() {
+    ytPlayerReady() {
         return this.#playerReadyPromise;
     }
 
     playerVars = {
         "autoplay": 1, //window.ytplayerAutoplay ??= 1
         'playsinline': 1,
-        "controls": 0,
-        "fs": 0,    // fullscreen buttons
+        "controls": 1,
+        "fs": 1,    // fullscreen buttons
         "rel": 0,   // related vids that channel only
         "iv_load_policy": 3, // annotations
         "mute": window.ytparams.muted ??= 0
     }
     // onReady, onStateChange, onPlaybackQualityChange, onPlaybackRateChange, onError, onApiChange
+    // https://developers.google.com/youtube/iframe_api_reference#Events
     events = {
         'onReady': this.onPlayerReady.bind(this), // called once when the player first initialises
         'onStateChange': this.onPlayerStateChange.bind(this),
@@ -169,6 +170,7 @@ class YTPlayer {
         // onYouTubeIframeAPIReady function
         let whenYTFrameReady = function(event) {
             // this can be delayed until we want it this.player = this.init_yt_iframe();
+                // create dictionary of states to their word
             for ( const [name, num] of Object.entries(YT.PlayerState) ) {                //console.debug(name, num);
                 this.states[num] = name;
             }

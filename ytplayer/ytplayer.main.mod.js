@@ -14,6 +14,7 @@ YTController -
 */
 import { config, playlistDefaults } from "./ytconfig.mod.js";
 import YTController from "./ytcontroller.class.mod.js";
+import { auto_ratio_init } from "./ytplayer.autoratio.mod.js";
 
 
 window.addEventListener('load', main);
@@ -41,7 +42,7 @@ async function main() {
 window.ytpc = ytpc;// debugging
 window.playlistDefaults = playlistDefaults;
 
-    await ytpc.ytPlayer.ready();
+    await ytpc.ytPlayer.ytIframeReady();
 
     // ytpc.add(playlistDefaults);
 
@@ -50,9 +51,11 @@ window.playlistDefaults = playlistDefaults;
 
     console.log(res ? "Iframe create SUCCESS!" : "FAILED creating iframe");
 
+    auto_ratio_init();
+
     // we need a second promise for the onReady event
     out("Waiting on player...")
-    await ytpc.ytPlayer.playerReady();
+    await ytpc.ytPlayer.ytPlayerReady();
     out("It ready")
 
     //test_real();
@@ -84,7 +87,7 @@ function grab_url_params() {
     let qs = new window.URLSearchParams( window.location.search );
     // url var | maps to param[that]
     let pList = ["x|XSize", "y|YSize", "muted", "video", "id|name", "chatadd", "add|chatadd", "chatadds|chatadd", "nan", "nowandnext|nan",
-    "playlist", "pl|playlist", "shuffle", "debug|ytdbg", "obs", "chatcmds", "chatcommands|chatcmds", "cmds|chatcmds"];
+    "playlist", "pl|playlist", "shuffle", "debug|ytdbg", "obs", "chatcmds", "chatcommands|chatcmds", "cmds|chatcmds", "autoratio"];
 
     for (let p of pList) {
         let [param, to] = p.split("|");

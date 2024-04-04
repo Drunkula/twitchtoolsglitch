@@ -19,6 +19,7 @@ var UserMon = UserMon || {};
 */
         // window must be interacted with to work
 window.addEventListener('beforeunload', x => x.preventDefault());
+
 //window.addEventListener('beforeunload', x => x.returnValue = "Are you sure about this?");
 
 (function(ns) {
@@ -26,12 +27,15 @@ window.addEventListener('beforeunload', x => x.preventDefault());
     const USERMON_EVENTS = [
 		{selector: '#users', event: 'change', function: users_tracked_changed, params: {noAutoChange: true}},
 		{selector: '#buzzwords', event: 'change', function: search_terms_changed, params: {noAutoChange: false}},
+		{selector: '#chfilter', event: 'keyup', function: ch_filter_changed, params: {noAutoChange: false}},
     ];//*/
 
     var userT, messageT;
     var searchTermRegex = null;
     var msgHits = 0;
 
+    var chFilterText = "";  // can be used to check incoming messages
+    var chFilterInput = gid("chfilter");
 
 
     window.addEventListener('load', async (event) => {
@@ -148,6 +152,9 @@ window.addEventListener('beforeunload', x => x.preventDefault());
 
         timeNMsgDiv.append(tDiv, chDiv);
         msgRow.append(userDiv, msgDiv, timeNMsgDiv);
+// filter incoming messages
+        if (chFilterText && !channel.includes(chFilterText)) msgRow.style.display="none";
+
         messageT.prepend( msgRow );
     }
 
@@ -218,6 +225,19 @@ window.addEventListener('beforeunload', x => x.preventDefault());
         } else {
             searchTermRegex = null;
         }
+    }
+
+        // filter changed
+
+    function ch_filter_changed() {
+
+        chFilterText = chFilterInput.value.trim();
+
+        let rows = qsa("#messagelog div > div > div:nth-of-type(2)");
+console.log("ROWS", rows);
+        rows.forEach(x => {
+            x.parentNode.parentNode.style.display = x.textContent.includes(chFilterText) ? "flex" : "none";
+        });
     }
 
 		// document create element
