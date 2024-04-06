@@ -51,7 +51,9 @@ window.playlistDefaults = playlistDefaults;
 
     console.log(res ? "Iframe create SUCCESS!" : "FAILED creating iframe");
 
-    auto_ratio_init();
+    if (ytparams.autoratio) {
+        auto_ratio_init();
+    }
 
     // we need a second promise for the onReady event
     out("Waiting on player...")
@@ -115,6 +117,7 @@ function init_controls() {
 }
 
 function test_real() {
+    console.log("################## TEST REAL CALLED ##################");
     ytpc.socketty.retryConnecting = false;
     ytpc.add(["2mQECKOkkqk", "ed8QTKtLxKs", "QM_kJkChgrc"]);
     ytpc.add(["Next 1", "Next 2"], true);

@@ -129,8 +129,10 @@ class YTController extends SockMsgRouter {
 
         adddefaults:d => this.add_video_items(playlistDefaults),// REDUNDANT
 
-        big:            d => this.yt.setSize(640, 360),
-        small:          d => this.yt.setSize(320, 180),
+        bigWidescreen:  d => this.yt.setSize(640, 360),
+        big43:          d => this.yt.setSize(640, 480),
+        smallWidescreen:d => this.yt.setSize(320, 180),
+        small43:        d => this.yt.setSize(320, 240),
         title:          d => clog(this.yt.videoTitle),
         qualityget:     d => clog(this.yt.getAvailableQualityLevels()),
 

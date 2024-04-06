@@ -6,22 +6,41 @@
      -->
      <title>Youtube Player</title>
     <style>
-        body, html, iframe {margin: 0; padding: 0;}
+        body, html, iframe, div {margin: 0; padding: 0;}
+        body {background: black;}
 
         .youtube-player {
+
+            /* height: 0px;
+            /* margin: 1em 0px; */
+            /* MY ADDS */
+            border: 4px solid green;
             text-align: center;
-            /* background-color: black; */
+
         }
 
         .youtube-player iframe {
+            /* text-align: center;
+            position: absolute;
+            top: 0px;
+            left: 0px;*/
             width: 100%;
-            height: 100%;
+            height: 100%; /* */
             background: none repeat scroll 0% 0%
         }
             /* add and remove this class as necessary */
         .youtube-player-43 iframe {
             width: 75% !important;
         }
+/*
+        .xyoutube-player {
+            overflow: hidden;
+            }
+        .xyoutube-player iframe {
+            left: -10%;
+            width: 120%;
+            }
+/* */
     </style>
 
     <script>
@@ -72,7 +91,7 @@
     -->
 </head>
 <body>
-    <div id="ytcontainer">
+    <div class="youtube-player" id="ytcontainer">
         <div id="ytplayer"></div>
     </div>
     <!--<div id="messages" style="clear: left;"></div>-->

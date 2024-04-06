@@ -70,13 +70,13 @@
                     <ul>
                         <li data-action="next">next()</li>
                         <li data-action="prev">prev()</li>
+                        <li data-action='{"action":"fwd", "data":30}'>fwd(30)</li>
+                        <li data-action='{"action":"rwd", "data":5}'>rwd(5)</li>
                         <li data-action="play">Play</li>
                         <li data-action="pause">Pause</li>
                         <li data-action="stop">Stop</li>
                         <li data-action="restart">Restart</li>
 
-                        <li data-action='{"action":"fwd", "data":30}'>fwd</li>
-                        <li data-action='{"action":"rwd", "data":5}'>rwd</li>
                         <li data-action="almostend">toward end</li>
                     </ul>
                 </div>
@@ -84,12 +84,14 @@
             <td>
                 <div class="controls">
                     <ul>
-                        <li data-action="big">Big</li>
-                        <li data-action="small">Small</li>
+                        <li data-action="bigWidescreen">Big 16:9</li>
+                        <li data-action="big43">Big 4:3</li>
+                        <li data-action="smallWidescreen">Small 16:9</li>
+                        <li data-action="small43">Small 4:3</li>
                         <li data-action="getvideoinfo">Video Info</li>
                         <li data-action="title">Title</li>
-                        <li data-action="qualityget">Qualities</li>
                         <li data-action="clearvideos">Clear Videos</li>
+                        <li data-action="qualityget">Qualities</li>
                     </ul>
                 </div>
             </td>
@@ -117,8 +119,6 @@
                         <li data-action="volup">volume up</li>
                         <li data-action="voldown">volume down</li>
                         <li data-action="mutetoggle">Mute/Unmute</li>
-                        <li data-action='{"action":"sendmessage", "data": "testaddnext"}'>add video next</li>
-                        <li data-action='{"action":"sendmessage", "data": "testaddrandom"}'>add video random pos</li>
                         <li data-action="adddefaults">adddefaults</li>
                     </ul>
                 </div>
