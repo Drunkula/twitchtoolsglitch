@@ -308,28 +308,41 @@ Disabling let's you get a player's list and send it to another.">
                 <li>chatcmds - default: false. true allows !next !prev !play !pause, etc from chat unless locked out</li>
                 <li>shuffle - true/false Override the shuffle flag for a list.  Not included uses the list's default.</li>
                 <li>video.  The id of the initial video to load e.g. video=xayd1c0wtOE</li>
-                <li>x and y to set the size of the player</li>
+                <li>autoratio - will border and centre non widescreen videos and fit the player to the browser size you set.  Let's you do a trick.</li>
+                <li>x and y to set the size of the player if not using autoratio</li>
                 <li>muted - true/false. Whether the player starts muted. More for debugging</li>
                 <li>volume - 0 to 100.  Initial volume of player.  Default 100.</li>
                 <li>debug - true/false. Whether debug messages appear in a browser console.</li>
-                <li><b>NOTE:</b> if you delete items from a playlist, don't refresh then rearrange and update the list the deleted entries will be resaved.</li>
-                <li>The yt_playlist_default length value in the variables table shows you the data length as the variable itself looks blank.</li>
               </ul>
             </div>
           </div>
           <div class="box">
-            <p>A playlists chat add option means it'll store chat !adds unless the permanent storage option is set to off.  Having a list with this set means you can copy ones you like to other playlists later.</p>
+            <div class="content">
+              <ul>
+                <li><b>NOTE:</b> if you delete items from a playlist, don't refresh then rearrange and update the list the deleted entries will be resaved.</li>
+                <li>The yt_playlist_default length value in the variables table shows you the data length as the variable itself looks blank.</li>
+                <li>A playlists chat add option means it'll store chat !adds unless the permanent storage option is set to off.  Having a list with this set means you can copy ones you like to other playlists later.</li>
+              </ul>
+            </div>
           </div>
           <div class="box"><b>OBS</b>
             <div class="content">
-              <div class="ul">
+              <ul>
                 <li>Player sources must start YTPlayer in OBS for them to be automatically paused/resumed on scene changes.</li>
                 <li>Players must be in the root of a scene for them to automatically pause/resume OR...</li>
                 <li>Player proxies can be used for players that are in groups or nested scenes or even not in the scene. e.g. for a hidden player used for background music.</li>
                 <li>Proxies are any sources called the player's source name with Proxy after.  They need to be in a scene's root. e.g.</li>
                 <li>YTPlayerStartMusic Proxy for YTPlayerStartMusic.  YTPlayer Cartoons Proxy for YTPlayer Cartoons.  Any source type can be used for a proxy.</li>
                 <li>The visibility of a player doesn't affect playing/resuming.  If you've got a player hidden in a scene and don't want it to play then put it in a group.</li>
-              </div>
+                <li><strong>OBS Trick:</strong>
+                  <ul>
+                    <li>Create a browser source and add a player with &amp;autoratio=true as part of the parameters.</li>
+                    <li>Make the vertical size larger than the widescreen size e.g 1280 x 1300.</li>
+                    <li>Use a crop/pad filter to take 290 off top and bottom making it display 16:9.</li>
+                    <li>Now no youtube video title or branding will appear!  Woohoo.</li>
+                  </ul>
+                </li>
+              </ul>
             </div>
           </div>
           <div class="box"><b>NOT YET DONE</b>
@@ -340,7 +353,7 @@ Disabling let's you get a player's list and send it to another.">
                 <li>Add: Player's !add and !nan flags can be adjusted in the interface</li>
                 <li>Add: Option to auto update Player/Playlists on adds/deletes rather than having to refresh.  Players could send a 'playlistchanged' message.</li>
                 <li>Playlist not changing on fwd?  Hit Play/pause as cueing doesn't send a song id. (low priority)</li>
-                <li>Delete from playlist items in another playlist. A vanity letting me move wathched items to a 'Watched' list, then update the playlist from youtube if there are new videos and then remove the watched.</li>
+                <li>Delete from playlist items in another playlist. A vanity letting me move watched items to a 'Watched' list, then update the playlist from youtube if there are new videos and then remove the watched.</li>
                 <li>Seeker bar / goto time if using the player for long videos.</li>
               </ul>
             </div>
