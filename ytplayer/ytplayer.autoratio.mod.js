@@ -20,12 +20,34 @@ export function auto_ratio_handler(p) {
     let vr = p.target.playerInfo.videoContentRect;
     let ratio = vr.height/vr.width;
 
+    //let holderRatio = playerContainer.clientHeight / playerContainer.clientWidth;
+    //let holderRatio = document.documentElement.clientHeight / document.documentElement.clientWidth;
+    //document.documentElement.clientHeight
+/*
+    ytpc.send_json({action:"relay", to: "all", data: {
+            action: "consolelog",
+            message:`window inner w x h = ${window.innerWidth} x ${window.innerHeight}`,
+            colour: "y"
+        }
+    });
+    ytpc.send_json({action:"relay", to: "all", data: {
+            action: "consolelog",
+            message:`Doc Element w x h = ${document.documentElement.clientWidth} x ${document.documentElement.clientHeight}`,
+            colour: "y"
+        }
+    });
+*/
     if (p.data === 1) // 1 = playing
+    /*
+    if (ratio > holderRatio) {
+        ytplayer.style.width = `${100 * holderRatio / ratio}%`;
+    }*/
     if (ratio  - 0.65 > 0) { // will be 0.75 or .5625, do a 'trick'
-        ytplayer.style.width = `${56.25 / ratio}%`;
+        //ytplayer.style.width = `${56.25 / ratio}%`;
         //playerContainer.classList.add("youtube-player-43");
         //ytplayer.style.width="75%";
-    } else {
+    }
+    else {
         //playerContainer.classList.remove("youtube-player-43");
         ytplayer.style.width="100%";
     }

@@ -1,0 +1,67 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
+    <title>Youtube Player</title>
+    <style>
+        /*
+        html, .table, .section {
+            background-color: darkblue;
+            color: antiquewhite;
+        }*/
+    </style>
+    <script>
+        window.addEventListener('load', async () => {
+            zone="england-and-wales";
+            let qs = new window.URLSearchParams( window.location.search );
+            months = qs.get("months") ?? 6;
+            const OVO_RETURN_URL    = "https://account.ovoenergy.com/usage?fuel=electricity";
+
+            let dateHi = new Date();
+            let dateLow = new Date();
+            dateLow.setMonth( dateLow.getMonth() - months - 1 );
+            dateHi.setMonth( dateHi.getMonth() + 1 );
+            let bhr = {}, bhdates = {};
+            try {
+                bhr = await fetch("https://www.gov.uk/bank-holidays.json");
+            } catch (e) {
+                out("<div>&nbsp;</div><b>Can't process bank holidays directly...</b>");
+                return;
+            }
+
+            let bh = await bhr.json();
+            for (let d of bh[zone].events) {
+                let dobh = new Date(d.date);
+                if (dobh > dateLow && dobh < dateHi)
+                    bhdates[d.date] = d.title;
+            }
+
+            let redir = OVO_RETURN_URL + "&bh=" + encodeURIComponent(JSON.stringify(bhdates));
+            window.location.href = redir;
+        });
+
+        function out() {
+            var nDiv = document.createElement("div");
+            nDiv.innerHTML = [...arguments].join("");
+            document.getElementById("messages").append(nDiv);
+        }
+            // real version doesn't need logging
+        function clog() {
+            console.log(...arguments);
+        }
+
+
+    </script>
+
+
+</head>
+<body>
+    <div class="section">
+
+        <div id="messages" class="box">Getting bank holiday data.  Redirecting soon...</div>
+
+    </div>
+
+</body>
+</html>
