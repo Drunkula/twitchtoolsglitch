@@ -42,8 +42,8 @@
       <div class="mb-0">&nbsp;</div>
       <div class="block tab-content" id="playlistpanels">
         <div class="tab-pane is-active">
-          <div class="columns is-flex-direction-row-reverse is-variable is-1">
-            <div class="column is-4-desktop is-5-tablet">
+          <div class="columns is-flex-direction-row-reverse">
+            <div class="column is-4-widescreen is-5-desktop is-6-tablet">
               <div class="box mb-2">
                 <div class="columns is-mobile is-gapless is-multiline">
                   <div class="column is-7-mobile is-12-tablet">
@@ -154,9 +154,9 @@ Disabling let's you get a player's list and send it to another.">
                 </div>
               </div>
             </div>
-            <div class="column is-8-desktop is-7-tablet">
-              <div class="box pt-2 pb-3">
-                <div id="playerplaylist" style="overflow-y: auto; height: 90vh;">
+            <div class="column is-8-widescreen is-7-desktop is-6-tablet">
+              <div class="box">
+                <div id="playerplaylist" style="overflow-y: auto; height:calc(100vh - 60px);">
                   <div class="notification" id="playerinstructions">
                     <button class="delete" data-target="#playerinstructions"></button>
                     <div class="box">Playlists will appear here when you select a player from the dropdown on the right.</div>
@@ -181,8 +181,8 @@ Disabling let's you get a player's list and send it to another.">
           </div>
         </div>
         <div class="tab-pane">
-          <div class="columns is-flex-direction-row-reverse is-variable is-1">
-            <div class="column is-4-desktop is-6-tablet">
+          <div class="columns is-flex-direction-row-reverse">
+            <div class="column is-4-widescreen is-5-desktop is-6-tablet">
               <div class="box playlist-controls">
                 <div class="level is-mobile">
                   <div class="level-left is-flex-direction-row">
@@ -285,9 +285,9 @@ Disabling let's you get a player's list and send it to another.">
                 </div>
               </div>
             </div>
-            <div class="column">
-              <div class="box pb-3">
-                <div id="playlist" style="overflow-y: auto; height: 90vh">
+            <div class="column is-8-widescreen is-7-desktop is-6-tablet">
+              <div class="box ml-0">
+                <div id="playlist" style="overflow-y: auto; height:calc(100vh - 80px);">
                   <div class="notification mb-1">
                     <p>If the ** playing error log ** playlist has entries you can select its entries and then use the <strong>Copy selected to / Delete from</strong> playlist box to delete the failed entries from other lists.</p>
                   </div>

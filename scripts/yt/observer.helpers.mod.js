@@ -38,15 +38,8 @@ function move_table_rows(tableid, direction="up") {
         if (r.dataset['videoid']) rows.push(r);
     });
 
-    if (direction === "top") {
-        tbl.firstChild.scrollIntoView({behavior: "smooth", block:"end", inline:"start"})
-    }
-    else if (direction === "bottom") {
-        tbl.lastChild.scrollIntoView({behavior: "smooth", block:"end", inline:"start"})
-    }
-
     if (!rows.length) return false;
-
+// scrollIntoView still a bit of a mess on Brave
     switch(direction) {
         case "up":
             if (rows[0].previousSibling === tbl.firstChild) {            // have reached the header
@@ -54,7 +47,7 @@ function move_table_rows(tableid, direction="up") {
             } else {
                 rows[0].previousSibling.before(...rows);
             }
-            rows[0].scrollIntoView({behavior: "smooth", block: "nearest", inline: "start"});
+            rows[0].scrollIntoView({behavior: "smooth", block: "nearest"});
             break;
         case "down":
             let last = rows.length - 1;
@@ -63,13 +56,15 @@ function move_table_rows(tableid, direction="up") {
             } else {
                 rows[last].after(...rows);
             }
-            rows[last].scrollIntoView({behavior: "smooth", block: "nearest", inline: "start"});
+            rows[last].scrollIntoView({behavior: "smooth", block: "nearest"});
             break;
         case "top":
             tbl.firstChild.after(...rows);
+            tbl.parentNode.scrollTo({top:0, left: 0, behavior: "smooth"});
             break;
         case "bottom":
             tbl.lastChild.after(...rows);
+            tbl.parentNode.scrollTo({top: tbl.parentNode.scrollHeight, left: 0, behavior: "smooth"});
             break;
     }
 
