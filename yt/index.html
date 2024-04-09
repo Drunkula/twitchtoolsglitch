@@ -31,14 +31,15 @@
             background-color: #9900b8 !important;
         }
       </style>
-      <div class="navbar-item mb-1 py-0 px-5 tabs is-fullwidth is-toggle is-small" data-target="#playlistpanels">
-        <ul>
+      <div class="navbar-item mb-1 py-0 px-5 tabs is-fullwidth is-toggle is-small" data-target="#playlistpanels" style="position: fixed; width: 100%; top: 0; left: 0; z-index: 1;">
+        <ul onClick="window.scrollTo(0,0);">
           <li class="is-active"><a>Player</a></li>
           <li class="pl-tab"><a>Playlists</a></li>
           <li class="insts-tab"><a>Instructions
               <!-- scroll into view--></a></li>
         </ul>
       </div>
+      <div class="mb-0">&nbsp;</div>
       <div class="block tab-content" id="playlistpanels">
         <div class="tab-pane is-active">
           <div class="columns is-flex-direction-row-reverse is-variable is-1">
@@ -93,7 +94,7 @@ Disabling let's you get a player's list and send it to another.">
                           </button>
                         </div>
                         <div class="dropdown-menu">
-                          <div class="dropdown-content"><a class="dropdown-item" data-get="chatlockout">Chat lockout</a><hr class="dropdown-divider"><a class="dropdown-item" data-get="chatunlock">Chat allow</a><hr class="dropdown-divider"><a class="dropdown-item" data-get="storeon">Store On</a><hr class="dropdown-divider"><a class="dropdown-item" data-get="storeoff">Store Off</a><hr class="dropdown-divider"><a class="dropdown-item" data-get="playersidentify">Reidentify Players</a></div>
+                          <div class="dropdown-content"><a class="dropdown-item" data-get="playersidentify">Reidentify Players</a><hr class="dropdown-divider"><a class="dropdown-item" data-get="chatlockout">Chat lockout</a><hr class="dropdown-divider"><a class="dropdown-item" data-get="chatunlock">Chat allow</a><hr class="dropdown-divider"><a class="dropdown-item" data-get="storeon">Store On</a><hr class="dropdown-divider"><a class="dropdown-item" data-get="storeoff">Store Off</a></div>
                         </div>
                       </div>
                     </div>
@@ -287,7 +288,20 @@ Disabling let's you get a player's list and send it to another.">
             <div class="column">
               <div class="box pb-3">
                 <div id="playlist" style="overflow-y: auto; height: 90vh">
-                  <p>Playlist.</p>
+                  <div class="notification mb-1">
+                    <p>If the ** playing error log ** playlist has entries you can select its entries and then use the <strong>Copy selected to / Delete from</strong> playlist box to delete the failed entries from other lists.</p>
+                  </div>
+                  <div class="notification">
+                    <p>You can use this feature to help you delete watched entries from a playlist that you might update periodically.
+                      <div class="content">
+                        <ul>
+                          <li>copy watched items to a 'watched' playlist as you delete them.</li>
+                          <li>if you update the playlist by importing it again then use the <i>delete from</i> feature to removed already watched videos.</li>
+                          <li>good to you I am.</li>
+                        </ul>
+                      </div>
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -296,20 +310,20 @@ Disabling let's you get a player's list and send it to another.">
         <div class="tab-pane">
           <div class="box"><b>players now can have (and need) optional paramers.  Most default to off</b>
             <p>For a chat controlled list you'd want nan, chatadd, chatcmds to be on</p>
-            <p class="pl-6"><a href="https://twitch-tools.glitch.me/ytplayer/?id=Test%20Player&amp;chatadd=true&amp;chatcmds=true&amp;nan=true" target="_blank">https://twitch-tools.glitch.me/ytplayer/?id=Name in Observer Page&amp;nan=true&amp;chatadd=true&amp;chatcmds=true</a></p>
+            <p class="pl-6"><a href="https://twitch-tools.glitch.me/ytplayer/?id=Test%20Player&amp;chatadd&amp;chatcmds&amp;nan&amp;autoratio" target="_blank">https://twitch-tools.glitch.me/ytplayer/?id=Name in Observer Page&amp;nan&amp;chatadd&amp;chatcmdsf;&amp;autoratio</a></p>
             <p>Put a ? after the url and separate them with &amp; signs.  E.g. /?playlist=default&amp;x=1280&amp;y=720</p>
+            <p>Including just the name of a true/false option marks it true so use &amp;nan&amp;chatcmds instead of &amp;nan=true&amp;chatcmds=true</p>
             <p>The options are:</p>
             <div class="content">
               <ul>
-                <li>playlist - default = default.  Set with playlist=Start Music</li>
+                <li>playlist. Which playlist to load. Default is default.  Set with playlist=Start Music</li>
                 <li>id - the name that'll show in the controller page</li>
                 <li>nan - default: false. Set true for the player to respond to now and next requests and !added videos.</li>
                 <li>chatadd - default: false. true means it'll add videos from chat with !add or !src</li>
                 <li>chatcmds - default: false. true allows !next !prev !play !pause, etc from chat unless locked out</li>
                 <li>shuffle - true/false Override the shuffle flag for a list.  Not included uses the list's default.</li>
                 <li>video.  The id of the initial video to load e.g. video=xayd1c0wtOE</li>
-                <li>autoratio - will border and centre non widescreen videos and fit the player to the browser size you set.  Let's you do a trick.</li>
-                <li>x and y to set the size of the player if not using autoratio</li>
+                <li>autoratio.  <strong>Recommended.</strong>  Borders and centres non-widescreen content so no clipping occurs. See OBS trick below.</li>
                 <li>muted - true/false. Whether the player starts muted. More for debugging</li>
                 <li>volume - 0 to 100.  Initial volume of player.  Default 100.</li>
                 <li>debug - true/false. Whether debug messages appear in a browser console.</li>
@@ -334,6 +348,7 @@ Disabling let's you get a player's list and send it to another.">
                 <li>Proxies are any sources called the player's source name with Proxy after.  They need to be in a scene's root. e.g.</li>
                 <li>YTPlayerStartMusic Proxy for YTPlayerStartMusic.  YTPlayer Cartoons Proxy for YTPlayer Cartoons.  Any source type can be used for a proxy.</li>
                 <li>The visibility of a player doesn't affect playing/resuming.  If you've got a player hidden in a scene and don't want it to play then put it in a group.</li>
+                <li>If using autoratio in OBS and you change the width or height within a browser source then refresh any browser (including observers) to detect changes.</li>
                 <li><strong>OBS Trick:</strong>
                   <ul>
                     <li>Create a browser source and add a player with &amp;autoratio=true as part of the parameters.</li>
