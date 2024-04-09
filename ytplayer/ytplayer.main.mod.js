@@ -88,20 +88,25 @@ window.playlistDefaults = playlistDefaults;
 function grab_url_params() {
     let qs = new window.URLSearchParams( window.location.search );
     // url var | maps to param[that]
-    let pList = ["x|XSize", "y|YSize", "muted", "video", "id|name", "chatadd", "add|chatadd", "chatadds|chatadd", "nan", "nowandnext|nan",
-    "playlist", "pl|playlist", "shuffle", "debug|ytdbg", "obs", "chatcmds", "chatcommands|chatcmds", "cmds|chatcmds", "autoratio"];
+    let pList = ["x|XSize", "y|YSize", "muted", "video", "id|name", "name", "chatadd", "add|chatadd", "chatadds|chatadd",
+        "nan", "nowandnext|nan", "playlist", "pl|playlist", "shuffle", "debug|ytdbg", "chatcmds", "chatcommands|chatcmds", "cmds|chatcmds",
+        "obs", "autoratio", "obsWidth", "obsHeight"];
 
     for (let p of pList) {
         let [param, to] = p.split("|");
         let u = qs.get(param);
         // no value means true e.g &nan means nan is true
         if (u === "false") u = false; else if(u === "true") u = true; else if (u === "") u = true;
+
 clog(`${param} maps to ${to} value : `, u);
+
         if (u !== null) {
             param = to ? to : param; // to exists after param|to split
             ytparams[param] = u;
         }
     }
+
+    ytparams.name ??= ytparams.obs;
 
     return ytparams;// they're global anyway
 }

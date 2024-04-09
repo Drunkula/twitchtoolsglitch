@@ -7,30 +7,25 @@
      <title>Youtube Player</title>
     <style>
         body, html, iframe {margin: 0; padding: 0;}
+/*
+
+#ytcontainer {
+    width: 100%;
+    height: 100%;
+}*/
 
         .youtube-player {
             text-align: center;
-            /* background-color: black; */
         }
 
         .youtube-player iframe {
             width: 100%;
-            height: 100%;
+            height: 100%; /* */
             /* background: none repeat scroll 0% 0% */
-        }
-            /* add and remove this class as necessary */
-        .youtube-player-43 iframe {
-            width: 75% !important;
         }
     </style>
 
     <script>
-           /* this will be run before the module
-                FLAGS in the url
-                    nan chat !nan commands make it return list
-                    add chat !add commands add to the list
-                    Is it possible to tell a player to 'nan' when it's onscreen in OBS?  Later.
-           */
           // updated by grab_url_params
         var ytparams =
         {
@@ -72,7 +67,7 @@
     -->
 </head>
 <body>
-    <div id="ytcontainer">
+    <div id="ytcontainer" class="youtube-player">
         <div id="ytplayer"></div>
     </div>
     <!--<div id="messages" style="clear: left;"></div>-->
