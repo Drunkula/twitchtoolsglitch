@@ -249,7 +249,7 @@ Disabling let's you get a player's list and send it to another.">
                 </div>
               </div>
               <div class="box playlist-controls">
-                <div class="label">Copy selected to / Delete from playlist</div>
+                <div class="label">Copy selected to / Delete selected from playlist</div>
                 <div class="level is-mobile">
                   <div class="level-left is-flex-direction-row">
                     <div class="level-item">
@@ -288,7 +288,7 @@ Disabling let's you get a player's list and send it to another.">
               <div class="box px-0" style="height: calc(100vh - 45px)">
                 <div id="playlist" style="overflow-y: auto; height: 100%;">
                   <div class="notification mb-1">
-                    <p>If the ** playing error log ** playlist has entries you can select its entries and then use the <strong>Copy selected to / Delete from</strong> playlist box to delete the failed entries from other lists.</p>
+                    <p>If the ** playing error log ** playlist has entries you can select its entries and then use the <strong>Copy selected to / Delete select from</strong> playlist box to delete the failed entries from other lists.</p>
                   </div>
                   <div class="notification">
                     <p>You can use this feature to help you delete watched entries from a playlist that you might update periodically.
@@ -323,8 +323,8 @@ Disabling let's you get a player's list and send it to another.">
                 <li>shuffle - true/false Override the shuffle flag for a list.  Not included uses the list's default.</li>
                 <li>video.  The id of the initial video to load e.g. video=xayd1c0wtOE</li>
                 <li>autoratio.  <strong>Recommended.</strong>  Borders and centres non-widescreen content so no clipping occurs. See OBS trick below.</li>
-                <li>muted - true/false. Whether the player starts muted. More for debugging</li>
-                <li>volume - 0 to 100.  Initial volume of player.  Default 100.</li>
+                <li>muted - true/false. Whether the player starts muted.</li>
+                <li>volume - 0 to 100.  Initial volume of player.  More for debugging outside OBS.  Default 100.</li>
                 <li>debug - true/false. Whether debug messages appear in a browser console.</li>
               </ul>
             </div>
@@ -332,9 +332,10 @@ Disabling let's you get a player's list and send it to another.">
           <div class="box">
             <div class="content">
               <ul>
-                <li><b>NOTE:</b> if you delete items from a playlist, don't refresh then rearrange and update the list the deleted entries will be resaved.</li>
-                <li>The yt_playlist_default length value in the variables table shows you the data length as the variable itself looks blank.</li>
-                <li>A playlists chat add option means it'll store chat !adds unless the permanent storage option is set to off.  Having a list with this set means you can copy ones you like to other playlists later.</li>
+                <li><b>NOTE:</b> if you delete items from a playlist, don't refresh if and then rearrange and update the list the deleted entries will be resaved.</li>
+                <li>A playlist's <i>chat !add stores</i> option makes it store videos added by the chat.  Having a list with this set means you can copy ones you like to other playlists later.</li>
+                <li>Permanent storage off will stop chat !adds going to ALL playlists with the storage flag set.</li>
+                <li>More for me: The yt_playlist_default length value in the Streamerbot variables table shows you the length of saved data as the list variable itself looks empty.</li>
               </ul>
             </div>
           </div>
