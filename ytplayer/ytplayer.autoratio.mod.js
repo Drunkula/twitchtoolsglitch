@@ -1,17 +1,13 @@
 /**
  * Resize the player to 4:3 size when a real 4:3 video is present
  */
-var playerContainer = document.getElementById("ytcontainer");
-var ytIframe;
 
 // what events does the YT internal player have?  onStateChange, that'll do
 // https://developers.google.com/youtube/iframe_api_reference#Events
 
-export async function auto_ratio_init() {
-    //ytcontainer.classList.add("youtube-player");
+export async function auto_ratio_init() {       //ytcontainer.classList.add("youtube-player");
     await window.ytpc.ytPlayer.ytPlayerReady();
     ytpc.ytPlayer.addPlayerListener('onStateChange', auto_ratio_handler);
-    ytIframe = document.getElementById("ytplayer");
 }
 
     // Playing seems to be the only reliable state to change ratio on.
@@ -22,33 +18,12 @@ export function auto_ratio_handler(p) {
 
     let holderRatio = document.documentElement.clientHeight / document.documentElement.clientWidth;
 
-    if (ytparams.obsHeight && ytparams.obsWidth) {
-        // console.log("USING THE YT PLAYER OBS width and height parameters");
+    if (ytparams.obsHeight && ytparams.obsWidth) {        // console.log("USING THE YT PLAYER OBS width and height parameters");
         holderRatio = ytparams.obsHeight / ytparams.obsWidth;
     }
-    //let holderRatio = playerContainer.clientHeight / playerContainer.clientWidth;
-    //document.documentElement.clientHeight
-/*
-    try {
-        ytpc.send_json({action:"relay", to: "all", data: {
-                action: "consolelog",
-                message:`window inner w x h = ${window.innerWidth} x ${window.innerHeight}`,
-                colour: "y"
-            }
-        });
-        ytpc.send_json({action:"relay", to: "all", data: {
-                action: "consolelog",
-                message:`Doc Element w x h = ${document.documentElement.clientWidth} x ${document.documentElement.clientHeight}`,
-                colour: "y"
-            }
-        });
-    } catch (error) {
-        console.log("ERRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRORRRRRRRRRRRRRRRRRRRRRRRRRRRR", error);
-    }
-//*/
+
     if (p.data === 1) // 1 = playing
-        // taller than holder's ratio, bars l/r
-    if (ratio > holderRatio) {
+    if (ratio > holderRatio) { // taller than holder's ratio, bars l/r
         ytplayer.style.width = `${100 * holderRatio / ratio}%`;
     }
     else {
