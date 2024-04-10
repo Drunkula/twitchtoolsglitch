@@ -38,25 +38,29 @@ function move_table_rows(tableid, direction="up") {
         if (r.dataset['videoid']) rows.push(r);
     });
 
-    if (!rows.length) return false;
+    //if (!rows.length) return false;
 // scrollIntoView still a bit of a mess on Brave
     switch(direction) {
         case "up":
-            if (rows[0].previousSibling === tbl.firstChild) {            // have reached the header
-                rows[0].previousSibling.after(...rows);
-            } else {
-                rows[0].previousSibling.before(...rows);
+            if (rows.length) {
+                if (rows[0].previousSibling === tbl.firstChild) {            // have reached the header
+                    rows[0].previousSibling.after(...rows);
+                } else {
+                    rows[0].previousSibling.before(...rows);
+                }
+                rows[0].scrollIntoView({behavior: "smooth", block: "nearest"});
             }
-            rows[0].scrollIntoView({behavior: "smooth", block: "nearest"});
             break;
         case "down":
             let last = rows.length - 1;
-            if (rows[last].nextSibling) {
-                rows[last].nextSibling.after(...rows);
-            } else {
-                rows[last].after(...rows);
+            if (rows.length) {
+                if (rows[last].nextSibling) {
+                    rows[last].nextSibling.after(...rows);
+                } else {
+                    rows[last].after(...rows);
+                }
+                rows[last].scrollIntoView({behavior: "smooth", block: "nearest"});
             }
-            rows[last].scrollIntoView({behavior: "smooth", block: "nearest"});
             break;
         case "top":
             tbl.firstChild.after(...rows);

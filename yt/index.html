@@ -39,7 +39,7 @@
               <!-- scroll into view--></a></li>
         </ul>
       </div>
-      <div class="mb-0">&nbsp;</div>
+      <div class="mb-1">&nbsp;</div>
       <div class="block tab-content" id="playlistpanels">
         <div class="tab-pane is-active">
           <div class="columns is-flex-direction-row-reverse">
@@ -103,7 +103,7 @@ Disabling let's you get a player's list and send it to another.">
               </div>
               <div class="mb-3 is-hidden-mobile"></div>
               <div class="box is-hidden-mobile mb-2">
-                <div>table rows</div>
+                <div>Entries</div>
                 <div class="player-controls">
                   <button class="rowsup button is-link is-small"><span class="icon"><i class="fas fa-angles-up"></i></span></button>
                   <button class="rowsdown button is-link is-small"><span class="icon"><i class="fas fa-angles-down"></i></span></button>
@@ -154,8 +154,8 @@ Disabling let's you get a player's list and send it to another.">
                 </div>
               </div>
             </div>
-            <div class="column is-8-widescreen is-7-desktop is-6-tablet">
-              <div class="box">
+            <div class="column is-8-widescreen is-7-desktop is-6-tablet px-0">
+              <div class="box px-0">
                 <div id="playerplaylist" style="overflow-y: auto; height:calc(100vh - 60px);">
                   <div class="notification" id="playerinstructions">
                     <button class="delete" data-target="#playerinstructions"></button>
@@ -169,8 +169,7 @@ Disabling let's you get a player's list and send it to another.">
                       <p>If you rearrange a list use the 'update list' button to send it to the player.  If you haven't refreshed after previous deletes they will be restored.</p>
                     </div>
                     <div class="box">
-                      <div class="block">
-                        Disabling the <i>auto</i> option means you have to use the reload button view a player's list.&nbsp;&nbsp;This can be used to 'get' a player's list, rearrange it, and update send it to a different or all players.</div><b>NOTE:</b>&nbsp;update replaces a player's entire list.
+                      <div class="block">Disabling the <i>auto</i> option turns off auto loading the playlist for a player.  You can use this to send a playlist from one player to another with "update".</div><b>NOTE:</b>&nbsp;update replaces a player's entire list.
                     </div>
                     <p class="box">'All Players' will send adds and deletes everywhere, so be careful if you've got multiple players in your setup for things like start and end music.  The changes are not permanent.</p>
                     <p class="box">The add video box will add to the player targetted by the select or all players.  Double click or right click the box to clear it.</p>
@@ -229,7 +228,7 @@ Disabling let's you get a player's list and send it to another.">
                 </div>
               </div>
               <div class="box">
-                <div>table rows
+                <div>Entries
                   <div class="playlist-controls">
                     <button class="rowsup button is-link is-small"><span class="icon"><i class="fas fa-angles-up"></i></span></button>
                     <button class="rowsdown button is-link is-small"><span class="icon"><i class="fas fa-angles-down"></i></span></button>
@@ -285,8 +284,8 @@ Disabling let's you get a player's list and send it to another.">
                 </div>
               </div>
             </div>
-            <div class="column is-8-widescreen is-7-desktop is-6-tablet">
-              <div class="box ml-0">
+            <div class="column is-8-widescreen is-7-desktop is-6-tablet px-0">
+              <div class="box px-0">
                 <div id="playlist" style="overflow-y: auto; height:calc(100vh - 80px);">
                   <div class="notification mb-1">
                     <p>If the ** playing error log ** playlist has entries you can select its entries and then use the <strong>Copy selected to / Delete from</strong> playlist box to delete the failed entries from other lists.</p>
@@ -310,9 +309,9 @@ Disabling let's you get a player's list and send it to another.">
         <div class="tab-pane">
           <div class="box"><b>players now can have (and need) optional paramers.  Most default to off</b>
             <p>For a chat controlled list you'd want nan, chatadd, chatcmds to be on</p>
-            <p class="pl-6"><a href="https://twitch-tools.glitch.me/ytplayer/?id=Test%20Player&amp;chatadd&amp;chatcmds&amp;nan&amp;autoratio" target="_blank">https://twitch-tools.glitch.me/ytplayer/?id=Name in Observer Page&amp;nan&amp;chatadd&amp;chatcmdsf;&amp;autoratio</a></p>
-            <p>Put a ? after the url and separate them with &amp; signs.  E.g. /?playlist=default&amp;x=1280&amp;y=720</p>
-            <p>Including just the name of a true/false option marks it true so use &amp;nan&amp;chatcmds instead of &amp;nan=true&amp;chatcmds=true</p>
+            <p class="pl-6"><a href="https://twitch-tools.glitch.me/ytplayer/?id=Test%20Player&amp;chatadd&amp;chatcmds&amp;nan&amp;autoratio" target="_blank">https://twitch-tools.glitch.me/ytplayer/?id=Name in Observer Page&amp;nan&amp;chatadd&amp;chatcmds&amp;autoratio</a></p>
+            <p>Put a ? after the url and separate them with &amp; signs.  E.g. /?playlist=default&amp;chatadd=true&amp;id=Grindhouse Films</p>
+            <p>The option alone is a shortcut for it being true so &amp;nan&amp;chatcmds is the same as &amp;nan=true&amp;chatcmds=true</p>
             <p>The options are:</p>
             <div class="content">
               <ul>
