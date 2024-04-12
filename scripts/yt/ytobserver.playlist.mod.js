@@ -362,3 +362,31 @@ export function on_playlist_deleted(d) {
     toast(`Playlist <strong>${d.name}</strong> deleted.\n${d.count} entries were lost at sea.`, "is-link", 10000, {dismissible: true});
 }
 
+    // replace all the videos in a player - acts as if the player requested a playlist
+
+export function player_playlist_replace() {
+// #playerfullreplace
+    // toast("Yeay yea");
+    let listuid = window.get_select_val("loadplaylistselect");
+    if ( listuid === "") {
+        toast("Select a playlist", "is-danger");
+        return;
+    }
+    let name = window.get_select_text("loadplaylistselect");
+    let to = window.get_select_val("playlistcopytoplayer");
+    if (to === "players") {
+        toast("Replacing all playlists in all players is too dangerous.  Choose a player");
+        return;
+    }
+
+        // need the playlist NAME to avoid writing code
+    let pack = {
+        action: "loadplaylist",
+        name,
+        to,
+    }
+
+    YTO.send_json(pack);
+
+    toast(`Replacing <b>${window.get_select_text("playlistcopytoplayer")}'s</b> playlist with <b>${name}</b>`);
+}

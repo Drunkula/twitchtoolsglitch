@@ -169,7 +169,7 @@ Disabling let's you get a player's list and send it to another.">
                       <p>If you rearrange a list use the 'update list' button to send it to the player.  If you haven't refreshed after previous deletes they will be restored.</p>
                     </div>
                     <div class="box">
-                      <div class="block">Disabling the <i>auto</i> option turns off auto loading the playlist for a player.  You can use this to send a playlist from one player to another with "update".</div><b>NOTE:</b>&nbsp;update replaces a player's entire list.
+                      <div class="block">Disabling the <i>auto</i> option turns off auto loading a playlist when the select is changed.  You can use this to send a playlist from one player to another with "update".</div><b>NOTE:</b>&nbsp;update replaces a player's entire list.
                     </div>
                     <p class="box">'All Players' will send adds and deletes everywhere, so be careful if you've got multiple players in your setup for things like start and end music.  The changes are not permanent.</p>
                     <p class="box">The add video box will add to the player targetted by the select or all players.  Double click or right click the box to clear it.</p>
@@ -181,7 +181,7 @@ Disabling let's you get a player's list and send it to another.">
         </div>
         <div class="tab-pane">
           <div class="columns is-flex-direction-row-reverse">
-            <div class="column is-4-widescreen is-5-desktop is-6-tablet">
+            <div class="column is-4-fullhd is-5-widescreen is-6-desktop is-7-tablet">
               <div class="box playlist-controls">
                 <div class="level is-mobile">
                   <div class="level-left is-flex-direction-row">
@@ -201,7 +201,7 @@ Disabling let's you get a player's list and send it to another.">
                       <button class="button is-success" data-get="saveplaylist" title="I do save even though I don't say anything."><span class="icon"><i class="fas fa-floppy-disk"></i></span></button>
                     </div>
                     <div class="level-item">
-                      <button class="button is-success" data-get="getplaylists">Get lists</button>
+                      <button class="button is-success" data-get="getplaylists" title="Refreshes this list of playlists">Lists</button>
                     </div>
                   </div>
                 </div>
@@ -271,20 +271,29 @@ Disabling let's you get a player's list and send it to another.">
                     </div>
                   </div>
                 </div>
-                <div class="label">Send to player</div>
-                <div class="field has-addons">
-                  <div class="control">
-                    <div class="select">
-                      <select class="playerselect" id="playlistcopytoplayer">
-                        <option value="" disabled>get playlists first</option>
-                      </select>
+                <div class="label">Add to player (selected) / Replace all (everything)</div>
+                <div class="level is-mobile"></div>
+                <div class="level-left is-flex-direction-row">
+                  <div class="level-item">
+                    <div class="field has-addons">
+                      <div class="control">
+                        <div class="select">
+                          <select class="playerselect" id="playlistcopytoplayer">
+                            <option value="" disabled>get playlists first</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="control"><a class="button is-success sendtoplayer" data-toselectid="playlistcopytoplayer" title="Adds the selected entries to the player(s)">Add</a></div>
                     </div>
                   </div>
-                  <div class="control"><a class="button is-success sendtoplayer" data-toselectid="playlistcopytoplayer">Send</a></div>
+                  <div class="level-item">
+                    <button class="button is-danger" id="playerfullreplace" title="Replaces the player's entire playlist.
+No selections need to be made.">Replace</button>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="column is-8-widescreen is-7-desktop is-6-tablet px-0">
+            <div class="column is-8-fullhd is-7-widescreen is-6-desktop is-5-tablet px-0">
               <div class="box px-0" style="height: calc(100vh - 45px)">
                 <div id="playlist" style="overflow-y: auto; height: 100%;">
                   <div class="notification mb-1">
