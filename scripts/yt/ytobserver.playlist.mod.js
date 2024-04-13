@@ -12,9 +12,11 @@ let playlistEvents = {
 
 export function send_entries_to_player(x) {
     console.log("Send entries to player: ", x);
-    let select = gid(x.target.dataset['toselectid']);
-    let uid = select.selectedIndex >= 0 ? select.options[select.selectedIndex].value : "players";
-    let toName = select.selectedOptions[0].text;
+    //let select = gid(x.target.dataset['toselectid']);
+    //let uid = select.selectedIndex >= 0 ? select.options[select.selectedIndex].value : "players";
+    let uid = window.get_select_val(x.target.dataset['toselectid']) ?? "players";
+    let toName = window.get_select_text(x.target.dataset['toselectid']);
+    //let toName = select.selectedOptions[0].text;
 
     //let entries = table_entries_to_array('playlisttable');
     let data = table_entries_to_array('playlist', true);
@@ -28,7 +30,7 @@ export function send_entries_to_player(x) {
         shuffle: false
     }
 
-    toast(`Sending ${data.length} entries to ${toName}`);
+    toast(`Sending <b>${data.length}</b> entries to <b>${toName}</b>`);
     YTO.send_json(pack);
 }
 
@@ -364,17 +366,23 @@ export function on_playlist_deleted(d) {
 
     // replace all the videos in a player - acts as if the player requested a playlist
 
-export function player_playlist_replace() {
-// #playerfullreplace
-    // toast("Yeay yea");
-    let listuid = window.get_select_val("loadplaylistselect");
+export function player_playlist_replace(e) {
+    // ids for the selects
+    let player = e.target.dataset["playerselect"];
+    let list = e.target.dataset["listselect"];
+
+    let listuid = window.get_select_val(list);
+    let playlistName = window.get_select_text(list);
+
     if ( listuid === "") {
         toast("Select a playlist", "is-danger");
         return;
     }
-    let name = window.get_select_text("loadplaylistselect");
-    let to = window.get_select_val("playlistcopytoplayer");
-    if (to === "players") {
+
+    let playerUid = window.get_select_val(player);
+    let playerName = window.get_select_text(player)
+
+    if (playerUid === "players") {
         toast("Replacing all playlists in all players is too dangerous.  Choose a player");
         return;
     }
@@ -382,11 +390,11 @@ export function player_playlist_replace() {
         // need the playlist NAME to avoid writing code
     let pack = {
         action: "loadplaylist",
-        name,
-        to,
+        name: playlistName,
+        to: playerUid,
     }
 
     YTO.send_json(pack);
 
-    toast(`Replacing <b>${window.get_select_text("playlistcopytoplayer")}'s</b> playlist with <b>${name}</b>`);
+    toast(`Replacing <b>${playerName}'s</b> playlist with <b>${playlistName}</b>`);
 }

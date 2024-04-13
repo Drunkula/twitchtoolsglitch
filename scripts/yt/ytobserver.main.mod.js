@@ -91,7 +91,7 @@ window.YTO = YTO;// so console debug
 
     // sends a video to the player
 
-function add_video_to_player() {
+export function add_video_to_player() {
     let video = gid("addvideotoplayer").value;
     YTO.send_json({action: "addvideotoplayer", video, to: gid("playerselect").value,
         adder: gid("videoadder").value, from: YTO.myUID});
@@ -103,7 +103,7 @@ function update_playlist_set_btn_state(on = true) {
 window.update_playlist_set_btn_state = update_playlist_set_btn_state;
     // sends delete permanently info to player
 
-function delete_player_only(perm = false) {
+export function delete_player_only(perm = false) {
         // get the selected playlist boxes
     // obs fix let rows = qsa("#playerplaylist tr:has(input[type=checkbox]:checked)");
     let rows = [];

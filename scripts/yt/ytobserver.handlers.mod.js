@@ -1,4 +1,4 @@
-import {send_playlist_to_player, get_players_list} from "./ytobserver.main.mod.js";
+import {add_video_to_player, send_playlist_to_player, get_players_list, delete_player_only} from "./ytobserver.main.mod.js";
 import * as l from "./ytobserver.playlist.mod.js";
 import {move_table_rows} from "./observer.helpers.mod.js";
 
@@ -71,6 +71,6 @@ export default
     {selector: "#del-sel-from-pl", event: "click", function: l.delete_from_other_playlist},
 
         // full replace button
-    {selector: "#playerfullreplace", event: "click", function: l.player_playlist_replace}
+    {selector: ".load-playlist", event: "click", function: l.player_playlist_replace}
 
 ];

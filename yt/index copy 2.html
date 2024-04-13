@@ -102,28 +102,6 @@ Disabling let's you get a player's list and send it to another.">
                 </div>
               </div>
               <div class="mb-3 is-hidden-mobile"></div>
-              <div class="box player-controls is-hidden-mobile mb-2">
-                <div class="label">Load / Copy selected to playlist</div>
-                <div class="level is-mobile">
-                  <div class="level-left is-flex-direction-row">
-                    <div class="level-item">
-                      <div class="field has-addons">
-                        <div class="control">
-                          <div class="select is-small">
-                            <select class="playlistselect" id="copytoplaylistfromplayer">
-                              <option value="" disabled>get playlists first</option>
-                            </select>
-                          </div>
-                        </div>
-                        <div class="control"><a class="button is-small is-success load-playlist" data-playerselect="playerselect" data-listselect="copytoplaylistfromplayer">load</a></div>
-                      </div>
-                    </div>
-                    <div class="level-item">
-                      <div class="control"><a class="button is-small is-success savetoplaylist" data-toselectid="copytoplaylistfromplayer">Copy</a></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
               <div class="box is-hidden-mobile mb-2">
                 <div>Entries</div>
                 <div class="player-controls">
@@ -149,6 +127,20 @@ Disabling let's you get a player's list and send it to another.">
                   <div class="control"><a class="button is-info addvideobtn">add</a></div>
                 </div>
               </div>
+              <div class="box player-controls is-hidden-mobile mb-2">
+                <div class="label">Copy selected to playlist
+                  <div class="field has-addons">
+                    <div class="control">
+                      <div class="select">
+                        <select class="playlistselect" id="copytoplaylistfromplayer">
+                          <option value="" disabled>get playlists first</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="control"><a class="button is-success savetoplaylist" data-toselectid="copytoplaylistfromplayer">Copy</a></div>
+                  </div>
+                </div>
+              </div>
               <div class="box is-hidden-mobile">
                 <div class="level">
                   <div class="level-left">
@@ -163,7 +155,7 @@ Disabling let's you get a player's list and send it to another.">
               </div>
             </div>
             <div class="column is-8-widescreen is-7-desktop is-6-tablet px-0">
-              <div class="box px-0" style="height:calc(100vh - 45px); position: sticky;">
+              <div class="box px-0" style="height:calc(100vh - 45px);">
                 <div id="playerplaylist" style="overflow-y: auto; height: 100%">
                   <div class="notification" id="playerinstructions">
                     <button class="delete" data-target="#playerinstructions"></button>
@@ -258,7 +250,7 @@ Disabling let's you get a player's list and send it to another.">
               </div>
               <div class="box playlist-controls">
                 <div class="label" title="Copy checked entries in the playlist to the selected playlist
-or delete the checked entries from the selected playlist.">Copy selected to / Delete selected from...</div>
+or delete the checked entries from the selected playlist.">Copy selected to / Delete selected from playlist</div>
                 <div class="level is-mobile">
                   <div class="level-left is-flex-direction-row">
                     <div class="level-item">
@@ -280,21 +272,24 @@ or delete the checked entries from the selected playlist.">Copy selected to / De
                     </div>
                   </div>
                 </div>
-                <div class="label">Add selected videos to player</div>
-                <div class="level is-mobile">
-                  <div class="level-left is-flex-direction-row">
-                    <div class="level-item">
-                      <div class="field has-addons">
-                        <div class="control">
-                          <div class="select">
-                            <select class="playerselect" id="playlistcopytoplayer">
-                              <option value="" disabled>get playlists first</option>
-                            </select>
-                          </div>
+                <div class="label">Add to player (selected) / Replace all (everything)</div>
+                <div class="level is-mobile"></div>
+                <div class="level-left is-flex-direction-row">
+                  <div class="level-item">
+                    <div class="field has-addons">
+                      <div class="control">
+                        <div class="select">
+                          <select class="playerselect" id="playlistcopytoplayer">
+                            <option value="" disabled>get playlists first</option>
+                          </select>
                         </div>
-                        <div class="control"><a class="button is-success sendtoplayer" data-toselectid="playlistcopytoplayer" title="Adds the selected entries to the player(s)">Add</a></div>
                       </div>
+                      <div class="control"><a class="button is-success sendtoplayer" data-toselectid="playlistcopytoplayer" title="Adds the selected entries to the player(s)">Add</a></div>
                     </div>
+                  </div>
+                  <div class="level-item">
+                    <button class="button is-danger" id="playerfullreplace" title="Replaces the chosen player's entire playlist with the selected playlist.
+No boxes need to be ticked.">Replace</button>
                   </div>
                 </div>
               </div>

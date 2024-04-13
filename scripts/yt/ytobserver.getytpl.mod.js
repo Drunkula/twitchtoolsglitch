@@ -53,7 +53,7 @@ export async function add_ytplaylist_to_playlist() {
  * @returns array of VidInfo
  */
 
-export async function fetch_yt_playlist_entries(d) {
+async function fetch_yt_playlist_entries(d) {
     let vInfos = [];
     let deletedVideos = 0;
     let pageToken = null;   // page tokens let us know there are more results to grab
@@ -80,7 +80,7 @@ export async function fetch_yt_playlist_entries(d) {
             return;
         }
 
-fetchedResults += res.items.length;
+        fetchedResults += res.items.length;
 
         for(let vi of res.items) {
             let title = vi.snippet.title;
