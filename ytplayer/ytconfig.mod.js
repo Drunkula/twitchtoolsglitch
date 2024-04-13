@@ -25,7 +25,6 @@ export let playlistDefaults = [
     "hFtfMtFSD8A",
     "QM_kJkChgrc",
     'fqACWyzdkh8',
-    "57QRuxfWkyU",
 ];
 
 
