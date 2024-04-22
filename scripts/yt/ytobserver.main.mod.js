@@ -25,7 +25,7 @@ class YTObserver extends SockMsgRouter {
     defaultAdderSet = false;
 
     actions = {
-        allplayerlistdata: received_player_playlist,
+        allplayerlistdata: received_player_list,
         currsongid: received_songid,
 
         consoleclear: d => console.clear(),
@@ -234,13 +234,13 @@ function playlist_selects_update(d) {
 
         o1.text = "Choose"; o1.value="";
         opts.push(o1);
+            // alpha sort the object's keys
+        d.lists.sort( (a,b) => a.name.localeCompare(b.name) );
 
         for (let p of d.lists) {
             let opt = dce("option");
             opt.value = p.uid;
             opt.text = p.name;
-            //console.log("SELECT BUILD", p);
-            //opt.dataset["socketid"] = p;
             if (opt.value === currSel) opt.selected = 'selected';
             opts.push(opt);
         }
@@ -263,7 +263,7 @@ function got_storage_status(d) {
 
     // creates a table from the playlist data
 
-function received_player_playlist(d) {
+function received_player_list(d) {
     let pl = JSON.parse(d.data);
 
     let {playlist, playlistmap, playlistindex} = pl.data;

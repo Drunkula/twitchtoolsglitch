@@ -89,21 +89,14 @@ window.addEventListener('beforeunload', x => x.preventDefault());
     }
 
     function message_handler(channel, userstate, message, self) {
-
-        if (searchTermRegex.test(message)) {
-            let msgHighlight = message.replaceAll(searchTermRegex, '<span class="searchterm">$1</span>');
-
-            msg_add(channel, userstate["display-name"], msgHighlight, userstate["tmi-sent-ts"]);
-        } else
         if ( TT.config.users.includes( userstate["username"] )  ) {
             console.log(`${userstate["username"]} in ${channel}: ${message}`);
 //console.log(userstate);
             msg_add(channel, userstate["display-name"], message, userstate["tmi-sent-ts"]);
+        } else
+        if (searchTermRegex.test(message)) {
+            msg_add(channel, userstate["display-name"], message, userstate["tmi-sent-ts"]);
         }
-    }
-
-    function highlight_matches(message, regex) {
-
     }
 
         // I'm not getting new JOIN info when I leave a channel and then join again
@@ -145,8 +138,7 @@ window.addEventListener('beforeunload', x => x.preventDefault());
 
             // message
         let msgDiv = dce('div');
-		//msgDiv.textContent = message;
-		msgDiv.innerHTML = message;
+		msgDiv.textContent = message;
 		msgDiv.classList.add('speechQText');
             // time
         let tDiv = dce('div');  // well done for not taking a string, Date.
@@ -227,7 +219,7 @@ window.addEventListener('beforeunload', x => x.preventDefault());
                 // join with word boundaries
             let regexStr = "(\\b" + terms.join("\\b|\\b") + "\\b)";
             // backslashes ARE considered as word boundaries and \b\\b doesn't work
-            searchTermRegex = new RegExp(regexStr, "ig");
+            searchTermRegex = new RegExp(regexStr, "i");
             //searchTermRegex = new RegExp("\\b\\\\\\b", "i");
             console.log("REGEX STRING", regexStr, searchTermRegex);
         } else {
