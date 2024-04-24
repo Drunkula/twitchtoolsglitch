@@ -218,6 +218,19 @@ export function send_load_playlist_cmd() {
     YTO.send_json({action: "sendplaylist", uid});
 }
 
+    // update the viewed table if the auto checkbox is set
+
+export function dirty_handler(d) {
+    if ( ! gid("autoloadplayerlist").checked ) return;
+
+    let table = gid("playertable");
+    if (!table) return;
+
+    if (table.dataset['uid'] === d.player.uid) {
+        YTO.send_json({action: "getplayerplaylist", to: d.player.uid});
+    }
+}
+
 
     // OBS's browser doesn't allow the use of :has() so let's change things
 export function table_entries_to_array(tableId, onlyChecked = false) {

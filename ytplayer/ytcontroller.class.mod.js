@@ -64,6 +64,8 @@ class YTController extends SockMsgRouter {
         ['onError', e => this.yt_player_play_error_handler(e)],
     ]
 
+        // events that can be added before the youtube player is ready to play
+
     playerPreReadyEvents = [
         ['onReady', e => {
             out("--- Player is Ready ---");
@@ -98,13 +100,13 @@ class YTController extends SockMsgRouter {
         chatprev:   d => { if (this.chatcmds) this.prev(); },
         chatshuffle:d => { if (this.chatcmds) this.shuffle(false); },
 
-        shuffle:        d => { this.shuffle(false); },
-        shuffleall:     d => { this.shuffle(true); },
+        shuffle:        d => { this.shuffle(false); this.dirty_announce("shuffle"); },
+        shuffleall:     d => { this.shuffle(true); this.dirty_announce("shuffle"); },
 
         // needs to check if it's chat added
-        playlistadd:    d =>this.playlist_add_handler(d),
+        playlistadd:    d => {if (this.playlist_add_handler(d)) this.dirty_announce("addedvideos");},
             // received entire thing
-        fullplaylist:   d => this.got_full_playlist(d),
+        fullplaylist:   d => { this.got_full_playlist(d); this.dirty_announce("fullplaylistload")}, // dirty ??
         loadplaylist:   d => this.send_json({action:"loadplaylist", name: ytparams.playlist}),
         // SENDS our playlist up, not received
         getplayerplaylist: e => this.send_whole_playlist(e),
@@ -113,7 +115,7 @@ class YTController extends SockMsgRouter {
         almostend:  d => { this.yt.seekTo( this.yt.getDuration() - 5); },
         "next()":       d => {this.yt.nextVideo()},
         "prev()":       d => {this.yt.previousVideo()},
-
+            // SB broadcasts a list with players in the current scene.  Play if your name is in the list or pause
         allplayersplaypause: d => {
             if ( d.players.includes(this.myObsSourceName) )// IDEA && !thisIgnorePlayPause
                 this.play();
@@ -138,7 +140,7 @@ class YTController extends SockMsgRouter {
 
         sendmessage:    d => { clog("Sending:" + d.data); this.send(d.data); },
 
-        clearvideos:d => { this.playlist = []; this.playlistPointer = 0; this.playlistMap.clear(); this.playlistNextCount = 0;},
+        clearvideos:d => { this.playlist = []; this.playlistPointer = 0; this.playlistMap.clear(); this.playlistNextCount = 0; this.dirty_announce("clearedplaylist"); },
 
         getvideoinfo:   d => {clog( this.yt.getVideoData() ); },
 
@@ -149,9 +151,10 @@ class YTController extends SockMsgRouter {
         disconnect: d => ytpc.socketty.close(),
         f: d => {},
             // true = delete permanently, sends flag back to streamerbot
-        deletecurrentvideoperm: d => this.delete_current(true),
-        deletecurrentvideotemp: d => this.delete_current(false),
-        deletefromplayer: d => this.delete_vids(d.videoids),
+        //deletecurrentvideoperm: d => this.delete_current(true),
+        //deletecurrentvideotemp: d => this.delete_current(false),
+
+        deletefromplayer: d => { if (this.delete_vids(d.videoids) > 0) this.dirty_announce("deletedvids"); },
 
         nowandnext: d => this.now_and_next(d.data.howMany),
 /*
@@ -200,10 +203,13 @@ class YTController extends SockMsgRouter {
         }
     }
 
-        // splice out the current video and any nexts
-        // shuffle everything
-        // put curr and nexts back to the start and reset the pointer
-    shuffle(all = false) {clog("Shuffly shuff shuff happan");
+        /**
+         * splice out the current video and any nexts, put curr and nexts back to the start and reset the poi
+         * Shuffles the playlist fully or leaves nexts
+         * @param {bool} all true shuffles everything
+         */
+
+    shuffle(all = false) {//clog("Shuffly shuff shuff happan");
         let m, currAndNexts, t, i;
 
         if (all) {
@@ -237,8 +243,9 @@ class YTController extends SockMsgRouter {
         // got to deal with playnexts.
         if (newPlPos >= 0) {
             let fwdOffset = newPlPos - this.playlistPointer;
-            console.log("OLD POS, NEW POS, DIFFERENCE:", this.playlistPointer, newPlPos, fwdOffset);
+            //console.log("OLD POS, NEW POS, DIFFERENCE:", this.playlistPointer, newPlPos, fwdOffset);
             this.playlistPointer = newPlPos;
+            // if you jump past queued zero it, jump back CLEARS queue - DEBUG: this is not ideal.
             if (fwdOffset > 0)
             {
                 this.playlistNextCount -= fwdOffset;
@@ -328,7 +335,7 @@ class YTController extends SockMsgRouter {
 
     playlist_add_handler(d) {
         if (d.chatadded === true && this.chatadds === false) return;
-
+        // result has {addCount, relative, position, success}
         let result = this.add_video_items(d.data, d.addnext ? true : false);
 
         console.log("RESULT OF THE CHAT ADDED THING: ", result);
@@ -352,11 +359,15 @@ class YTController extends SockMsgRouter {
                 data: {action: "playeraddresult", result, player: this.get_player_info(), data: d.data}
             });
         }
+
+        return result.addCount;
     }
 
 /*
 https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJXC18b_bf6PIIUYFrkRwlGjK6P4&fields=items.snippet.description,items.snippet.title,items.snippet.channelTitle&id=Ks-_Mh1QhMc
 https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJXC18b_bf6PIIUYFrkRwlGjK6P4&fields=items.snippet.description,items.snippet.title,items.snippet.channelTitle&id=%videoid%
+
+    @returns {addCount, position, relative, success}
 */
     add_video_items(videoItem, isNext = false) {
         //clog("ADD next:", isNext);
@@ -402,6 +413,13 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         // in reality I think using a "front splice" method where nexts are put at the start
         // is 'better' as less splices will happen toward the front of the array
 
+        /**
+         * Adds a SINGLE video entry to the playlist
+         * @param {*} entry
+         * @param {*} next
+         * @returns {success: bool, position: absolute, relative: to playlistpointer, error: only on fail}
+         */
+
     #add_entry(entry, next = false) {
         let {videoid, title="Unknown", channel = "Unknown", adder = "Unknown adder", starttime = 0} = entry;
 
@@ -446,7 +464,7 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
             return {success: true, position: posn, relative};
         }
 
-        return {success: false, error: "Unknown", position: -1, relative: -1};
+        // unreachable return {success: false, error: "Unknown", position: -1, relative: -1};
     }
 
         // PLAYING, CUED, PAUSED, BUFFERING, UNSTARTED
@@ -609,7 +627,7 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
 
         // delete current video and report its id back to the master
 
-    delete_current(perm = false) {
+/*     delete_current(perm = false) {
         let videoid = this.playlistCurrentId;
             // filter the array or splice?  Filtering 'safer'
 
@@ -628,12 +646,15 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         }
 
         // this.next();
-    }
+    } */
 
-        // vids = array
-        // HEY HEY HEY HEY HEY HEY HEY HEY HEY HEY  Make this account for nexts
+        /**
+         * param vids = array of video ids
+         * returns number of deletes
+         */
+
     delete_vids(vids) {
-        let wasCurr = 0;
+        let wasCurr = 0;// a count where deleted video would be the one playing
         let deletes = 0;
         for (let v of vids) {
             let pos = this.delete(v);   // has spliced out
@@ -659,15 +680,13 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
             this.next();
         }
 
-        // delete if it's in the next
-        //console.log("DELETES", deletes, "was curr:", wasCurr);
-        this.send_json({uid: this.myUID, name: this.myName, to: this.returnto, action:"playerdeletecount", count: deletes});
-        console.log("RETURN TO: ", this.returnto);
-        this.send_json({action: "relay", to: this.returnto,
-            data: {action:"playerdeletecount", count: deletes, player: this.get_player_info()}});
+//        this.send_json({uid: this.myUID, name: this.myName, to: this.returnto, action:"playerdeletecount", count: deletes});
+        this.send_json({action: "relay", to: this.returnto, data: {action:"playerdeletecount", count: deletes, player: this.get_player_info()}});
 
         this.send_json({action:"toast", uid: this.uid, to: this.returnto,
             message: `<b>${this.myName}</b> says\n${deletes} videos I have deleted, father.`});
+
+        return deletes;
     }
 
         // single id, url, playlist position
@@ -732,7 +751,6 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         }
         else
         if (ytparams.shuffle === true || (ytparams.shuffle === null && d.shuffle === true)) {
-            console.log("I AM SHUFFLING!");
             this.shuffle(true);
         }
 
@@ -757,6 +775,20 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         this.send_json(pack);
     }
 
+        // observers can decide whether to request an updated playlist
+
+    dirty_announce(reason = "unknown") {
+        let pack = {
+            action: "relay",
+            to: "observers",
+            data: {
+                action: "playlistdirty",
+                reason,
+                player: this.get_player_info()
+            }
+        }
+        this.send_json(pack);
+    }
         // player info could be added at the streamerbot stage from the players dictionary
         // if done on every message that needs relaying to an observer that'll remove a stage
         // objs passed by ref so can just run as add_reqpack(obj) or console.log(add_reqpack(obj))
