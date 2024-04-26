@@ -78,12 +78,7 @@
                         <div class="control"><a class="button is-success" id="playerselectgetbtn"><span class="icon"><i class="fas fa-rotate"></i></span></a></div>
                       </div>
                     </div>
-                    <div class="level-item">
-                      <label class="checkbox" title="Auto load player's list on change.
-Disabling let's you get a player's list and send it to another.">
-                        <input class="mr-2" id="autoloadplayerlist" type="checkbox" checked="checked">auto
-                      </label>
-                    </div>
+                    <div class="level-item">zzz</div>
                   </div>
                   <div class="level-right">
                     <div class="level-item">
@@ -137,8 +132,22 @@ Disabling let's you get a player's list and send it to another.">
                 </div>
                 <div>Player Only :</div>
                 <div class="player-controls">
-                  <button class="delete-playeronly button is-danger is-small">Delete</button>
-                  <button class="button is-danger is-small" data-relay="shuffle">Shuffle</button>
+                  <div class="level is-mobile">
+                    <div class="level-left is-flex-direction-row">
+                      <div class="level-item">
+                        <button class="delete-playeronly button is-danger is-small">Delete</button>
+                      </div>
+                      <div class="level-item">
+                        <button class="button is-danger is-small" data-relay="shuffle">Shuffle</button>
+                      </div>
+                      <div class="level-item">
+                        <label class="checkbox" title="Auto load player's list on change.
+Disabling let's you get a player's list and send it to another.">
+                          <input class="mr-2" id="autoloadplayerlist" type="checkbox" checked="checked">auto update
+                        </label>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="box player-controls is-hidden-mobile mb-2">
@@ -248,11 +257,25 @@ Disabling let's you get a player's list and send it to another.">
                   </div>
                   <div>Delete :</div>
                   <div class="playlist-controls">
-                    <button class="delete-permanently button is-danger is-small">Confirm
-                      <input class="ml-1" id="delplaylistconfirm" type="checkbox">
-                    </button>
-                    <button class="modal-trigger button is-danger is-small" data-target="createlistmodal">Create</button>
-                    <button class="button is-link is-small" id="editplaylistshowmodalbtn">Edit</button>
+                    <div class="level is-mobile"></div>
+                    <div class="level-left is-flex-direction-row">
+                      <div class="level-item">
+                        <button class="delete-permanently button is-danger is-small">Confirm
+                          <input class="ml-1" id="delplaylistconfirm" type="checkbox">
+                        </button>
+                      </div>
+                      <div class="level-item">
+                        <button class="modal-trigger button is-danger is-small" data-target="createlistmodal">Create</button>
+                      </div>
+                      <div class="level-item">
+                        <button class="button is-link is-small" id="editplaylistshowmodalbtn">Edit</button>
+                      </div>
+                      <div class="level-item">
+                        <label class="checkbox" title="Auto update playlist on changes.">
+                          <input class="mr-2" id="autoloadplaylist" type="checkbox" checked="checked">auto update
+                        </label>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

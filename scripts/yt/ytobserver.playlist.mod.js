@@ -220,7 +220,7 @@ export function send_load_playlist_cmd() {
 
     // update the viewed table if the auto checkbox is set
 
-export function dirty_handler(d) {
+export function player_dirty_handler(d) {
     if ( ! gid("autoloadplayerlist").checked ) return;
 
     let table = gid("playertable");
@@ -228,6 +228,19 @@ export function dirty_handler(d) {
 
     if (table.dataset['uid'] === d.player.uid) {
         YTO.send_json({action: "getplayerplaylist", to: d.player.uid});
+    }
+}
+
+    // update the viewed table if the auto checkbox is set
+
+export function playlist_dirty_handler(d) {
+    if ( ! gid("autoloadplaylist").checked ) return;
+
+    let table = gid("playlisttable");
+    if (!table) return;
+
+    if (table.dataset['uid'] === d.uid) {
+        YTO.send_json({action: "sendplaylist", uid: d.uid});
     }
 }
 

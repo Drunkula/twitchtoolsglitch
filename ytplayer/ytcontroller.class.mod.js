@@ -782,7 +782,7 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
             action: "relay",
             to: "observers",
             data: {
-                action: "playlistdirty",
+                action: "playerdirty",
                 reason,
                 player: this.get_player_info()
             }
