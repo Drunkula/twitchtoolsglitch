@@ -391,6 +391,7 @@ html {
 
 table tr.is-chat-added {
 	background-color: #40144a;
+	color: white;
 }
 
 table tr.is-chat-added.is-selected {
