@@ -398,3 +398,11 @@ table tr.is-chat-added.is-selected {
 	color: white;
 }
 
+#playerplaylist, #playlist {
+	scrollbar-color: white rebeccapurple;
+	scrollbar-width: thin;
+}
+
+#playlist ::-webkit-scrollbar {
+	width: 10px;
+}

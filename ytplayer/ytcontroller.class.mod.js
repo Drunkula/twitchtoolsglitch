@@ -338,20 +338,16 @@ class YTController extends SockMsgRouter {
         // result has {addCount, relative, position, success}
 
         let chatAdded = Boolean(d.chatadded) || Boolean(d.addaschatadded);
-
-//console.log("CHAT ADDED?", chatAdded, d.chatadded, d.addaschatadded, d);
-
-        let result = this.add_video_items(d.data, d.addnext ? true : false, chatAdded);
+// adding all as chat adds *visually*
+        let result = this.add_video_items(d.data, d.addnext ? true : false, true);
 
         clog("RESULT OF THE CHAT ADDED THING: ", result);
 // chatadded or d.data === object = single, d.data == array = multiples
-        if (d.chatadded) {
-            // ytparams.nan can be used to mute this.
-            if (ytparams.nan === true)
-                this.send_json({action: "chataddresult", result, data: d.data, player: this.get_player_info()});
+        if (d.chatadded && ytparams.nan === true) {  // ytparams.nan can be used to mute this.
+            this.send_json({action: "chataddresult", result, data: d.data, player: this.get_player_info()});
             //return;
         }
-            // observer has sent 1 or many
+        else     // observer has sent 1 or many
         if (d.data instanceof Array) { // array of entries
             let r = {addCount: result.addCount, totalEntries: d.data.length}
             this.send_json({
