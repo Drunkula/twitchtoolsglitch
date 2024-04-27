@@ -289,6 +289,7 @@ function received_player_list(d) {
         tr.dataset["channel"] = playlistmap[id].channel;
         tr.dataset["starttime"] = playlistmap[id].starttime;
         if (counter === playlistindex) { tr.classList.add("is-selected"); selectedRow = tr; }
+        if (playlistmap[id].chatadd) { tr.classList.add("is-chat-added"); }
         t.append( tr );
         counter++;
 

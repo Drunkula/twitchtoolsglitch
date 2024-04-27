@@ -388,3 +388,13 @@ html {
 	white-space: nowrap;
 	/* background:rgb(81, 7, 116); color: white; */
 }
+
+table tr.is-chat-added {
+	background-color: #40144a;
+}
+
+table tr.is-chat-added.is-selected {
+	background-color: #a82cb9;
+	color: white;
+}
+

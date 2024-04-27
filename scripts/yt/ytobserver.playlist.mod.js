@@ -9,24 +9,27 @@ let playlistEvents = {
 
 // this will be a container for dealing with more of the
 // playlist related functions
+    /**
+     * On SB end this relays the data straight through
+     * using chatadd: true BREAKS newtonsoft and I have no idea why
+     * @param {strng} x
+     */
 
 export function send_entries_to_player(x) {
     console.log("Send entries to player: ", x);
-    //let select = gid(x.target.dataset['toselectid']);
-    //let uid = select.selectedIndex >= 0 ? select.options[select.selectedIndex].value : "players";
+
     let uid = window.get_select_val(x.target.dataset['toselectid']) ?? "players";
     let toName = window.get_select_text(x.target.dataset['toselectid']);
-    //let toName = select.selectedOptions[0].text;
 
-    //let entries = table_entries_to_array('playlisttable');
     let data = table_entries_to_array('playlist', true);
     let pack = {
         action: "playlistadd",
         to: uid,
-        //from: {UID: YTO.myUID, name: YTO.name, socketid: YTO.mySocketId},
         returnto: YTO.myUID,
         data,
         addnext: true,
+        //chatadded: true, // this breaks it, chatAdded doesn't.  I thought this was just relaying, it shouldn't break.
+        addaschatadded: true, // this gets through as does other random stuff
         shuffle: false
     }
 

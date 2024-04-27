@@ -336,15 +336,20 @@ class YTController extends SockMsgRouter {
     playlist_add_handler(d) {
         if (d.chatadded === true && this.chatadds === false) return;
         // result has {addCount, relative, position, success}
-        let result = this.add_video_items(d.data, d.addnext ? true : false);
 
-        console.log("RESULT OF THE CHAT ADDED THING: ", result);
+        let chatAdded = Boolean(d.chatadded) || Boolean(d.addaschatadded);
+
+//console.log("CHAT ADDED?", chatAdded, d.chatadded, d.addaschatadded, d);
+
+        let result = this.add_video_items(d.data, d.addnext ? true : false, chatAdded);
+
+        clog("RESULT OF THE CHAT ADDED THING: ", result);
 // chatadded or d.data === object = single, d.data == array = multiples
         if (d.chatadded) {
             // ytparams.nan can be used to mute this.
             if (ytparams.nan === true)
                 this.send_json({action: "chataddresult", result, data: d.data, player: this.get_player_info()});
-            return;
+            //return;
         }
             // observer has sent 1 or many
         if (d.data instanceof Array) { // array of entries
@@ -369,7 +374,7 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
 
     @returns {addCount, position, relative, success}
 */
-    add_video_items(videoItem, isNext = false) {
+    add_video_items(videoItem, isNext = false, chatadd = false) {
         //clog("ADD next:", isNext);
             // isNext should be carried, yeah?
         let res = {};
@@ -378,12 +383,12 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         let add_entry_switch = videoItem => {
             switch(true) {
                 case videoItem instanceof Object:   // vidInfo obj
-                    return this.#add_entry(videoItem, isNext);
+                    return this.#add_entry(videoItem, isNext, chatadd);
                     break;
 
                 case typeof videoItem === "string": // assume video id
                     if (videoItem.length === 0) return;
-                    return this.#add_entry({videoid: videoItem}, isNext);
+                    return this.#add_entry({videoid: videoItem}, isNext, chatadd);
                     break;
 
                 default:
@@ -420,7 +425,7 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
          * @returns {success: bool, position: absolute, relative: to playlistpointer, error: only on fail}
          */
 
-    #add_entry(entry, next = false) {
+    #add_entry(entry, next = false, chatadd = false) {
         let {videoid, title="Unknown", channel = "Unknown", adder = "Unknown adder", starttime = 0} = entry;
 
         let posnA = this.playlist.indexOf(videoid);
@@ -431,7 +436,7 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
             return {success: false, error: "Already in playlist", position: posnA, relative};
         }
 
-        this.playlistMap.set(videoid, {title, adder, channel, starttime: parseInt(starttime), "number": this.playlistMapCounter++});
+        this.playlistMap.set(videoid, {title, adder, channel, starttime: parseInt(starttime), chatadd});//"number": this.playlistMapCounter++});
 
         let len = this.playlist.length;
 
@@ -741,7 +746,7 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         this.playlistNextCount = 0;
         this.playlistPointer = d.playlistpos ?? 0;
 
-        this.add_video_items(d.data, true);//d.addnext);    // this addnext thing needs to change
+        this.add_video_items(d.data, true, false);//d.addnext);    // this addnext thing needs to change
             // CLUDGE UPDATE
         this.playlistNextCount=0;       // addnext adds in order
 
