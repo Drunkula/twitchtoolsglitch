@@ -389,12 +389,12 @@ html {
 	/* background:rgb(81, 7, 116); color: white; */
 }
 
-table tr.is-chat-added {
+table tr.is-chat-added, table tr[data-chatadd="true"] {
 	background-color: #40144a;
 	color: white;
 }
 
-table tr.is-chat-added.is-selected {
+table tr.is-chat-added.is-selected, table tr[data-chatadd="true"].is-selected {
 	background-color: #a82cb9;
 	color: white;
 }

@@ -432,6 +432,9 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
             return {success: false, error: "Already in playlist", position: posnA, relative};
         }
 
+// DEBUG WARN - FEELS HACKY.  Lets chat adds remain coloured after reorder of list.
+        if (entry.chatadd === "true") chatadd = true;
+
         this.playlistMap.set(videoid, {title, adder, channel, starttime: parseInt(starttime), chatadd});//"number": this.playlistMapCounter++});
 
         let len = this.playlist.length;
