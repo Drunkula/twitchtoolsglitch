@@ -167,6 +167,8 @@ window.addEventListener('beforeunload', x => x.preventDefault());
         msgRow.append(userDiv, msgDiv, timeNMsgDiv);
 // filter incoming messages
         if (chFilterText && !channel.includes(chFilterText.toLowerCase())) msgRow.style.display="none";
+// trim the list
+        while (messageT.children.length >= TT.config.messageLimit) messageT.lastChild.remove();
 
         messageT.prepend( msgRow );
     }
