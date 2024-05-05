@@ -57,7 +57,8 @@ window.addEventListener('beforeunload', x => x.preventDefault());
         TT.cclient.on("join", join_handler);
         TT.cclient.on("part", part_handler);
         TT.cclient.on("message", message_handler);
-            // JOIN events can take a while to arrive
+        TT.cclient.on("raided", raid_handler);
+            // JOIN events can take a while to arrive.  Up to 2 minutes.
         TT.join_chans();
 
         if (TT.config.miniviewOnStart) {
@@ -102,6 +103,10 @@ window.addEventListener('beforeunload', x => x.preventDefault());
         }
     }
 
+    function raid_handler(channel, raider, viewers) {
+        msg_add(channel, "***RAID***", `<b>${channel}</b> raided by <b>${raider}</b> with ${viewers} viewers`);
+    }
+
     function highlight_matches(message, regex) {
 
     }
@@ -129,8 +134,8 @@ window.addEventListener('beforeunload', x => x.preventDefault());
 
         // message log add
 
-    function msg_add(channel, user, message, ts) {
-        inc_msg_hits();
+    function msg_add(channel, user, message, ts = Date.now()) {
+        inc_msg_hits(); // increases message hit counter
 
         let msgRow = dce('div');
         msgRow.classList.add('speechQRow');
