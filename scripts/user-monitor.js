@@ -104,7 +104,7 @@ window.addEventListener('beforeunload', x => x.preventDefault());
     }
 
     function raid_handler(channel, raider, viewers) {
-        msg_add("***RAID***", channel, `<b>${channel}</b> raided by <b>${raider}</b> with ${viewers} viewers`);
+        msg_add("***RAID***", "***RAID***", `<b>${raider}</b> raided <b>${channel}</b> with ${viewers} viewers`);
     }
 
     function highlight_matches(message, regex) {
