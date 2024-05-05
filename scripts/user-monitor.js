@@ -104,7 +104,7 @@ window.addEventListener('beforeunload', x => x.preventDefault());
     }
 
     function raid_handler(channel, raider, viewers) {
-        msg_add(channel, "***RAID***", `<b>${channel}</b> raided by <b>${raider}</b> with ${viewers} viewers`);
+        msg_add("***RAID***", channel, `<b>${channel}</b> raided by <b>${raider}</b> with ${viewers} viewers`);
     }
 
     function highlight_matches(message, regex) {
@@ -166,7 +166,7 @@ window.addEventListener('beforeunload', x => x.preventDefault());
         timeNMsgDiv.append(tDiv, chDiv);
         msgRow.append(userDiv, msgDiv, timeNMsgDiv);
 // filter incoming messages
-        if (chFilterText && !channel.includes(chFilterText)) msgRow.style.display="none";
+        if (chFilterText && !channel.includes(chFilterText.toLowerCase())) msgRow.style.display="none";
 
         messageT.prepend( msgRow );
     }
@@ -249,7 +249,7 @@ window.addEventListener('beforeunload', x => x.preventDefault());
         let rows = qsa("#messagelog div > div > div:nth-of-type(2)");
 console.log("ROWS", rows);
         rows.forEach(x => {
-            x.parentNode.parentNode.style.display = x.textContent.includes(chFilterText) ? "flex" : "none";
+            x.parentNode.parentNode.style.display = x.textContent.toLowerCase().includes(chFilterText.toLowerCase()) ? "flex" : "none";
         });
     }
 
