@@ -45,7 +45,7 @@ class YTPlayer {
         "rel": 0,   // related vids that channel only
         "iv_load_policy": 3, // annotations
         "mute": window.ytparams.muted ??= 0,
-        "start": this.autoplay ? 0 : 120
+        "start": this.autoplay ? 0 : 9999 // stop OBS auto plays
     }
     // onReady, onStateChange, onPlaybackQualityChange, onPlaybackRateChange, onError, onApiChange
     // https://developers.google.com/youtube/iframe_api_reference#Events
