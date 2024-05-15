@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Flash / Countdown Test</title>
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+	<link rel="stylesheet" href="../../css/styles.css">
+
+	<script src="../Flasher+Countdown.class.js" ></script>
+</head>
+<body>
+	<div id="flasher">Let's<br>Do<br>Flashing!</div>
+
+	<div class="box">
+
+		Flash / Countdown Tester
+		<div id="mainoutput">
+
+		</div>
+
+		<button onclick="countdown.start()">Start</button>
+		<button onclick="countdown.add_secs(5)">Add 5</button>
+		<button onclick="countdown.add_secs(10)">Add 10</button>
+		<button onclick="countdown.reset()">Clear</button>
+
+		<button onclick="flasher.start_flash()">Flash</button>
+		<button onclick="flasher.stop_flash()">Stop</button>
+
+
+	</div><!-- end box -->
+</body>
+</html>
+<script>
+
+out("Testing flasher Ready")
+
+let flasher = new Flasher({secs: 1.5});
+
+let countdown = new Countdown(5);
+countdown.on('tick', tick_listener  )
+countdown.on('finished', finished_listener  )
+countdown.start();
+
+function tick_listener(s) {
+	out("Tick", s);
+	console.log("tick", s);
+}
+
+function finished_listener(s) {
+	out("IT DID FINISH!!!!");
+}
+//)()
+
+
+
+function out() {
+	/*
+	if (clearIt)
+		document.getElementById(divId).innerHTML = '';
+	*/
+	str = [...arguments].join(' ');
+
+	if (!str) return;
+
+	var ndiv = `<div>${str}</div>`;
+
+		// https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML
+
+	let oDiv = document.getElementById('mainoutput');
+
+	if (oDiv) {
+		oDiv.insertAdjacentHTML('beforeend', ndiv);
+	}
+	else {
+		console.log(r("Couldn't output to mainoutput"), str);
+		couldNotOut.push(str);
+	}
+}
+
+
+function qsa(query, el=document) {
+	return [...el.querySelectorAll(query)];
+}
+
+function gid(id, el = document) {
+    return el.getElementById(id);
+}
+
+function sleep(ms) {		// sleep(200).then(...)
+	return new Promise(res => {
+		setTimeout(res, ms)
+	});
+}
+
+function docReady(fn) {
+    // see if DOM is already available
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+        // call on next available tick
+        setTimeout(fn, 1);
+    } else {
+        document.addEventListener("DOMContentLoaded", fn);
+    }
+}
+
+</script>

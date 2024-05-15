@@ -1,0 +1,111 @@
+
+<!DOCTYPE html><!-- http://t2t2.github.io/obs-tablet-remote/ this works and authenticates
+	https://github.com/Palakis/obs-websocket/blob/4.9.0/docs/generated/protocol.md    -->
+<html>
+<head>
+<!-- <script type="text/javascript" src="/public/scripts/obs-websocket-js.js"></script> -->
+<script src="../obs-websocket.v4.min.js"></script>
+
+</head>
+<body>
+<h1>Connect</h1>
+<input id="address" placeholder="Address"><button id="address_button">Connect</button>
+
+<h1>Scene List</h1>
+<div id="scene_list"></div>
+<div id="output"></div>
+
+<p>Javascript contained within the script - change the value of localStorage.debug to set the debug level.</p>
+<p>localStorage.debug = 'obs-websocket-js:*';  // Will make it wail like crazy</p>
+
+<script>
+/** 24th May 21 - wanted to set up something for Kim Justice after the wee bit of pukey/drunkey
+*  The web example given with this is fucking bollocks because it presumes there's no authentication
+*  so just barges through and you get authentication errors because it's trying to do stuff before
+*  authentication has happened.
+*/
+const password = 'chicken'
+
+
+// refresh twice when changing debug options
+//localStorage.debug = 'obs-websocket-js:*';  // NO SHUT THAT THING UP!
+localStorage.debug = '';
+// secure uses a wss socket - not needed for local use, or with remote because of the auth
+var opts = {address: 'localhost:4444', password: password, secure: false};
+
+const obs = new OBSWebSocket();
+
+obs.on('error', e => { o('OBS error: '+e); console.log("OBS error", e); })
+// happens before the connection
+obs.on('ConnectionOpened', (d) => { o('Connection opened!'); console.log('ConnectionOpenend'); });
+
+//document.getElementById('address_button').addEventListener('click', e => {
+//const address = document.getElementById('address').value;
+
+obs.connect(opts)
+.then(() => {
+o('Connected!  - Guess I need to check the auth:');
+// grab the scene buttons
+obs.send('GetSceneList').then(data => {
+const sceneListDiv = document.getElementById('scene_list');
+const frag = document.createDocumentFragment();
+
+data.scenes.forEach(scene => {
+  const sceneElement = document.createElement('button');
+  sceneElement.textContent = scene.name;
+  sceneElement.onclick = function() {
+	obs.send('SetCurrentScene', {
+	  'scene-name': scene.name
+	});
+  };
+  frag.appendChild(sceneElement);
+});
+  // add a disconnect button
+const btn = document.createElement('button');
+btn.textContent = 'DISCONNECT NOW!'
+btn.onclick = () => {obs.disconnect(); o('<h1>BYE BYE!</h1>')}
+frag.appendChild(btn);
+  // add a manual scene set - just a test
+const inTxt = document.createElement('input')
+inTxt.setAttribute('type', 'text');
+inTxt.setAttribute('id', 'scnname');
+frag.appendChild(inTxt);
+  // button
+const scnBtn = document.createElement('button')
+scnBtn.textContent = "set scene";
+scnBtn.onclick = () => {
+  obs.send('SetCurrentScene', {'scene-name': inTxt.value})
+	.then(a => console.log(`set scene then`, a))
+	.catch(a => console.log(`set scene catch`, a));
+}
+frag.appendChild(scnBtn);
+
+sceneListDiv.appendChild(frag);
+})
+
+get_stats();
+})
+.catch(e => {
+console.log(`Connect Error : `, e);
+o(`Error on connect ` + e.description);
+return;
+});
+//}); // click
+
+// uses the alternative calling method
+async function get_stats() {
+obs.sendCallback('GetStats', (err, data) => {
+if (err) data = error;
+console.log('Get Stats:', data);
+})
+}
+
+function o(str, br='<br/>') {
+var dv = document.createElement('p');
+dv.textContent = str;
+//document.getElementById('output').insertAdjacentHTML('beforeEnd', str+br);
+document.getElementById('output').insertAdjacentElement('beforeEnd', dv);
+}
+</script>
+</body>
+</html>
