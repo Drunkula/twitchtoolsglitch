@@ -9,7 +9,6 @@
     Possibly have a nextvid NO - the player should be separate from the controller
 */
 class YTPlayer {
-
     width = window.ytparams.XSize ??=  320;
     height = window.ytparams.YSize ??= 180;
     autoplay = window.ytparams.autoplay ??= true;
