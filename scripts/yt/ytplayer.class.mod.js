@@ -44,7 +44,8 @@ class YTPlayer {
         "fs": 1,    // fullscreen buttons
         "rel": 0,   // related vids that channel only
         "iv_load_policy": 3, // annotations
-        "mute": window.ytparams.muted ??= 0
+        "mute": window.ytparams.muted ??= 0,
+        "start": this.autoplay ? 0 : 120
     }
     // onReady, onStateChange, onPlaybackQualityChange, onPlaybackRateChange, onError, onApiChange
     // https://developers.google.com/youtube/iframe_api_reference#Events
