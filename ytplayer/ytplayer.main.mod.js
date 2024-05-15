@@ -90,7 +90,7 @@ function grab_url_params() {
     // url var | maps to param[that]
     let pList = ["x|XSize", "y|YSize", "muted", "video", "id|name", "name", "chatadd", "add|chatadd", "chatadds|chatadd",
         "nan", "nowandnext|nan", "playlist", "pl|playlist", "shuffle", "debug|ytdbg", "chatcmds", "chatcommands|chatcmds", "cmds|chatcmds",
-        "obs", "autoratio", "obsWidth", "obsHeight"];
+        "obs", "autoratio", "obsWidth", "obsHeight", "autoplay"];
 
     for (let p of pList) {
         let [param, to] = p.split("|");

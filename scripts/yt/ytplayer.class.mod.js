@@ -12,6 +12,7 @@ class YTPlayer {
 
     width = window.ytparams.XSize ??=  320;
     height = window.ytparams.YSize ??= 180;
+    autoplay = window.ytparams.autoplay ??= true;
     player = {};    // the youtube player
     playerDivName = "ytplayer";
     states = {};    // will reverse YT.PlayerState and be indexed by number
@@ -37,7 +38,7 @@ class YTPlayer {
     }
 
     playerVars = {
-        "autoplay": 1, //window.ytplayerAutoplay ??= 1
+        "autoplay": this.autoplay, //window.ytplayerAutoplay ??= 1
         'playsinline': 1,
         "controls": 1,
         "fs": 1,    // fullscreen buttons
