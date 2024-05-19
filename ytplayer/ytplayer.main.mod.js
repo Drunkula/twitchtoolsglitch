@@ -34,7 +34,7 @@ async function main() {
     ytpc.myName = ytparams.name; // got from URL params
     ytpc.myObsSourceName = ytparams.obs;
     ytpc.chatcmds = ytparams.chatcmds;
-    ytpc.chatadds = ytparams.chatadds;
+    ytpc.chatadds = ytparams.chatadd;
 
         // it'll send 'closing' to streamerbot
     //window.addEventListener('beforeunload', () => ytpc.close());
@@ -99,7 +99,7 @@ function cmd_replace(controller) {
     if ( qs.get("cmdreplace") !== null) {
         let cmdPairs = qs.get("cmdreplace").split(",");
         for (let p of cmdPairs) {
-            let [cmd, prox] = p.split("|");
+            let [cmd, prox] = p.split(":");
             if (typeof prox === "undefined") continue;
 
             cmd = "chat" + cmd.trim(); prox = prox.trim();
@@ -125,7 +125,7 @@ function grab_url_params() {
     for (let p of pList) {
         let [param, to] = p.split("|");
         let u = qs.get(param);
-        // no value means true e.g &nan means nan is true
+           // no value means true e.g &nan means nan is true
         if (u === "false") u = false; else if(u === "true") u = true; else if (u === "") u = true;
 
 clog(`${param} maps to ${to} value : `, u);
