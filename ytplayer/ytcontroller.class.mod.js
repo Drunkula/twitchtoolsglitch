@@ -100,11 +100,12 @@ class YTController extends SockMsgRouter {
         chatnext:   d => { if (this.chatcmds) this.next(); },
         chatprev:   d => { if (this.chatcmds) this.prev(); },
         chatshuffle:d => { if (this.chatcmds) { this.shuffle(false); this.dirty_announce("shuffle"); } },
-        chatnan:    d => this.now_and_next(3),  // fake it for now
+        chatnan:    d => { let num = parseInt(d.data?.howMany ?? 3); this.now_and_next(num); },  // fake it for now
+
+        nowandnext: d => this.now_and_next(d.data.howMany),
 
         shuffleall:  d => { this.shuffle(true); this.dirty_announce("shuffle"); },
 
-        nowandnext: d => this.now_and_next(d.data.howMany),
 
         // needs to check if it's chat added
         playlistadd:    d => {if (this.playlist_add_handler(d)) this.dirty_announce("addedvideos");},
