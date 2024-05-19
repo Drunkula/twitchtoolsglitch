@@ -39,8 +39,10 @@ async function main() {
         // it'll send 'closing' to streamerbot
     //window.addEventListener('beforeunload', () => ytpc.close());
 
-window.ytpc = ytpc;// debugging
-window.playlistDefaults = playlistDefaults;
+    window.ytpc = ytpc;// debugging
+    window.playlistDefaults = playlistDefaults;
+        // players can be given different commands for !next, !prev, etc
+    cmd_replace(ytpc);
 
     await ytpc.ytPlayer.ytIframeReady();
 
@@ -81,6 +83,34 @@ window.playlistDefaults = playlistDefaults;
     init_controls();
 
     return;
+}
+
+    /**
+     * Replaces chat commands allowing for multiple players with different commands
+     * &cmdreplace=next|playnext,fwd|forward
+     * @param {YTController} controller
+     */
+
+function cmd_replace(controller) {
+    let qs = new window.URLSearchParams( window.location.search );
+
+    clog(qs.get("cmdreplace"));
+
+    if ( qs.get("cmdreplace") !== null) {
+        let cmdPairs = qs.get("cmdreplace").split(",");
+        for (let p of cmdPairs) {
+            let [cmd, prox] = p.split("|");
+            if (typeof prox === "undefined") continue;
+
+            cmd = "chat" + cmd.trim(); prox = prox.trim();
+
+            if (controller.actions[cmd] ? true : false) {
+                clog("Replacing command", cmd, prox);
+                controller.actions[prox] = controller.actions[cmd];
+                delete controller.actions[cmd];
+            }
+        }
+    }
 }
 
     // updates ytparams with params passed to the url

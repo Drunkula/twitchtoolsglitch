@@ -80,28 +80,31 @@ class YTController extends SockMsgRouter {
     actions = {
         playvideo:  d => this.load_video(d.videoid, d.starttime),
         playsong:   d => this.play_song(d.id),  // sent by playlist double click
-            // have chat ones and normal
+        // OBSERVER sent
         play:       d => this.play(),
         pause:      d => this.pause(),
         stop:       d => this.yt.stopVideo(),
         resume:     d => this.yt.playVideo(),
-        fwd:        d => {clog("=========== fwd", d); this.yt.seekTo( this.yt.getCurrentTime() + d.data);},
-        rwd:        d => {this.yt.seekTo( this.yt.getCurrentTime() - d.data);},
+        fwd:        d => {let t = parseInt(d.data); if (isNaN(t)) t = 30; this.yt.seekTo( this.yt.getCurrentTime() + t);},
+        rwd:        d => {let t = parseInt(d.data); if (isNaN(t)) t = 5;  this.yt.seekTo( this.yt.getCurrentTime() - t);},
         next:       d => { this.next(); },
         prev:       d => { this.prev(); },
-
+        shuffle:    d => { this.shuffle(false); this.dirty_announce("shuffle"); },
+        // CHAT sent
         chatplay:   d => { if (this.chatcmds) this.play() },
         chatpause:  d => { if (this.chatcmds) this.pause() },
         chatstop:   d => { if (this.chatcmds) this.yt.stopVideo() },
         chatresume: d => { if (this.chatcmds) this.yt.playVideo() },
-        chatfwd:    d => { if (this.chatcmds) this.yt.seekTo( this.yt.getCurrentTime() + d.data);},
-        chatrwd:    d => { if (this.chatcmds) this.yt.seekTo( this.yt.getCurrentTime() - d.data);},
+        chatfwd:    d => { if (this.chatcmds) this.actions["fwd"](d);},
+        chatrwd:    d => { if (this.chatcmds) this.actions["rwd"](d);},
         chatnext:   d => { if (this.chatcmds) this.next(); },
         chatprev:   d => { if (this.chatcmds) this.prev(); },
-        chatshuffle:d => { if (this.chatcmds) this.shuffle(false); },
+        chatshuffle:d => { if (this.chatcmds) { this.shuffle(false); this.dirty_announce("shuffle"); } },
+        chatnan:    d => this.now_and_next(3),  // fake it for now
 
-        shuffle:        d => { this.shuffle(false); this.dirty_announce("shuffle"); },
-        shuffleall:     d => { this.shuffle(true); this.dirty_announce("shuffle"); },
+        shuffleall:  d => { this.shuffle(true); this.dirty_announce("shuffle"); },
+
+        nowandnext: d => this.now_and_next(d.data.howMany),
 
         // needs to check if it's chat added
         playlistadd:    d => {if (this.playlist_add_handler(d)) this.dirty_announce("addedvideos");},
@@ -156,7 +159,6 @@ class YTController extends SockMsgRouter {
 
         deletefromplayer: d => { if (this.delete_vids(d.videoids) > 0) this.dirty_announce("deletedvids"); },
 
-        nowandnext: d => this.now_and_next(d.data.howMany),
 /*
         playlistcount: e => {
             clog("sending count:", this.playlist,length);
