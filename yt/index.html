@@ -357,9 +357,13 @@ or delete the checked entries from the selected playlist.">Copy selected to / De
                 <li>muted - true/false. Whether the player starts muted.  e.g. muted=true</li>
                 <li>volume - 0 to 100.  Initial volume of player.  More for debugging outside OBS.  In OBS use that to control the volume.</li>
                 <li>debug - true/false. Whether debug messages appear in a browser console.  e.g. debug=true</li>
-                <li>cmdreplace - if you want multiple players each with different chat commands then the next commands can be specified like so:
-                  <div class="ml-5">cmdreplace=next:newnext,prev:newprev,fwd:forward,rwd:brewind,nan:otherplayernan</div>
-                  <p>the old commands will no longer work for that player.  Available: next, prev, fwd, rwd, nan, shuffle, play, pause, stop, resume</p>
+                <li>
+                  <p>cmdreplace - if you want multiple players each with different chat commands then the commands can be specified in command:newcommand pairs like so:</p>
+                  <p class="ml-5">cmdreplace=next:newnext,prev:newprev,fwd:forward,rwd:brewind,nan:otherplayernan</p>the old commands will no longer work for that player.  Available: next, prev, fwd, rwd, nan, shuffle, play, pause, stop, resume
+                  <p><strong>Individual commands can be disabled</strong> by adding just the command name or command name followd by a colon so</p>
+                  <p class="ml-5">cmdreplace=next:newnext,prev:newprev,shuffle:,fwd,rwd</p>
+                  <p>wlll allow the use of newnext and newprev but no shuffle, fwd or rwd.  Commands like fwd and rwd will function as normal.</p>
+                  <p><strong>Note:</strong> &amp;chatcmds=true will still need to be specified for replaced commands to function.</p>
                 </li>
               </ul>
             </div>

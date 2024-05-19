@@ -100,9 +100,9 @@ function cmd_replace(controller) {
         let cmdPairs = qs.get("cmdreplace").split(",");
         for (let p of cmdPairs) {
             let [cmd, prox] = p.split(":");
-            if (typeof prox === "undefined") continue;
+            if (typeof prox === "string") prox = prox.trim();;
 
-            cmd = "chat" + cmd.trim(); prox = prox.trim();
+            cmd = "chat" + cmd.trim();
 
             if (controller.actions[cmd] ? true : false) {
                 clog("Replacing command", cmd, prox);
