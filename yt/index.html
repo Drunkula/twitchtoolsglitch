@@ -339,24 +339,28 @@ or delete the checked entries from the selected playlist.">Copy selected to / De
         </div>
         <div class="tab-pane">
           <div class="box"><b>players now can have (and need) optional paramers.  Most default to off</b>
-            <p>For a chat controlled list you'd want nan, chatadd, chatcmds to be on</p>
+            <p>For a chat controlled list you'd want nan, chatadd and chatcmds to be on</p>
             <p class="pl-6"><a href="https://twitch-tools.glitch.me/ytplayer/?id=Test%20Player&amp;chatadd&amp;chatcmds&amp;nan&amp;autoratio" target="_blank">https://twitch-tools.glitch.me/ytplayer/?id=Name in Observer Page&amp;nan&amp;chatadd&amp;chatcmds&amp;autoratio</a></p>
-            <p>Put a ? after the url and separate them with &amp; signs.  E.g. /?playlist=default&amp;chatadd=true&amp;id=Grindhouse Films</p>
+            <p><strong>Put a ? after the url and separate them with &amp; signs.</strong>  E.g. <strong>https://twitch-tools.glitch.me/ytplayer/?playlist=default&amp;chatadd=true&amp;id=Grindhouse Films</strong></p>
             <p>The option alone is a shortcut for it being true so &amp;nan&amp;chatcmds is the same as &amp;nan=true&amp;chatcmds=true</p>
             <p>The options are:</p>
             <div class="content">
               <ul>
-                <li>playlist. Which playlist to load. Default is default.  Set with playlist=Start Music</li>
-                <li>id - the name that'll show in the controller page</li>
-                <li>nan - default: false. Set true for the player to respond to now and next requests and !added videos.</li>
-                <li>chatadd - default: false. true means it'll add videos from chat with !add or !src</li>
-                <li>chatcmds - default: false. true allows !next !prev !play !pause, etc from chat unless locked out</li>
-                <li>shuffle - true/false Override the shuffle flag for a list.  Not included uses the list's default.</li>
+                <li>playlist. Which playlist to load. Default is default.  e.g. playlist=Start Music</li>
+                <li>id - the name that'll show in the controller page.  e.g. id=80s Disco</li>
+                <li>nan - default: false. Set true for the player to respond to now and next requests and !added videos. e.g. nan=true</li>
+                <li>chatadd - default: false. true means it'll add videos from chat with !add or !sr. e.g. chatadd=false</li>
+                <li>chatcmds - default: false. true allows !next !prev !play !pause, etc from chat unless locked out. e.g. chatcmds=true</li>
+                <li>shuffle - true/false Override the shuffle flag for a list.  Not included uses the list's default.  e.g. shuffle=false</li>
                 <li>video.  The id of the initial video to load e.g. video=xayd1c0wtOE</li>
-                <li>autoratio.  <strong>Recommended.</strong>  Borders and centres non-widescreen content so no clipping occurs. See OBS trick below.</li>
-                <li>muted - true/false. Whether the player starts muted.</li>
-                <li>volume - 0 to 100.  Initial volume of player.  More for debugging outside OBS.  Default 100.</li>
-                <li>debug - true/false. Whether debug messages appear in a browser console.</li>
+                <li>autoratio.  <strong>Recommended.</strong>  Borders and centres non-widescreen content so no clipping occurs. See OBS trick below.  e.g. autoratio=true</li>
+                <li>muted - true/false. Whether the player starts muted.  e.g. muted=true</li>
+                <li>volume - 0 to 100.  Initial volume of player.  More for debugging outside OBS.  In OBS use that to control the volume.</li>
+                <li>debug - true/false. Whether debug messages appear in a browser console.  e.g. debug=true</li>
+                <li>cmdreplace - if you want multiple players each with different chat commands then the next commands can be specified like so:
+                  <div class="ml-5">cmdreplace=next:newnext,prev:newprev,fwd:forward,rwd:brewind,nan:otherplayernan</div>
+                  <p>the old commands will no longer work for that player.  Available: next, prev, fwd, rwd, nan, shuffle, play, pause, stop, resume</p>
+                </li>
               </ul>
             </div>
           </div>

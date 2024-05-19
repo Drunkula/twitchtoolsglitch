@@ -106,7 +106,10 @@ function cmd_replace(controller) {
 
             if (controller.actions[cmd] ? true : false) {
                 clog("Replacing command", cmd, prox);
-                controller.actions[prox] = controller.actions[cmd];
+                // allow commands to be destroyed
+                if (prox?.length > 0)
+                    controller.actions[prox] = controller.actions[cmd];
+
                 delete controller.actions[cmd];
             }
         }
