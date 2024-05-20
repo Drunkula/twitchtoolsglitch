@@ -4,3 +4,26 @@
 Alternate commands for different players
 
 In the URL
+&cmdreplace=next:bnext,prev:bprev
+
+Thing is chat commands are actually sent as chatprev, chatnext.  I could trim them off but maybe that's an advantage
+
+nan should be redefined, too.  Yeah, I changed it to chatnan.  Only commands starting chat can be redefined.
+
+
+Some chat commands are easy to replace as if the command doesn't exist you just
+pass it along with the raw input e.g. you get
+!bnext you ship that out and players check the action bnext which will have been next renamed
+
+!add in chat has got to perform a grab then send a chunk of data with action="chatadd"
+
+if we wanted to use !badd instead we've got to map add to badd (easy) but then map to a different sent command
+
+!add|!badd|newchatadd
+
+I suppose we could add a commandused="..." but !add also uses !sr and !songrequest
+
+Add a command="!bim" to the package and check for that.
+
+NEEDED : alias map in SB
+    triggercommand in package

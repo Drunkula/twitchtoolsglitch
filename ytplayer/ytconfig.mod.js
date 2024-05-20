@@ -27,6 +27,8 @@ export let playlistDefaults = [
     'fqACWyzdkh8',
 ];
 
+// debugging
+window.playlistDefaults = playlistDefaults;
 
 //export { config };
 //https://speaker.bot/guide/api/websocket/requests/

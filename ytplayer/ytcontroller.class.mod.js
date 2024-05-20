@@ -101,14 +101,17 @@ class YTController extends SockMsgRouter {
         chatprev:   d => { if (this.chatcmds) this.prev(); },
         chatshuffle:d => { if (this.chatcmds) { this.shuffle(false); this.dirty_announce("shuffle"); } },
         chatnan:    d => { let num = parseInt(d.data?.howMany ?? 3); this.now_and_next(num); },  // fake it for now
+        chatsong:   d => this.now_and_next(1),
+        chatadd:    d => this.actions["playlistadd"](d),
 
+
+        playlistadd:    d => {if (this.playlist_add_handler(d)) this.dirty_announce("addedvideos");},
         nowandnext: d => this.now_and_next(d.data.howMany),
 
         shuffleall:  d => { this.shuffle(true); this.dirty_announce("shuffle"); },
 
 
         // needs to check if it's chat added
-        playlistadd:    d => {if (this.playlist_add_handler(d)) this.dirty_announce("addedvideos");},
             // received entire thing
         fullplaylist:   d => { this.got_full_playlist(d); this.dirty_announce("fullplaylistload")}, // dirty ??
         loadplaylist:   d => this.send_json({action:"loadplaylist", name: ytparams.playlist}),
@@ -117,6 +120,7 @@ class YTController extends SockMsgRouter {
 
         restart:    d => { this.yt.seekTo(0); this.play();},
         almostend:  d => { this.yt.seekTo( this.yt.getDuration() - 5); },
+
         "next()":       d => {this.yt.nextVideo()},
         "prev()":       d => {this.yt.previousVideo()},
             // SB broadcasts a list with players in the current scene.  Play if your name is in the list or pause

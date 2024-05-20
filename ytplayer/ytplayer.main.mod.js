@@ -31,24 +31,19 @@ async function main() {
     clog =  ytparams.ytdbg === true ? console.log : function (){};
 
     let ytpc = new YTController();
+    window.ytpc = ytpc;// debugging
+
     ytpc.myName = ytparams.name; // got from URL params
     ytpc.myObsSourceName = ytparams.obs;
     ytpc.chatcmds = ytparams.chatcmds;
     ytpc.chatadds = ytparams.chatadd;
 
-        // it'll send 'closing' to streamerbot
-    //window.addEventListener('beforeunload', () => ytpc.close());
-
-    window.ytpc = ytpc;// debugging
-    window.playlistDefaults = playlistDefaults;
+        // it'll send 'closing' to streamerbot NO NEED SB FIXED disconnects    //window.addEventListener('beforeunload', () => ytpc.close());
         // players can be given different commands for !next, !prev, etc
     cmd_replace(ytpc);
 
     await ytpc.ytPlayer.ytIframeReady();
-
-    // ytpc.add(playlistDefaults);
-
-    // now we can init the iframe
+        // now we can init the iframe
     let res = ytpc.ytPlayer.init_iframe( ytparams.videoId );
 
     console.log(res ? "Iframe create SUCCESS!" : "FAILED creating iframe");
@@ -62,7 +57,6 @@ async function main() {
     await ytpc.ytPlayer.ytPlayerReady();
     out("It ready")
 
-    //test_real();
     let socket = ytparams.webSock ??= config.socketty.socketUrl;
     ytpc.socketty.connect( socket );
 
@@ -70,7 +64,7 @@ async function main() {
 
     clog("Awaiting socket ready:", sw, "readystate", ytpc.socketty.readyState);
         // if the above wait resolved false it'll still try and send
-    ytpc.ytPlayer.play();   // on, it has to have emitted ready first
+    ytpc.ytPlayer.play();   // it has to have emitted ready first
 
         // play will try and send a socket message even though it's not open.
         // IF the socket url has been changed here
@@ -87,7 +81,7 @@ async function main() {
 
     /**
      * Replaces chat commands allowing for multiple players with different commands
-     * &cmdreplace=next|playnext,fwd|forward
+     * e.g. &cmdreplace=next:playnext,fwd:forward
      * @param {YTController} controller
      */
 
@@ -144,6 +138,10 @@ clog(`${param} maps to ${to} value : `, u);
     return ytparams;// they're global anyway
 }
 
+    /**
+     * Debug player text controls init
+     */
+
 function init_controls() {
     let controls = document.querySelectorAll(".controls li");
 
@@ -154,13 +152,6 @@ function init_controls() {
     }
 }
 
-function test_real() {
-    console.log("################## TEST REAL CALLED ##################");
-    ytpc.socketty.retryConnecting = false;
-    ytpc.add(["2mQECKOkkqk", "ed8QTKtLxKs", "QM_kJkChgrc"]);
-    ytpc.add(["Next 1", "Next 2"], true);
-    ytpc.add("Some Rando");
-}
 
 [ ['r', 1], ['g', 2], ['b', 4], ['w', 7], ['c', 6], ['m', 5], ['y', 3], ['k', 0] ]
 .reduce(
