@@ -358,12 +358,14 @@ or delete the checked entries from the selected playlist.">Copy selected to / De
                 <li>volume - 0 to 100.  Initial volume of player.  More for debugging outside OBS.  In OBS use that to control the volume.</li>
                 <li>debug - true/false. Whether debug messages appear in a browser console.  e.g. debug=true</li>
                 <li>
-                  <p>cmdreplace - if you want multiple players each with different chat commands then the commands can be specified in command:newcommand pairs like so:</p>
+                  <p>cmdreplace - if you want multiple players each with different chat commands then the commands can be specified in command:aliasforcommand pairs like so:</p>
                   <p class="ml-5">cmdreplace=next:newnext,prev:newprev,fwd:forward,rwd:brewind,nan:otherplayernan</p>the old commands will no longer work for that player.  Available: next, prev, fwd, rwd, nan, shuffle, play, pause, stop, resume
                   <p><strong>Individual commands can be disabled</strong> by adding just the command name or command name followd by a colon so</p>
                   <p class="ml-5">cmdreplace=next:newnext,prev:newprev,shuffle:,fwd,rwd</p>
-                  <p>wlll allow the use of newnext and newprev but no shuffle, fwd or rwd.  Commands like fwd and rwd will function as normal.</p>
+                  <p>wlll allow the use of newnext and newprev; shuffle, fwd and rwd will be disabled.  Commands like play and resume will function as normal.</p>
                   <p><strong>Note:</strong> &amp;chatcmds=true will still need to be specified for replaced commands to function.</p>
+                  <p><strong>IMPORTANT:</strong> Any command aliases need to be added to the YTPlayer MASTER Commands command.  So for the above !newnext and !newprev should be added.</p>A global permanent variable YT_PLAYER_ALIASES must also be set with command alias pairs e.g. add:newadd,rwd:p2rwd,rwd:otherrwd
+                  <p>Available to alias: next prev fwd rwd nan song shuffle add play pause stop resume</p>
                 </li>
               </ul>
             </div>
@@ -403,9 +405,7 @@ or delete the checked entries from the selected playlist.">Copy selected to / De
             <div class="content">
               <ul>
                 <li>Streamerbot compiles and runs Init() more than once.  Not my fault, startup messages may be seen more than once, that's all.</li>
-                <li>Add: player playlist different colours between perm and added entries</li>
                 <li>Add: Player's !add and !nan flags can be adjusted in the interface</li>
-                <li>Add: Option to auto update Player/Playlists on adds/deletes rather than having to refresh.  Players could send a 'playlistchanged' message.</li>
                 <li>Playlist not changing on fwd?  Hit Play/pause as cueing doesn't send a song id. (low priority)</li>
                 <li>Seeker bar / goto time if using the player for long videos.</li>
               </ul>
