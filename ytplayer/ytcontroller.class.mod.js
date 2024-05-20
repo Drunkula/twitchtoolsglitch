@@ -523,6 +523,10 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
         try {
             data = JSON.parse(action);
             action = data.action;
+                // cmd proxy if no match for action?
+            if (!this.actions[action] && data.cmdReceived) {
+                action = data.cmdReceived.replace(/^!*/, '');
+            }
                 // WARNING: DANGEROUS ASSUMPTION that from should be return to'd
             if (data.returnto)
                 this.returnto = data.returnto;  // UID or "observers", "players" etc
