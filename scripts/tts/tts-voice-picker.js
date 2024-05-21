@@ -13,7 +13,7 @@ let VOICE_PICK_EVENTS = [
         // want this it happen AFTER update_say_commands
     {selector: ".voice-select", event: 'change', function: test_voice_onclick, params: {noAutoChange: true,}},
 
-    {selector: '.voice-filter', event: 'change', function: select_filter, params: {}},
+    {selector: '.voice-filter', event: 'change', function: select_filter_onchange, params: {}},
 
     {selector: 'button[data-for]', event: 'click', function: test_voice_onclick, params: {}},
 
@@ -41,6 +41,14 @@ window.addEventListener('load', async (event) => {
     add_event_listeners(VOICE_PICK_EVENTS);
 
     gid("testtext").value = TTS_TEST_TEXT;
+
+    speech.addEventListener('voiceschanged', () => {
+        voices = speechSynthesis.getVoices();
+        sort_and_filter_voices(voices);
+
+        create_speech_selects_options(voices);
+        create_speech_filters_options();
+    });
 });
 
 
@@ -137,7 +145,9 @@ console.log(source);
     }
 }
 
-function select_filter(e) {
+    // filter
+
+function select_filter_onchange(e) {
     let v = e.target.value;
     let targ = e.target.dataset["for"];
 
