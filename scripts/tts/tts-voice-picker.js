@@ -69,15 +69,17 @@ function sort_and_filter_voices(voices) {
     for (let v of voices) {            //let vf = {...v};// nope //let vf = structuredClone(v);  // nope
         //console.log(v.lang)
         let [subLang, sl2] = v.lang.split('-');
-        let langW = v.name.split('-')[1];
+
+        // name MAY NOT have a dash but URL always seems to
+        let langW = v.voiceURI.split('-')[1];
 
         let c = langW.match(/(\w*)\s\((.*)\)/);
+        langs[subLang] = c[1];
+        langsR[sl2] = c[2];
 
         //console.log(v.lang);
         //console.log(c);
 
-        langs[subLang] = c[1];
-        langsR[sl2] = c[2];
         v.nicename = vnf2(voice_name_filter(v.name));
     }
 
