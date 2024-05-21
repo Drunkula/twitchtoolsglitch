@@ -502,11 +502,16 @@ https://youtube.googleapis.com/youtube/v3/videos?part=snippet&key=AIzaSyBRPuveJX
 
     }
 
-// debug console filter
-// -url:https://play.google.com/ -url:chrome-extension://mnjggcdmjocbbbhaepdhchncahnbgone/js/content.js -url:https://www.youtube.com
-// or use current context only
-// handler for socket messages and string actions
-//*
+
+        /**
+         * Handles socked messages, json or strings.  Strings are treated as an 'action' and are checked for in the actions table
+         * json will have an action and data within them
+         * COMMAND ALIASES: if cmdIsAlias is set the original action should be ignored and cmdReceived used instead.
+         * This lets different players have different commands using the url &cmdreplace=cmd:cmdalias,cmd2:cmd2alias pairs
+         * @param {TMI Socket Message} e
+         * @returns void
+         */
+
 
     message_handler(e) {
         let data = null, action, json = "not json";
