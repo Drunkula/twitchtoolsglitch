@@ -17,7 +17,7 @@ let VOICE_PICK_EVENTS = [
 
     {selector: 'button[data-for]', event: 'click', function: test_voice_onclick, params: {}},
 
-//    {selector: 'input[type="range"]', event: 'input', function: slider_oninput, params: {}},
+    {selector: 'input[type="range"]', event: 'input', function: slider_oninput, params: {}},
 
 //    {selector: '#volumemaster', event: 'input', function: volume_master_slider_oninput, params: {}},
 ];
@@ -68,14 +68,19 @@ function sort_and_filter_voices(voices) {
         // array returned by speechSynthesis.getVoices() is immutable.   // let vsc = structuredClone(voices);  // nope   //voices = JSON.parse(JSON.stringify(voices));    // NOPE
     for (let v of voices) {            //let vf = {...v};// nope //let vf = structuredClone(v);  // nope
         //console.log(v.lang)
-        let [subLang, sl2] = v.lang.split('-');
+        // format en-NG
+        let [lang, region] = v.lang.split('-');
 
         // name MAY NOT have a dash but URL always seems to
-        let langW = v.voiceURI.split('-')[1];
+        let langW = v.voiceURI.split('-');
 
-        let c = langW.match(/(\w*)\s\((.*)\)/);
-        langs[subLang] = c[1];
-        langsR[sl2] = c[2];
+            // format is like Microsoft Abeo Online (Natural) - English (Nigeria)
+        if (langW.length > 1) {
+            let c = langW[1].match(/(\w*)\s\((.*)\)/);
+            langs[lang] = c[1];
+            langsR[region] = c[2];
+        }
+
 
         //console.log(v.lang);
         //console.log(c);
@@ -96,11 +101,7 @@ function create_speech_selects_options (voices) {
     //let voice_name_filter = (v => v.replace(/Microsoft\s*|Google\s*/, ''))
 
     let selects = qsa(".voice-select")
-
-    //log("Number of voices : " + TTSVars.voices.length)
-
         // voices contains names, voiceURI, default, lang, localService
-
     for (let s of selects) { // create <option>s
         let frag = document.createDocumentFragment();
 
@@ -156,14 +157,12 @@ function select_filter_onchange(e) {
     targ = '#'+targ+" option";
 
     console.log("FILTER:", v, targ);
-    //console.log( e.target
 
     let opts = qsa(targ);
-
-    console.log("OPTS", opts);
+    //console.log("OPTS", opts);
 
     for (let opt of opts) {
-        console.log(opt.value);
+        // console.log(opt.value);
         if (v === "" || opt.dataset['lang'] === v)
             opt.classList.remove("is-hidden");
         else
@@ -172,9 +171,6 @@ function select_filter_onchange(e) {
 }
 
 function test_voice_onclick (e) {
-    if (e.type === "change") {
-        console.log("YOU CHANGED THE SELECT THING!");
-    }
 // lazy
     let targ = e.type === "change" ? e.target.id : e.target.dataset['for'];
     test_voice(targ);
@@ -224,3 +220,18 @@ add_event_listeners = function(events = TT_EVENT_ITEMS) {
         }
     }
 }
+
+    /**
+         * Adds the slider updates
+         */
+
+    function slider_oninput(e) {
+        let sout = e.target.dataset.for;
+        let [type, idx] = e.target.id.split("-");
+
+        let id = type === "rate" ? 'ro-' + idx : 'po-' + idx;
+
+        if (id = gid(id)) {
+            id.innerText = e.target.value;
+        }
+    }
