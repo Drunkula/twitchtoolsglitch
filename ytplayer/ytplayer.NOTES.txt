@@ -1,6 +1,5 @@
 
 
-
 Alternate commands for different players
 
 In the URL
@@ -27,3 +26,47 @@ Add a command="!bim" to the package and check for that.
 
 NEEDED : alias map in SB
     triggercommand in package
+
+IMPLEMENTED
+    SB has a perm var with ALIASES !add:!badd,!fwd:!bfwd and so on
+    Command sends
+     {action:"chatadd", cmdIsAlias: true, cmdTriggered: "!add", cmdReceived: "!badd"}
+
+    The player can check if it's an alias and if it has !badd as a command that chatadd will have been replaced by.
+
+
+
+CONTROLS - ONLY
+Could hide things on the main observer page but that's really messy
+    Top tabs pushes down, breakpoints on the controls are grim
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -461,8 +461,13 @@
 
 		// ************** EVENTS ************** //
 
-		// *** Utterance events *** ///
-			// added to every UTTERANCE, takes { event : fn , event2 : fn} so multiple calls for same even
+			/**
+			 * Adds events to all utterances provided as an object with the keys as the events
+			 * Multiple handlers for the same event will require multiple calls
+			 * e.g {error: e => some_func(), end: end_handler}
+			 * Events are boundary end error mark pause resume start
+			 * @param {object} evs
+			 */
 
 		utteranceOn(evs) {
 			utteranceEventTypes.forEach( ev => {

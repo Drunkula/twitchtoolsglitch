@@ -4,8 +4,8 @@
 import { Socketty } from "/scripts/Socketty.class.js";
 
     // whether next or prev was last used
-const PLAYLIST_FORWARD = 1;
-const PLAYLIST_BACKWARD = -1;
+//const PLAYLIST_FORWARD = 1;
+//const PLAYLIST_BACKWARD = -1;
     // Default playlist in config.mod.js
 
 // essentially {these funcs} = {this object of funcs}

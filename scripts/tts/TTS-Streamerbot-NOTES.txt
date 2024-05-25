@@ -1,0 +1,29 @@
+
+
+Ok - let's say we want multiple browsers, Edge and Chrome
+
+Nickname, voice (name, pitch, rate, browser)
+
+MESSAGE IN:
+    * broadcast to all connected for DISPLAY ONLY.
+    * Queued in SB for speaking
+
+SPEECH OUT
+    * Sent to all connected with a flag of which browser type it's for
+
+BROWSERS
+    ON SPEECH
+    * send END message with id of the message
+    * send START message with the id of the message.  SB can start a timer in case of stalls
+
+    ON CONNECT
+    * SEND Type of browser
+    * RECEIVES: users, nicknames, banned, permissions, user assigned voices, default voice, say before, say after,
+
+    MESSAGES TO:
+        speakmessage, movemessagetoold, addmessage, deletemessage,
+
+
+SB NEEDED
+    * List of connected browsers and if the browser needed for a voice is available
+    * Not available then change to a browser that is

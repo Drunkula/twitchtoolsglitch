@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Twitch Tools</title>
+    <meta name="description">
+    <!--link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css')-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
+    <script defer="" src="https://use.fontawesome.com/releases/v6.1.1/js/all.js"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+  </head>
+  <body>
+    <div class="block mx-5 my-3 main-container">
+      <script>
+        window.TT = window.TT ? window.TT : {};
+        //document.body.classList.add("has-navbar-fixed-top");
+        
+      </script>
+      <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+      <script src="/scripts/helpers.js"></script>
+      <script src="/scripts/yt/ytobserver.main.mod.js" type="module"></script>
+      <script src="/scripts/bulma-components-init.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/bulma-toast/2.4.4/bulma-toast.min.js"></script>
+      <style type="text/css">
+        li > a {background-color: white;}
+        li.insts-tab.is-active a {
+            background-color: #cf0808 !important;
+        }
+        li.pl-tab.is-active a {
+            background-color: #9900b8 !important;
+        }
+      </style>
+      <div class="block tab-content" id="playlistpanels" data-theme="dark">
+        <div class="tab-pane is-active">
+          <div class="columns">
+            <div class="column">
+              <div class="box mb-2 p-1">
+                <button class="is-small button is-success mr-1" data-send="playprev"><span class="icon"><i class="fas fa-backward-fast"></i></span></button>
+                <button class="is-small button is-success mr-1" data-relay="{&quot;action&quot;:&quot;rwd&quot;,&quot;data&quot;:5}" title="-5s"><span class="icon"><i class="fas fa-backward"></i></span></button>
+                <button class="is-small button is-info mr-1" data-send="play"><span class="icon"><i class="fas fa-play"></i></span></button>
+                <button class="is-small button is-info mr-1" data-relay="pause"><span class="icon"><i class="fas fa-pause"></i></span></button>
+                <button class="is-small button is-success mr-1" data-relay="{&quot;action&quot;:&quot;fwd&quot;,&quot;data&quot;:30}" title="+30s"><span class="icon"><i class="fas fa-forward"></i></span></button>
+                <button class="is-small button is-success" data-send="playnext"><span class="icon"><i class="fas fa-forward-fast"></i></span></button>&nbsp;
+                <button class="is-small button is-warning mr-1" data-send="voldown" title="vol down"><span class="icon"><i class="fas fa-arrow-down-wide-short"></i></span></button>
+                <button class="is-small button is-warning mr-1" data-send="volup" title="vol up"><span class="icon"><i class="fas fa-arrow-up-wide-short"></i></span></button>
+                <button class="is-small button is-danger mr-1" data-relay="mute"><span class="icon"><i class="fas fa-volume-xmark"></i></span></button>
+                <button class="is-small button is-danger" data-relay="unmute"><span class="icon"><i class="fas fa-volume-high"></i></span></button>
+              </div>
+              <div class="box mb-0 p-1">
+                <div class="level is-mobile">
+                  <div class="level-left is-flex-direction-row">
+                    <div class="level-item">
+                      <div class="field has-addons is-horizontal">
+                        <div class="control">
+                          <div class="select is-small">
+                            <select class="playerselect" id="playerselect" name="players">
+                              <option value="players">All Players</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="control"><a class="button is-small is-success" id="playerselectgetbtn"><span class="icon"><i class="fas fa-rotate"></i></span></a></div>
+                      </div>
+                    </div>
+                    <div class="level-item">
+                      <div class="field has-addons">
+                        <div class="control">
+                          <div class="select is-small">
+                            <select class="playlistselect" id="copytoplaylistfromplayer">
+                              <option value="" disabled>get playlists first</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="control"><a class="button is-small is-success load-playlist" data-playerselect="playerselect" data-listselect="copytoplaylistfromplayer">load</a></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="level-right">
+                    <div class="level-item">
+                      <div class="dropdown is-right">
+                        <div class="dropdown-trigger">
+                          <button class="button">
+                            <!--span controls--><span class="icon is-small"><i class="fas fa-angle-down"></i></span>
+                          </button>
+                        </div>
+                        <div class="dropdown-menu">
+                          <div class="dropdown-content"><a class="dropdown-item" data-get="playersidentify">Reidentify Players</a><hr class="dropdown-divider"><a class="dropdown-item" data-get="chatlockout">Chat lockout</a><hr class="dropdown-divider"><a class="dropdown-item" data-get="chatunlock">Chat allow</a><hr class="dropdown-divider"><a class="dropdown-item" data-get="storeon">Store On</a><hr class="dropdown-divider"><a class="dropdown-item" data-get="storeoff">Store Off</a></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="mb-3"></div>
+              <div class="box p-1"><strong>Storage:&nbsp;</strong>
+                <tag class="tag is-link" id="storagestatus">?</tag><strong class="ml-2">Chat Control:&nbsp;</strong>
+                <tag class="tag is-link" id="chatlockoutstatus">?</tag>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

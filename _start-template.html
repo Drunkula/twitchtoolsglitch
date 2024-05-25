@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Twitch Tools</title>
+    <meta name="description">
+    <!--link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css')-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
+    <script defer="" src="https://use.fontawesome.com/releases/v6.1.1/js/all.js"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+  </head>
+  <body>
+        <nav class="navbar is-dark cadbury">
+          <div class="navbar-brand"><a class="navbar-item" href="/"><img src="/assets/tt-nav.svg"></a>
+            <!-- burger needs to be inside the brand--><a class="navbar-burger" id="burger-component"><span></span><span></span><span></span></a>
+          </div>
+          <div class="navbar-menu" id="nav-links-component">
+            <div class="navbar-start"><a class="navbar-item" href="/">Home.</a>
+              <div class="navbar-item has-dropdown is-hoverable"><a class="navbar-link">Tools List</a>
+                <div class="navbar-dropdown is-boxed"><a class="navbar-item" href="chat-to-speech-tabs.html">Speech from chat TTS</a><a class="navbar-item" href="scene-switcher.html">Scene change from chat - !brb, !game, !etc &nbsp;<strong>OBS v27</strong>&nbsp; and below</a><a class="navbar-item" href="scene-switcher-v5.html">Scene change from chat commands - &nbsp;<strong>OBS v28</strong>&nbsp; up</a><a class="navbar-item" href="new-chatter.html">New Chatters alert (say hello to new chatters easily)</a><a class="navbar-item" href="muted-alert.html">You're Muted alert</a><a class="navbar-item" href="chat-alert.html">New Message alert - don't miss chat messages (good for small channels)</a><a class="navbar-item" href="subs-gifts-cheers.html">Subs, gifts, cheers - it doesn't work yet (well it does, but it doesn't)</a><a class="navbar-item" href="localstorage.html">localstorage killer (just for my debuggin)</a><a class="navbar-item" href="#"><b>There'll be more...</b></a><a class="navbar-item" href="#">VIPs / Named chatters or WRONG 'UNS join</a><a class="navbar-item" href="#">OBS scene and mic control mod chat commands (!unmute, !brb, !game)</a><a class="navbar-item" href="#">OBS web control panel for your mods</a><a class="navbar-item" href="#">And your suggestions.</a>
+                  <hr class="navbar-divider is-hidden-desktop">
+                </div>
+              </div>
+            </div>
+            <div class="navbar-end">
+              <div class="navbar-item has-dropdown is-hoverable is-hidden-touch"><a class="navbar-link">Bulma Bits</a>
+                <div class="navbar-dropdown"><a class="navbar-item" href="https://bulma.io/documentation/components/" target="_blank">Components</a><a class="navbar-item" href="https://bulma.io/documentation/elements/" target="_blank">Elements</a>
+                  <hr class="navbar-divider"><a class="navbar-item" href="https://bulma.io/documentation/layout/" target="_blank">Layout</a><a class="navbar-item" href="https://bulma.io/documentation/form/" target="_blank">Forms</a>
+                </div>
+              </div>
+              <div class="navbar-item has-dropdown is-hoverable is-hidden-touch"><a class="navbar-link">Assets</a>
+                <div class="navbar-dropdown is-right"><a class="navbar-item" href="https://fontawesome.com/search?m=free&amp;s=solid" target="_blank">Fontawesome Solid Free</a><a class="navbar-item" href="https://fontawesome.com/search?m=free&amp;s=regular" target="_blank">Fontawesome Regular Free</a><a class="navbar-item" href="https://fontawesome.com/docs/web/style/animate#customization" target="_blank">Fontawesome Animations</a>
+                  <hr class="navbar-divider"><a class="navbar-item" href="https://fonts.google.com/" target="_blank">Google Fonts</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <script>
+          document.addEventListener("DOMContentLoaded", () => {
+          	// for this specific nav list
+          	const burger = document.querySelector('#burger-component');
+          	const navlist = document.querySelector('#nav-links-component');
+          	burger.addEventListener('click', () => {navlist.classList.toggle('is-active'); burger.classList.toggle('is-active')})
+          });
+          
+        </script>
+    <div class="block mx-5 my-3 main-container">
+      <script src="/scripts/backbone-common.js" defer></script>
+      <script src="/scripts/bulma-components-init.js" defer></script>
+      <div class="notification is-info" id="mynotif">Delete away.
+        <button class="delete" data-target="#mynotif"></button>
+      </div>
+      <div class="columns is-flex-direction-row-reverse">
+        <div class="column">
+          <div class="box">
+            <div class="title is-3">Hi there</div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="box">Remove, etc.</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
