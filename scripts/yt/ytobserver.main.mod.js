@@ -93,6 +93,33 @@ YTO.myName = new window.URLSearchParams( window.location.search ).get("id") ?? Y
 YTO.connect();
 window.YTO = YTO;// so console debug
 
+autoselect_player_check();
+// if ?autoselect=player-id is in the url on connects it will automatically select it if no other player is selected
+
+function autoselect_player_check() {
+    let q = new window.URLSearchParams( window.location.search );
+    let auto  = q.get("autoselect");
+    if (auto) {
+        auto = auto.toLowerCase();
+        let op = YTO.actions.players;// old players basically select update
+        let sel = gid("playerselect");
+        YTO.actions.players = d => {
+            op(d);// call the original action
+            if (sel.selectedIndex > 0) return;
+
+            let i = 0;
+            for (let o of sel.options) {
+                if (o.innerText.toLowerCase() == auto) {
+                    sel.selectedIndex = i;
+                    sel.dispatchEvent(new Event("change"));
+                    break;
+                }
+                i++;
+            }
+        }
+    }
+}
+
     // sends a video to the player
 
 export function add_video_to_player() {
