@@ -94,7 +94,11 @@ YTO.connect();
 window.YTO = YTO;// so console debug
 
 autoselect_player_check();
-// if ?autoselect=player-id is in the url on connects it will automatically select it if no other player is selected
+
+/**
+ * Automatically picks a player if ?autoselect=player id is in the url
+ * On connects it will automatically select it if no other player is selected
+ */
 
 function autoselect_player_check() {
     let q = new window.URLSearchParams( window.location.search );
@@ -104,7 +108,7 @@ function autoselect_player_check() {
         let op = YTO.actions.players;// old players basically select update
         let sel = gid("playerselect");
         YTO.actions.players = d => {
-            op(d);// call the original action
+            op(d);   // call the original action
             if (sel.selectedIndex > 0) return;
 
             let i = 0;
