@@ -33,7 +33,33 @@
         }
         
       </style>
-      <script>document.title = "YT Controls"</script><span class="is-hidden" id="autoloadplayerlist"></span>
+      <script type="module">
+        // stop console logging
+        document.title = "YT Controls";
+        YTO.actions.consolelog = d => d;
+        clog = d => d;
+        
+      </script>
+      <style>
+        body, html {
+            overflow: auto;
+            scrollbar-color: white rebeccapurple;
+            scrollbar-width: thin;
+        }
+        /* OBS browser */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rebeccapurple;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #555;
+        }
+        
+        
+        
+      </style><span class="is-hidden" id="autoloadplayerlist"></span><span class="is-hidden" id="videoadder"></span>
       <div class="box mb-1 p-1">
         <button class="is-small button is-success mr-1" data-send="playprev"><span class="icon"><i class="fas fa-backward-fast"></i></span></button>
         <button class="is-small button is-success mr-1" data-relay="{&quot;action&quot;:&quot;rwd&quot;,&quot;data&quot;:5}" title="-5s"><span class="icon"><i class="fas fa-backward"></i></span></button>

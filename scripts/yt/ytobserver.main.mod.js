@@ -105,20 +105,18 @@ function autoselect_player_check() {
     let auto  = q.get("autoselect");
     if (auto) {
         auto = auto.toLowerCase();
-        let op = YTO.actions.players;// old players basically select update
+        let origAction = YTO.actions.players;   // store old "players" action
         let sel = gid("playerselect");
         YTO.actions.players = d => {
-            op(d);   // call the original action
-            if (sel.selectedIndex > 0) return;
+            origAction(d);   // call the original action
+            if (sel.selectedIndex > 0) return; // don't select if something's already selected
 
-            let i = 0;
             for (let o of sel.options) {
                 if (o.innerText.toLowerCase() == auto) {
-                    sel.selectedIndex = i;
+                    o.selected = true;
                     sel.dispatchEvent(new Event("change"));
                     break;
                 }
-                i++;
             }
         }
     }
