@@ -13,8 +13,22 @@ function qs(query, el=document) {
     return el.querySelector(query);
 }
 
-function gid(id, el = document) {
-    return el.getElementById(id);
+let gidCache = {}
+function gidC(id, el = document) {
+    //if (gidCache.hasOwnProperty(el)) {
+    if ( gidCache[el]?.hasOwnProperty(id) ) {
+        return gidCache[el][id];
+    }
+
+    let o =  el.getElementById(id);
+    if (o) {
+		if ( !gidCache.hasOwnProperty(el) )
+			gidCache[el] = {};
+
+		gidCache[el][id] = o;
+	}
+
+    return o;
 }
 
 function dce(i) {
@@ -84,8 +98,6 @@ function form_filter_commas_to_spaces(str) {
     // setItem getItem removeItem clear
 
 function local_store_set(name, data) {
-    //console.log(localStorage);
-
     let namePath = name + window.location.pathname;
     localStorage.setItem(namePath, JSON.stringify(data));
 }
@@ -93,8 +105,6 @@ function local_store_set(name, data) {
     // url location of current page
 
 function local_store_get (name) {
-    //console.log(localStorage);
-
     let namePath = name + window.location.pathname;
     return JSON.parse( localStorage.getItem(namePath) );
 }

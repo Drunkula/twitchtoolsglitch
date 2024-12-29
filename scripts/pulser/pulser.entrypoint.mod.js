@@ -64,7 +64,10 @@ try {
 } catch (error) {
     console.log("NOT A MODULE");
 }
-
+// how about
+if (typeof exports === 'object' && typeof module === 'object') {
+    // module.exports...
+}
 
 // this is a module.  You don't need to worry about this
 ;(()=> {

@@ -1,7 +1,5 @@
 /*
     JAVASCRIPT part
-
-    actions and on() may now be used so multiple listeners can react to the same event
 */
 import Socketty from "/scripts/Socketty.class.js";
 
@@ -33,9 +31,6 @@ export default class SockMsgRouter {
         ['error', x => console.error("Error: SockMsgRouter Socketty error!", x.toString())]
     ];
 
-        // added to with on()
-    actionListeners = {};
-
         // messages will be like a format of "action" and "data"
 
     actions = {
@@ -57,16 +52,6 @@ export default class SockMsgRouter {
         for (const pair of events) {
             this.socketty.addEventListener(pair[0], pair[1]);
         }
-    }
-
-    on(sockMsg, fn) {
-        if (typeof fn !== "function")
-            return false;
-
-        if (this.actionListeners[sockMsg] === undefined)
-            this.actionListeners[sockMsg] = [];
-
-        this.actionListeners[sockMsg].push(fn);
     }
 
         // routes incoming socket messages
@@ -91,12 +76,6 @@ export default class SockMsgRouter {
 
         if (this.actions[action]) {
             this.actions[action](data);
-        }
-
-        if (this.actionListeners[action]) {
-            for (let act of this.actionListeners[action]) {
-                act(data);
-            }
         }
             // don't log everything
         if (["consolelog", "pong"].includes(action)) {

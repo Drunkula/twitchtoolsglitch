@@ -11,58 +11,435 @@
     <link rel="stylesheet" href="/css/styles.css">
   </head>
   <body>
-        <nav class="navbar is-dark cadbury">
-          <div class="navbar-brand"><a class="navbar-item" href="/"><img src="/assets/tt-nav.svg"></a>
-            <!-- burger needs to be inside the brand--><a class="navbar-burger" id="burger-component"><span></span><span></span><span></span></a>
-          </div>
-          <div class="navbar-menu" id="nav-links-component">
-            <div class="navbar-start"><a class="navbar-item" href="/">Home.</a>
-              <div class="navbar-item has-dropdown is-hoverable"><a class="navbar-link">Tools List</a>
-                <div class="navbar-dropdown is-boxed"><a class="navbar-item" href="chat-to-speech-tabs.html">Speech from chat TTS</a><a class="navbar-item" href="scene-switcher.html">Scene change from chat - !brb, !game, !etc &nbsp;<strong>OBS v27</strong>&nbsp; and below</a><a class="navbar-item" href="scene-switcher-v5.html">Scene change from chat commands - &nbsp;<strong>OBS v28</strong>&nbsp; up</a><a class="navbar-item" href="new-chatter.html">New Chatters alert (say hello to new chatters easily)</a><a class="navbar-item" href="muted-alert.html">You're Muted alert</a><a class="navbar-item" href="chat-alert.html">New Message alert - don't miss chat messages (good for small channels)</a><a class="navbar-item" href="subs-gifts-cheers.html">Subs, gifts, cheers - it doesn't work yet (well it does, but it doesn't)</a><a class="navbar-item" href="localstorage.html">localstorage killer (just for my debuggin)</a><a class="navbar-item" href="#"><b>There'll be more...</b></a><a class="navbar-item" href="#">VIPs / Named chatters or WRONG 'UNS join</a><a class="navbar-item" href="#">OBS scene and mic control mod chat commands (!unmute, !brb, !game)</a><a class="navbar-item" href="#">OBS web control panel for your mods</a><a class="navbar-item" href="#">And your suggestions.</a>
-                  <hr class="navbar-divider is-hidden-desktop">
-                </div>
-              </div>
-            </div>
-            <div class="navbar-end">
-              <div class="navbar-item has-dropdown is-hoverable is-hidden-touch"><a class="navbar-link">Bulma Bits</a>
-                <div class="navbar-dropdown"><a class="navbar-item" href="https://bulma.io/documentation/components/" target="_blank">Components</a><a class="navbar-item" href="https://bulma.io/documentation/elements/" target="_blank">Elements</a>
-                  <hr class="navbar-divider"><a class="navbar-item" href="https://bulma.io/documentation/layout/" target="_blank">Layout</a><a class="navbar-item" href="https://bulma.io/documentation/form/" target="_blank">Forms</a>
-                </div>
-              </div>
-              <div class="navbar-item has-dropdown is-hoverable is-hidden-touch"><a class="navbar-link">Assets</a>
-                <div class="navbar-dropdown is-right"><a class="navbar-item" href="https://fontawesome.com/search?m=free&amp;s=solid" target="_blank">Fontawesome Solid Free</a><a class="navbar-item" href="https://fontawesome.com/search?m=free&amp;s=regular" target="_blank">Fontawesome Regular Free</a><a class="navbar-item" href="https://fontawesome.com/docs/web/style/animate#customization" target="_blank">Fontawesome Animations</a>
-                  <hr class="navbar-divider"><a class="navbar-item" href="https://fonts.google.com/" target="_blank">Google Fonts</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </nav>
-        <script>
-          document.addEventListener("DOMContentLoaded", () => {
-          	// for this specific nav list
-          	const burger = document.querySelector('#burger-component');
-          	const navlist = document.querySelector('#nav-links-component');
-          	burger.addEventListener('click', () => {navlist.classList.toggle('is-active'); burger.classList.toggle('is-active')})
-          });
-          
-        </script>
     <div class="block mx-5 my-3 main-container">
       <script src="/scripts/backbone-common.js" defer></script>
       <script src="/scripts/bulma-components-init.js" defer></script>
-      <script src="/scripts/tts/tts-streamerbot.mod.js" type="module"></script>
-      <div class="notification is-info" id="mynotif">
-        <div class="title is-5">TAP THE PAGE if you're using Brave/Chrome</div>
-        <button class="delete" data-target="#mynotif"></button>
+      <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/bulma-toast/2.4.4/bulma-toast.min.js"></script>
+      <!--script(src="/scripts/Flasher+Countdown.class.js")-->
+      <script src="/scripts/ttssb/tts-sb.MAIN.mod.js" type="module"></script>
+      <style type="text/css">
+        li > a {background-color: black;}
+        li.insts-tab.is-active a {
+        	background-color: #cf0808 !important;
+        }
+        li.pl-tab.is-active a {
+        	background-color: #9900b8 !important;
+        }
+        
+        button input[type="checkbox"] {
+        	height: 1.4em; width: 1.4em; margin: 0; padding: 0;vertical-align: middle;
+        }
+        
+        #Zignoreddiv, #Zalloweddiv {
+        	min-height: 4em;
+        	max-height: 50%;
+        	overflow-y: auto;
+        	scrollbar-color: white rebeccapurple;
+        	scrollbar-width: thin;
+        }
+        
+        #ignoreddiv, #alloweddiv, .modal-card-body, #nicknametagpool {
+        	scrollbar-color: white rebeccapurple;
+        	scrollbar-width: thin;
+        }
+        
+        #nicknametagpool span:hover, #voicetagpool span:hover {
+        	cursor: pointer;
+        	background-color: blue;
+        }
+        
+        #Xnicknametagpool {
+        	//height: inherit;
+        	max-height: 80%;
+        	overflow-y: auto;
+        }
+        
+        
+        	/* a .hider class with a for="id" will take these away */
+        .hide-buttons button {
+        	display: none;
+        }
+        
+        .show-buttons span {
+        	padding-right: 0 !important;
+        }
+        
+        .show-buttons button {
+        	display: block;
+        }
+        .flex-center {
+        	display:  flex;
+        	align-items: center;
+        	line-height: 0;
+        }
+        .flex-center > * {
+        	padding: 10px 0px;
+        	margin-right: 0.75em;
+        }
+        
+        
+      </style>
+      <div class="navbar-item mb-1 py-0 px-5 tabs is-fullwidth is-toggle is-small" data-theme="dark" data-target="#ttstabs" style="position: fixed; width: 100%; top: 0; left: 0; z-index: 1;">
+        <ul onClick="window.scrollTo(0,0);">
+          <li class="is-active"><a>Speech Queue</a></li>
+          <li class="pl-tab"><a>Custom Voices</a></li>
+          <li class="insts-tab"><a>Ignored / Allowed</a></li>
+        </ul>
       </div>
-      <div class="columns is-flex-direction-row-reverse">
-        <div class="column">
+      <div class="mb-1">&nbsp;</div>
+      <div class="tab-content" id="ttstabs">
+        <div class="tab-pane is-active">
+          <div class="columns">
+            <div class="column" id="main">
+              <!--//////////// USER SELECT /////////////////-->
+              <div class="field is-grouped">
+                <div class="control">
+                  <button class="button is-small is-primary modal-trigger" data-target="configModal"><i class="fas fa-gear"></i></button>
+                </div>
+                <div class="control">
+                  <label class="button is-success" for="enabled">on
+                    <input class="ml-2" id="enabled" type="checkbox" checked>
+                  </label>
+                </div>
+                <button class="button is-success" id="debugttsbtn">Debug</button>
+                <button class="button is-success" id="debugsendcapsbtn">Send Capabilities</button>
+                <button class="button is-warning" id="nudgettsbtn">nudge TTS</button>
+              </div>
+              <!--/////////// MY VOICES SELECT ////////////////-->
+              <div class="field has-addons is-horizontal">
+                <div class="control">
+                  <div class="select">
+                    <select class="voiceselect" id="myvoiceselect">
+                      <option value="">My Voices</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="control">
+                  <div class="select">
+                    <select class="voiceselect" id="myvoiceselectfilter" data-for="myvoiceselect">
+                      <option value="">Filter</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="column">
+              <div class="box">
+                <div id="log"></div>
+                <p>Users to choose | Nicknames list (modal) | Voices assigned (select?) | word replace (regex) Table/checkboxes/ name+text</p>
+              </div>
+            </div>
+          </div>
           <div class="box">
-            <div class="title is-3">Hi there</div>
+            <div id="speechqueuesaying"><span class="tab is-info">Currently saying...</span></div>
+          </div>
+          <div class="box">
+            <div id="mainoutput"></div>
+            <p>speech queue</p>
+            <div id="speechqueue"></div>
+          </div>
+          <div class="box">
+            <p>old messages</p>
+            <div id="speechqueueold"></div>
           </div>
         </div>
-        <div class="column">
-          <div class="box">Remove, etc.</div>
+        <div class="tab-pane">
+          <div class="box">
+            <p class="title is-4">Custom voices</p>
+            <div class="field is-grouped">
+              <div class="field has-addons is-horizontal">
+                <div class="select">
+                  <select id="customvoiceuserselect">
+                    <option value="">Voice Pick</option>
+                  </select>
+                </div><a class="button is-success" id="customvoicesetbtn"><span class="icon"><i class="fas fa-rotate"></i></span></a>
+              </div>
+              <div class="field has-addons is-horizontal">
+                <div class="select">
+                  <select class="voiceselect" id="customvoiceselect">
+                    <option value="">My Voices</option>
+                  </select>
+                </div>
+                <div class="select">
+                  <select class="voiceselect" id="customvoiceselectfilter" data-for="customvoiceselect">
+                    <option value="">Filter</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <!--.field.is-horizontal-->
+            <div class="flex-center">
+              <label class="label">rate</label>
+              <input id="rate" type="range" min="0.5" max="2" step="0.1" value="1">
+              <label class="label">pitch</label>
+              <input id="pitch" type="range" min="0.5" max="2" step="0.1" value="1">
+              <input class="hide-button-toggle" id="cvdels" type="checkbox" data-for="voicetagpool">
+              <label class="label" for="cvdels">delete</label>
+            </div>
+            <div class="box hide-buttons" id="voicetagpool">
+              <p>Custom voices</p>
+            </div>
+            <!--// NICKNAMES PANE ////-->
+            <!--// NICKNAMES PANE ////-->
+          </div>
+          <div class="box">
+            <div class="title is-4">Nicknames
+              <div class="level">
+                <div class="level-left">
+                  <div class="level-item">
+                    <div class="field has-addons">
+                      <div class="control">
+                        <div class="select">
+                          <select id="nicknameuserselect">
+                            <option value="">Nicknames</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="control">
+                        <input class="input" id="nicknametext" type="input" placeholder="nickname here">
+                      </div>
+                      <div class="control"><a class="button is-success" id="nicknameupdatebtn"><span class="icon is-large"><i class="far fa-check-circle"></i></span></a></div>
+                    </div>
+                  </div>
+                  <div class="level-item">
+                    <input class="hide-button-toggle" id="nndels" type="checkbox" data-for="nicknametagpool">
+                  </div>
+                  <div class="level-item">
+                    <label class="label" for="nndels">delete</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="box hide-buttons" id="nicknametagpool"></div>
+          </div>
         </div>
+        <div class="tab-pane">
+          <!--// IGNORED / ALLOWED PANE ////-->
+          <!--// IGNORED / ALLOWED PANE ////-->
+          <div class="box">
+            <div class="field is-grouped">
+              <div class="field has-addons is-horizontal">
+                <div class="control">
+                  <div class="select">
+                    <select class="userselect" id="userselect">
+                      <option value="">Users</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="control"><a class="button is-success" id="playerselectgetbtn"><span class="icon"><i class="fas fa-rotate"></i></span></a></div>
+              </div>
+              <div class="control">
+                <button class="button is-warning" id="ignoreuserbtn">Ignore</button>
+              </div>
+              <div class="control">
+                <button class="button is-danger" id="deleteuserbtn">Delete
+                  <input class="ml-2" type="checkbox" id="deleteuserconfirm">
+                </button>
+              </div>
+              <div class="control">
+                <button class="button is-success" id="alwaysallowuserbtn">Always Allow</button>
+              </div>
+            </div>
+            <div class="box">
+              <div class="level">
+                <div class="level-left">
+                  <div class="level-item">
+                    <div class="title is-4 mb-2">Ignored Users</div>
+                  </div>
+                  <div class="level-item">
+                    <input class="hide-button-toggle mb-0" id="igdel" type="checkbox" data-for="ignoreddiv">
+                  </div>
+                  <div class="level-item">
+                    <label class="label" for="igdel">delete</label>
+                  </div>
+                </div>
+              </div>
+              <div class="hide-buttons" id="ignoreddiv"></div>
+            </div>
+            <div class="box">
+              <div class="level">
+                <div class="level-left">
+                  <div class="level-item">
+                    <div class="title is-4 mb-2">Always allowed (even if not mods)</div>
+                  </div>
+                  <div class="level-item">
+                    <input class="hide-button-toggle" id="allowdel" type="checkbox" data-for="alloweddiv">
+                  </div>
+                  <div class="level-item">
+                    <label class="label" for="allowdel">delete</label>
+                  </div>
+                </div>
+              </div>
+              <div class="hide-buttons" id="alloweddiv"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal" id="clickPageModal" data-theme="light">
+        <div class="modal-background modal-dismiss"></div>
+        <div class="modal-card modal-dismiss">
+          <header class="modal-card-head">
+            <p class="modal-card-title title is-2 mb-0">Click. The. Page</p>
+            <button class="delete" aria-label="close"></button>
+          </header>
+          <section class="modal-card-body">
+            <div class="box is-warning">
+              <p>Please click the page.</p>
+              <p>The speech engine can't function until the page has been "interacted" with.</p>
+              <p>So just close this and voila.</p>
+            </div>
+          </section>
+          <footer class="modal-card-foot">
+            <div class="buttons">
+              <button class="button is-success">Clicky clicky!</button>
+              <button class="button is-warning">Just bloody click somewhere.  Anywhere.</button>
+            </div>
+          </footer>
+        </div>
+      </div>
+      <div class="modal" id="configModal" data-theme="dark">
+        <div class="modal-background modal-dismiss"></div>
+        <div class="modal-card">
+          <section class="modal-card-body">
+            <div class="tabs is-fullwidth is-toggle is-toggle-rounded is-small" data-target="#configpanels">
+              <ul>
+                <li class="is-active"><a>Settings</a></li>
+                <!-- li: a Settings 2-->
+                <!--li: a Allow / Ignore-->
+                <li><a>Tweaks</a></li>
+              </ul>
+            </div>
+            <div class="block tab-content" id="configpanels">
+              <!--// SETTINGS PANE ////-->
+              <div class="tab-pane is-active">
+                <div class="field is-grouped-centered is-grouped mb-3">
+                  <div class="control">
+                    <label class="checkbox button is-link is-size-7-mobile is-responsive">
+                      <input class="tts-setting" type="checkbox" id="readAllChat"> All chat
+                    </label>
+                  </div>
+                  <div class="control">
+                    <label class="checkbox button is-link is-size-7-mobile is-responsive">
+                      <input class="tts-setting" type="checkbox" id="randomvoices"> Rand Voice
+                    </label>
+                  </div>
+                  <div class="control">
+                    <label class="checkbox button is-link is-size-7-mobile is-responsive">
+                      <input class="tts-setting" type="checkbox" id="readEmotes"> emotes
+                    </label>
+                  </div>
+                  <div class="control">
+                    <label class="checkbox button is-link is-size-7-mobile is-responsive">
+                      <input class="tts-setting" type="checkbox" id="readNameDigits"> name digits
+                    </label>
+                  </div>
+                  <div class="control">
+                    <label class="checkbox button is-link is-size-7-mobile is-responsive">
+                      <input class="tts-setting" type="checkbox" id="readCommands"> !cmds
+                    </label>
+                  </div>
+                </div>
+                <p class="label has-text-centered">Allow speech from:</p>
+                <div class="field is-grouped-centered is-grouped permissions">
+                  <div class="control">
+                    <label class="checkbox button is-info">
+                      <input class="tts-setting" id="allowEveryone" type="checkbox"> everyone
+                    </label>
+                  </div>
+                  <div class="control">
+                    <label class="checkbox button is-info">
+                      <input class="tts-setting" id="allowMods" type="checkbox" checked> mods
+                    </label>
+                  </div>
+                  <div class="control">
+                    <label class="checkbox button is-info">
+                      <input class="tts-setting" id="allowVips" type="checkbox" checked> vips
+                    </label>
+                  </div>
+                  <div class="control">
+                    <label class="checkbox button is-info">
+                      <input class="tts-setting" id="allowSubs" type="checkbox"> subs
+                    </label>
+                  </div>
+                </div>
+                <label class="label">Speech queue limit (0 = unlimited)</label>
+                <div class="field">
+                  <div class="control">
+                    <input class="input number-input-4 tts-setting" id="chatQueueLimit" type="number" min="0" max="200" value="10">
+                  </div>
+                </div>
+                <label class="label">Say before message - tags: {user} {channel}</label>
+                <div class="field">
+                  <div class="control">
+                    <input class="input tts-setting" id="sayBefore" type="text" placeholder="say before e.g {user} say" value="{user} says">
+                  </div>
+                </div>
+                <label class="label">Say after message - tags: {user} {channel}</label>
+                <div class="field">
+                  <div class="control">
+                    <input class="input tts-setting" id="sayAfter" type="text" placeholder="say after e.g said {user}" value="">
+                  </div>
+                </div>
+                <div class="columns is-mobile">
+                  <div class="column">
+                    <label class="label">Global cooldown seconds</label>
+                    <div class="field">
+                      <div class="control">
+                        <input class="input number-input-5 tts-setting" id="globalCooldown" type="number" min="0" max="12000" value="0">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="column">
+                    <label class="label">User cooldown seconds</label>
+                    <div class="field">
+                      <div class="control">
+                        <input class="input number-input-4 tts-setting" id="userCooldown" type="number" min="0" max="12000" value="0">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!--// TWEAKS PANE ////-->
+              <!--// TWEAKS PANE ////-->
+              <div class="tab-pane">
+                <label class="label">Max message seconds, zero disables which might cause Edge to stall.</label>
+                <div class="field">
+                  <div class="control">
+                    <input class="input number-input-3 tts-setting" id="messageTimeLimit" type="number" min="0" max="180" value="30">
+                  </div>
+                </div>
+                <label class="label">Old message queue limit</label>
+                <div class="field">
+                  <div class="control">
+                    <input class="input number-input-4 tts-setting" id="historyQueueLimit" type="number" min="0" max="1000" value="20">
+                  </div>
+                </div>
+                <label class="label">No "user says" if they speak again within these seconds.  Zero disables.</label>
+                <div class="field">
+                  <div class="control">
+                    <input class="input number-input-4 tts-setting" id="nameSuppressSeconds" type="number" min="0" max="1000" value="10" inputtype="numeric" pattern="[0-9]+">
+                  </div>
+                </div>
+                <label class="label">Filter characters</label>
+                <div class="field">
+                  <div class="control">
+                    <input class="input tts-setting" id="stripChars" type="text" value="\/#_()€¥¢©®™~¿[]{}&lt;&gt;¡`;÷|¦¬×§¶°">
+                  </div>
+                </div>
+                <div class="control">
+                  <label class="checkbox is-link is-responsive has-text-weight-medium">
+                    <input class="tts-setting" id="removeModeratedMessages" type="checkbox" checked> Remove moderated messages
+                  </label>
+                </div>
+              </div>
+            </div>
+          </section>
+          <footer class="modal-card-foot py-2">
+            <button class="button modal-dismiss is-small is-success is-responsive">Done</button>
+          </footer>
+        </div>
+        <button class="modal-close is-large">button</button>
       </div>
     </div>
   </body>

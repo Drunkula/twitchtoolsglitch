@@ -83,6 +83,7 @@ TT.restore_form_values = function restore_form_values(selector = '.form-save', o
 	let inputs = document.querySelectorAll(selector);
 
 	if (!paramString && localStorageFallback) {
+		console.log("USING LOCAL STORAGE");
 		paramString = TT.localstore_load();
 	}
 
@@ -169,9 +170,10 @@ TT.localstore_load = function page_params_get() {
 
 TT.get_restore_params = function get_restore_params() {
 	let getU = TT.query_string_params_to_array();
+
 console.log("Params from query string:",Object.keys(getU).length, "Param string length:", window.location.search.length);
+
 	if (Object.keys(getU).length) {
-		console.info('get_restore_params using '+ g('get'));
 		return getU;
 	}
 		// local storage?

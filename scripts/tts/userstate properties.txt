@@ -1,0 +1,90 @@
+badge-info: {subscriber: '53'}
+badge-info-raw: "subscriber/53"
+badges: {subscriber: '48', premium: '1'}
+badges-raw: "subscriber/48,premium/1"
+color: null
+display-name: "SquireHaggard"
+emotes: null
+emotes-raw: null
+first-msg: false
+flags: null
+id: "82053783-b594-476b-bc8a-08abf526a7b0"
+message-type: "chat"
+mod: false
+returning-chatter: false
+room-id: "7832442"
+subscriber: true
+tmi-sent-ts: "1729857770687"
+turbo: false
+user-id: "215342281"
+user-type: null
+username: "squirehaggard"
+
+
+Message with emmotes
+
+badge-info: null
+badge-info-raw: null
+badges: no_video: "1"
+vip: "1"
+badges-raw: "vip/1,no_video/1"
+client-nonce: "ee5bf39199a6144e0fa571c2c04df9e4"
+color: "#FF69B4"
+display-name: "AuntieBrenda"
+emotes:
+    28087: ['27-33']
+    30259: ['19-25']
+    305954156: ['35-42']
+emotes-raw: "305954156:35-42/30259:19-25/28087:27-33"
+first-msg: false
+flags: null
+id: "7c093cb8-5fd7-4d3c-aafa-105daa3cb0b1"
+message-type: "chat"
+mod: false
+returning-chatter: false
+room-id: "472548624"
+subscriber: false
+tmi-sent-ts: "1729858106739"
+turbo: false
+user-id: "576952126"
+user-type: null
+username: "auntiebrenda"
+vip: true
+
+
+
+badge-info: {subscriber: '56'}
+badge-info-raw: "subscriber/56"
+badges: {subscriber: '54', sub-gifter: '150'}
+badges-raw: "subscriber/54,sub-gifter/150"
+client-nonce: "e59f55f329c435883039dfa184c907c1"
+color: "#008000"
+display-name: "bakerdan500"
+emotes: null
+emotes-raw: null
+first-msg: false
+flags: null
+id: "f4f0489b-21f4-4caa-b963-86a64eb37fdc"
+message-type: "chat"
+mod: false
+reply-parent-display-name: "MetalRammy82"
+reply-parent-msg-body: "is that the same guy from Last Woman on earth?"
+reply-parent-msg-id: "67b34b7d-c2bf-409d-a0ad-9e74e613db49"
+reply-parent-user-id: "44602596"
+reply-parent-user-login: "metalrammy82"
+reply-thread-parent-display-name: "MetalRammy82"
+reply-thread-parent-msg-id: "67b34b7d-c2bf-409d-a0ad-9e74e613db49"
+reply-thread-parent-user-id: "44602596"
+reply-thread-parent-user-login: "metalrammy82"
+returning-chatter: false
+room-id: "7832442"
+subscriber: true
+tmi-sent-ts: "1729857995525"
+turbo: false
+user-id: "483699513"
+user-type: null
+username: "bakerdan500"
+
+
+
+

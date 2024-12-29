@@ -1,0 +1,60 @@
+
+<!--// IGNORED / ALLOWED PANE ////-->
+<!--// IGNORED / ALLOWED PANE ////-->
+<div class="box">
+  <div class="field is-grouped">
+    <div class="field has-addons is-horizontal">
+      <div class="control">
+        <div class="select">
+          <select class="userselect" id="userselect">
+            <option value="">Users</option>
+          </select>
+        </div>
+      </div>
+      <div class="control"><a class="button is-success" id="playerselectgetbtn"><span class="icon"><i class="fas fa-rotate"></i></span></a></div>
+    </div>
+    <div class="control">
+      <button class="button is-warning" id="ignoreuserbtn">Ignore</button>
+    </div>
+    <div class="control">
+      <button class="button is-danger" id="deleteuserbtn">Delete
+        <input class="ml-2" type="checkbox" id="deleteuserconfirm"/>
+      </button>
+    </div>
+    <div class="control">
+      <button class="button is-success" id="alwaysallowuserbtn">Always Allow</button>
+    </div>
+  </div>
+  <div class="box">
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item">
+          <div class="title is-4 mb-2">Ignored Users</div>
+        </div>
+        <div class="level-item">
+          <input class="hide-button-toggle mb-0" id="igdel" type="checkbox" data-for="ignoreddiv"/>
+        </div>
+        <div class="level-item">
+          <label class="label" for="igdel">delete</label>
+        </div>
+      </div>
+    </div>
+    <div class="hide-buttons" id="ignoreddiv"></div>
+  </div>
+  <div class="box">
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item">
+          <div class="title is-4 mb-2">Always allowed (even if not mods)</div>
+        </div>
+        <div class="level-item">
+          <input class="hide-button-toggle" id="allowdel" type="checkbox" data-for="alloweddiv"/>
+        </div>
+        <div class="level-item">
+          <label class="label" for="allowdel">delete</label>
+        </div>
+      </div>
+    </div>
+    <div class="hide-buttons" id="alloweddiv"></div>
+  </div>
+</div>

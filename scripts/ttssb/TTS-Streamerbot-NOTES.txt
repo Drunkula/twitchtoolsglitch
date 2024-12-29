@@ -1,0 +1,97 @@
+Handling emotes is much harder as their position isn't explicit
+
+Ok - let's say we want multiple browsers, Edge and Chrome
+
+Nickname, voice (name, pitch, rate, browser)
+
+MESSAGE IN:
+    * broadcast to all connected for DISPLAY ONLY.  Highlight colours for ones you'll say.
+    * Queued in SB for speaking
+
+SPEECH OUT
+    * Sent to all connected with a flag of which browser type it's for
+
+BROWSERS
+    ON SPEECH
+    * send END message with id of the message
+    * send START message with the id of the message.  SB can start a timer in case of stalls
+
+    ON CONNECT
+    * SEND Type of browser
+    * RECEIVES: users, nicknames, banned, permissions, user assigned voices, default voice, say before, say after,
+
+    MESSAGES TO:
+        speakmessage, movemessagetoold, addmessage, deletemessage,
+
+
+SB NEEDED
+    * List of connected browsers and if the browser needed for a voice is available
+    * Not available then change to a browser that is
+
+
+WHICH BROWSER DOES WHAT?
+
+    I could do ?id=EDGE | ?id=CHROME rather than autodetecting.  Edge is easy to detect
+
+    Browser SENDS voices on connect GETS browserID
+        SB checks if that browser handles saved voices
+
+        Dictionary<voiceURI, browserID>
+
+
+        VOICE SELECT: Browser > Language > Voice
+
+        If multiple browsers handle the same voice the 2nd one is ignored meaning multipled loads from same browser can be ignored
+
+        If no browser is connected with the default voice a "Play generic" command will be sent to a connected browser.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

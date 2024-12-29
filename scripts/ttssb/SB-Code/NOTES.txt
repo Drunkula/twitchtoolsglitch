@@ -1,0 +1,33 @@
+action:"presentviewers"
+users:Array(3)
+0:{id: '574953343', userName: 'cheekybot3000', display: 'CheekyBot3000', role: 3, isSubscribed: false}
+1:{id: '100135110', userName: 'streamelements', display: 'StreamElements', role: 3, isSubscribed: false}
+2:{id: '472548624', userName: 'drunkula', display: 'Drunkula', role: 4, isSubscribed: true}
+
+
+
+GetGlobalVar<T>(name, persisted) will return null if it doesn't exist.  Check for that using a temp var
+or null coalescing
+
+
+This will work on a value set with SetGlobalVar:
+
+string j2 = CPH.GetGlobalVar<string>("TTS_DATA", true);
+Dictionary<string, object> TTD = JsonConvert.DeserializeObject<Dictionary<string, object>>(j2);
+send_action("then after the -data-i-got", TTD);
+
+This will NOT work:
+
+Dictionary<string, object> foo = CPH.GetGlobalVar<Dictionary<string, object>>("TTS_DATA", true);
+
+use this instead like GetVarPerm<Dictionary<string, object>>("SOME_VAR");
+
+public T GetVarPerm<T>(string varname) {
+    var json = CPH.GetGlobalVar<string>(varname, true);
+
+    if (json == null) {
+        return default(T);
+    }
+        // build in get method can't do this
+    return JsonConvert.DeserializeObject<T>(json);
+}

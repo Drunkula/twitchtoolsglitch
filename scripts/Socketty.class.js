@@ -1,22 +1,24 @@
 /*
 I could add a ready() promise
-    Events added to Socketty will be backed up and reattached when a socket
-    connects / reconnects
+Events added to Socketty will be backed up and reattached when a socket
+connects / reconnects
 */
 //const socketUrl = 'ws://127.0.0.1:8081/'; // for streamerbot
 
-    /**
-     *  websocket wrapper with all the functionality but also
-     * pings
-     * reconnects
-     * restored event listeners
-     *
-     * use it as a direct replacement
-     */
+/**
+ *  websocket wrapper with all the functionality but also
+ * pings
+ * reconnects
+ * restored event listeners
+*
+* use it as a direct replacement
+*/
 
-export { Socketty };
+//var clog = window.clog;
 
-class Socketty {
+
+
+export class Socketty {
 
     ws = null;
     socketUrl = "ws://localhost:8081/";
@@ -61,7 +63,7 @@ class Socketty {
         // *************** FUNCTIONS / METHODS **************** //
 
     constructor(sockUrl) {
-        clog("I am a Socketty constructor");
+        window.clog("I am a Socketty constructor");
 
         if (sockUrl) {
             this.connect(sockUrl);  // don't RETURN this as you'll be returning our socket
@@ -76,6 +78,8 @@ class Socketty {
     1	OPEN	The connection is open and ready to communicate.
     2	CLOSING	The connection is in the process of closing.
     3	CLOSED	The connection is closed or couldn't be opened.
+
+    @returns this.ws or false
 */
 
     connect(sockUrl) {
@@ -298,3 +302,5 @@ class Socketty {
         return this.ws.readyState;
     }
 }   // class end
+
+export default Socketty;

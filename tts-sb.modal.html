@@ -1,0 +1,144 @@
+
+<div class="modal" id="configModal" data-theme="dark">
+  <div class="modal-background modal-dismiss"></div>
+  <div class="modal-card">
+    <section class="modal-card-body">
+      <div class="tabs is-fullwidth is-toggle is-toggle-rounded is-small" data-target="#configpanels">
+        <ul>
+          <li class="is-active"><a>Settings</a></li>
+          <!-- li: a Settings 2-->
+          <!--li: a Allow / Ignore-->
+          <li><a>Tweaks</a></li>
+        </ul>
+      </div>
+      <div class="block tab-content" id="configpanels">
+        <!--// SETTINGS PANE ////-->
+        <div class="tab-pane is-active">
+          <div class="field is-grouped-centered is-grouped mb-3">
+            <div class="control">
+              <label class="checkbox button is-link is-size-7-mobile is-responsive">
+                <input class="tts-setting" type="checkbox" id="readAllChat"/> All chat
+              </label>
+            </div>
+            <div class="control">
+              <label class="checkbox button is-link is-size-7-mobile is-responsive">
+                <input class="tts-setting" type="checkbox" id="randomvoices"/> Rand Voice
+              </label>
+            </div>
+            <div class="control">
+              <label class="checkbox button is-link is-size-7-mobile is-responsive">
+                <input class="tts-setting" type="checkbox" id="readEmotes"/> emotes
+              </label>
+            </div>
+            <div class="control">
+              <label class="checkbox button is-link is-size-7-mobile is-responsive">
+                <input class="tts-setting" type="checkbox" id="readNameDigits"/> name digits
+              </label>
+            </div>
+            <div class="control">
+              <label class="checkbox button is-link is-size-7-mobile is-responsive">
+                <input class="tts-setting" type="checkbox" id="readCommands"/> !cmds
+              </label>
+            </div>
+          </div>
+          <p class="label has-text-centered">Allow speech from:</p>
+          <div class="field is-grouped-centered is-grouped permissions">
+            <div class="control">
+              <label class="checkbox button is-info">
+                <input class="tts-setting" id="allowEveryone" type="checkbox"/> everyone
+              </label>
+            </div>
+            <div class="control">
+              <label class="checkbox button is-info">
+                <input class="tts-setting" id="allowMods" type="checkbox" checked="checked"/> mods
+              </label>
+            </div>
+            <div class="control">
+              <label class="checkbox button is-info">
+                <input class="tts-setting" id="allowVips" type="checkbox" checked="checked"/> vips
+              </label>
+            </div>
+            <div class="control">
+              <label class="checkbox button is-info">
+                <input class="tts-setting" id="allowSubs" type="checkbox"/> subs
+              </label>
+            </div>
+          </div>
+          <label class="label">Speech queue limit (0 = unlimited)</label>
+          <div class="field">
+            <div class="control">
+              <input class="input number-input-4 tts-setting" id="chatQueueLimit" type="number" min="0" max="200" value="10"/>
+            </div>
+          </div>
+          <label class="label">Say before message - tags: {user} {channel}</label>
+          <div class="field">
+            <div class="control">
+              <input class="input tts-setting" id="sayBefore" type="text" placeholder="say before e.g {user} say" value="{user} says"/>
+            </div>
+          </div>
+          <label class="label">Say after message - tags: {user} {channel}</label>
+          <div class="field">
+            <div class="control">
+              <input class="input tts-setting" id="sayAfter" type="text" placeholder="say after e.g said {user}" value=""/>
+            </div>
+          </div>
+          <div class="columns is-mobile">
+            <div class="column">
+              <label class="label">Global cooldown seconds</label>
+              <div class="field">
+                <div class="control">
+                  <input class="input number-input-5 tts-setting" id="globalCooldown" type="number" min="0" max="12000" value="0"/>
+                </div>
+              </div>
+            </div>
+            <div class="column">
+              <label class="label">User cooldown seconds</label>
+              <div class="field">
+                <div class="control">
+                  <input class="input number-input-4 tts-setting" id="userCooldown" type="number" min="0" max="12000" value="0"/>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!--// TWEAKS PANE ////-->
+        <!--// TWEAKS PANE ////-->
+        <div class="tab-pane">
+          <label class="label">Max message seconds, zero disables which might cause Edge to stall.</label>
+          <div class="field">
+            <div class="control">
+              <input class="input number-input-3 tts-setting" id="messageTimeLimit" type="number" min="0" max="180" value="30"/>
+            </div>
+          </div>
+          <label class="label">Old message queue limit</label>
+          <div class="field">
+            <div class="control">
+              <input class="input number-input-4 tts-setting" id="historyQueueLimit" type="number" min="0" max="1000" value="20"/>
+            </div>
+          </div>
+          <label class="label">No "user says" if they speak again within these seconds.  Zero disables.</label>
+          <div class="field">
+            <div class="control">
+              <input class="input number-input-4 tts-setting" id="nameSuppressSeconds" type="number" min="0" max="1000" value="10" inputtype="numeric" pattern="[0-9]+"/>
+            </div>
+          </div>
+          <label class="label">Filter characters</label>
+          <div class="field">
+            <div class="control">
+              <input class="input tts-setting" id="stripChars" type="text" value="\/#_()€¥¢©®™~¿[]{}&lt;&gt;¡`;÷|¦¬×§¶°"/>
+            </div>
+          </div>
+          <div class="control">
+            <label class="checkbox is-link is-responsive has-text-weight-medium">
+              <input class="tts-setting" id="removeModeratedMessages" type="checkbox" checked="checked"/> Remove moderated messages
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+    <footer class="modal-card-foot py-2">
+      <button class="button modal-dismiss is-small is-success is-responsive">Done</button>
+    </footer>
+  </div>
+  <button class="modal-close is-large">button</button>
+</div>

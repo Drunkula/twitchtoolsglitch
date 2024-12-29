@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBS Pipes</title>
+    <style>
+        text {
+            offset-anchor: 50% 50%;
+            offset-rotate: auto 90deg;
+            color: red;
+        }
+    </style>
+    <script>
+        "use strict"
+        // get the text and timing from the URL text & time.  SB has clipDurationOriginal in seconds
+        window.addEventListener('load', setup);
+
+        var txtPath, anim, pathLen, txtLen;
+        const MAX_SPEED = 320;  // pixels per second along the path
+
+        function setup() {
+            let qs = new window.URLSearchParams( window.location.search );
+            let qsText = qs.get("text");
+            let qsTime  = qs.get("time");
+
+
+            //out("Setting up.");
+            txtPath = gid("txt-path");
+            pathLen = gid("pipePath").getTotalLength();
+            anim = gid("txtAnim");
+
+            txtLen = change_text(qsText);
+            change_dur(qsTime);
+            anim.setAttribute("from", pathLen);
+            anim.setAttribute("to", -txtLen);
+            //set_anim_end_pos();
+
+            let speed = get_speed();
+
+            //set_anim_end_pos();
+
+            /* It seems that just setting "to" on its own causes problems */
+
+            try {
+                out("Total text length:", txtLen.toFixed(2));
+                out("Speed:", speed);
+                out("time:", qsTime);
+            } catch (error) {
+                console.error(error)
+            }
+
+            //let pathLen = gid("pipePath").getTotalLength().toFixed(2);
+            out("Total path length:", pathLen.toFixed(2));
+// TSPANS CAUSE PROBLEMS.  They're like separate NODES
+            if ( speed > MAX_SPEED ) {
+                // speed = distance / time
+                change_dur ( (txtLen + pathLen) / MAX_SPEED );
+                let s = get_speed();
+                out("NEW SPEED: ", s);
+            }
+
+
+        }
+
+        function set_anim_end_pos() {
+            let lastChar = txtPath.textLength.baseVal.value;
+        }
+
+            /* returns length of new text */
+
+        function change_text(str) {
+            let tn = document.createElementNS("http://www.w3.org/2000/svg", 'text');
+            let txtNode = document.createTextNode(str);
+            txtPath.firstChild.textContent = str;
+            let tl = txtPath.textLength.baseVal.value;
+            //out("Now text length:", tl.toFixed(2));
+            //set_anim_end_pos();
+            return tl;
+        }
+
+        function change_dur(dur) {
+            let secs = parseFloat(dur);
+            secs = isNaN(secs) ? 30.0 : secs
+            /* min dur isn't enough, min speed is
+            const MIN_ANIM_TIME = 20.0;
+            if (secs < MIN_ANIM_TIME) secs = MIN_ANIM_TIME;
+            */
+            anim.setAttribute("dur", `${secs}s`);
+        }
+
+            /**
+             * Speed - how work out?  Well the first char will travel the pathLen + textLen in the time
+             * Speed = distance / time = (pathLen + textLen) / duration
+             * */
+
+        function get_speed() {
+            //let pathLen = gid("pipePath").getTotalLength();
+            //let txtLen = txtPath.textLength.baseVal.value;
+            //let durStr = anim.getAttribute("dur");
+            //let durF = parseFloat(durStr);  // check for isNaN
+            let durNum = anim.getSimpleDuration();
+            let speed = (pathLen + txtLen) / durNum;
+            return speed.toFixed(1);
+        }
+
+    </script>
+    <style>
+        #messages {
+            position: fixed; right: 0px; top: 0px; padding: 5px;
+            border: 1px solid blue;
+            background-color: antiquewhite;
+        }
+
+        svg {
+            position: fixed;
+            left: 4px;
+            top: -3px;
+        }
+    </style>
+</head>
+<body>
+<!--     https://developer.mozilla.org/en-US/docs/Web/SVG/Element/animateMotion
+    https://developer.mozilla.org/en-US/docs/Web/SVG/Element/animateTransform translate | scale | rotate | skewX | skewY
+    https://www.w3schools.com/graphics/svg_animation.asp  -->
+    <div id="messages"></div>
+    <!-- <img height="30px" width="30px" src="https://static-cdn.jtvnw.net/jtv_user_pictures/ca053950-80c5-4ef4-bde1-9a4f0e0fc605-profile_image-300x300.png"> -->
+<svg width="1280" height="720" viewBox="0 0 1920 1080" version="1.1" id="svg1" xml:space="preserve" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+    <!-- <defs id="defs1" /> -->
+
+        <text font-size="2.4em" font-family="Arial" font-weight="bold">
+            <!--  rotate="15deg"  lengthAdjust="spacingAndGlyphs" -->
+
+            <textPath id="txt-path" href="#pipePath" startOffset="100%" side="right">
+                What a lovely streamer
+                <animate id="txtAnim"
+                attributeName="startOffset"
+                begin="0s" dur="30s"
+                from="100%" to="0%"
+                repeatCount="1" />
+
+            </textPath>
+        </text>
+
+        <!--<image href="https://www.aspose.cloud/templates/aspose/App_Themes/V3/images/svg/272x272/aspose_svg-for-net.png" x="20" y="20" height="180" width="180" />
+        -->
+
+        <path id="pipePath" style="fill:none;stroke:#000000;stroke-width:0px"
+        d="M -52.687098,258.13257 120.94084,143.00784 c 0,0 133.7705,-89.123307 150.02138,-100.242338 22.4729,-6.130294 26.85674,13.684961 26.85674,13.684961 0,0 -6.50036,895.680677 -0.68425,925.616537 5.81611,29.9358 45.50249,34.0413 45.50249,34.0413 L 2004.6757,896.36493" />
+
+</svg>
+
+<!--
+No zig zag and tweaked
+d="M -52.687098,258.13257 120.94084,143.00784 c 0,0 133.7705,-89.123307 150.02138,-100.242338 22.4729,-6.130294 26.85674,13.684961 26.85674,13.684961 0,0 -6.50036,895.680677 -0.68425,925.616537 5.81611,29.9358 45.50249,34.0413 45.50249,34.0413 L 2004.6757,896.36493"
+
+Zigzag path
+d="m -325.13808,1066.3755 -9.67673,-1033.474623 50.31899,-15.482766 11.61208,1060.569489 38.70691,-3.8707 -7.74138,-1035.409986 36.77157,-13.54742 -1.93535,1045.086706 32.90088,17.4181 -3.8707,-1054.763423 40.64226,1.935346 9.67673,1043.151377 36.771572,-5.8061 V 23.224148 l 47.169374,-12.960427 c 0,0 -10.947969,517.975759 -8.895225,523.449749 2.052744,5.47398 12.316465,4.78974 12.316465,4.78974 l 15.566643,-300.04277 145.744831,-95.4526 c 0,0 128.46757,-93.057733 150.02138,-100.242338 21.55382,-7.184604 26.85674,13.684961 26.85674,13.684961 0,0 -6.50036,895.680677 -0.68425,925.616537 5.81611,29.9358 45.50249,34.0413 45.50249,34.0413 L 2004.6757,896.36493"
+
+V2 Path
+d="m -84.846757,281.91019 c 0,0 321.596577,-229.907339 354.440487,-240.855308 32.8439,-10.947968 28.73842,21.895938 28.73842,21.895938 l -4.10549,385.91589 c 0,0 4.10549,403.70635 4.10549,492.65859 0,88.9522 56.10833,69.7933 56.10833,69.7933 L 2025.3742,890.89095"
+
+
+V! path
+d="M 2025.3742,890.89095 354.44048,1011.3186 c 0,0 -56.10833,19.1589 -56.10833,-69.7933 0,-88.95224 -4.10549,-492.65859 -4.10549,-492.65859 l 4.10549,-385.91589 c 0,0 4.10548,-32.843906 -28.73842,-21.895938 C 236.74982,52.002851 -84.846757,281.91019 -84.846757,281.91019"
+ -->
+
+ <script>
+    function out() {
+        var nDiv = document.createElement("div");
+        nDiv.innerText = [...arguments].join(" ");
+        document.getElementById("messages").append(nDiv);
+    }
+
+    function gid(name) {
+        return document.getElementById(name);
+    }
+
+    function dce(e) {
+        return document.createElement(e);
+    }
+    function dcen(e) {
+        return document.createElementNS("http://www.w3.org/2000/svg", e);
+    }
+</script>
+</body>
+</html>

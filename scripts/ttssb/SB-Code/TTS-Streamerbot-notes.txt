@@ -1,0 +1,29 @@
+
+
+
+MULTIPLE BROWSERS:
+
+    Problem:
+        Getting message to the right browser Edge / Chrome
+
+        FALLBACK if no browser can do a voice
+            Could do capability check on connect and keep dictionary and remove on disconnect
+
+        SENDING:
+
+        CONNECTIONS:
+            Ask browers DO YOU HANDLE THESE VOICES:
+                Returns
+
+SB Needs list of
+    HANDLED Voices
+    UNHANDLED Voices
+
+    SPEAK Can be sent on a broadcast
+
+
+
+INIT
+Wait for the speecher to be ready
+Wait for the socket to connect
+Identify self and voices to SB

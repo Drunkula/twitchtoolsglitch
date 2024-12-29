@@ -27,6 +27,7 @@ active()
 not doing pause / resume
 */
 
+
 class EventEmitter {
 	_events = {};
 	debug = true;
@@ -229,7 +230,15 @@ class Flasher {
 
 }// flasher ends
 
+// module use
+if (typeof(this) === "undefined" ) {
+	window.Flasher = Flasher;
+}
 
+//module.exports = Flasher;
+//module.exports = {Flasher: typeof Flasher, default: typeof Flasher};
+
+console.log("In flasher this", this);
 
 
 /*	css for the flasher  Just do #flasher: p NEW<br>CHAT<br>MESSAGE!

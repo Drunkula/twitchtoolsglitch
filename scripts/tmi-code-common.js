@@ -189,30 +189,6 @@ cclient.on('roomstate', (chan, state) => {
 		TT.url_populate();
 	}
 
-		// user allowed to do the command?
 
-	TT.user_permitted = function user_permitted(user) {
-		let allowed = false;
-
-		switch (true) {	// block first
-			case TT.config.perms.ignoredUsers.includes(user.username):
-				allowed = false;
-				break;
-			case TT.config.perms.allowEveryone:
-			case TT.config.perms.allowMods && user.mod:
-			case TT.config.perms.allowVips && user.badges && user.badges.vip === "1":
-			case TT.config.perms.allowSubs && user.subscriber:
-			case TT.config.perms.allowNamed.includes(user.username):
-			case user.badges && user.badges.broadcaster === "1":
-				allowed = true;
-				break;
-
-			default:
-				allowed = false;
-				break;
-		}
-
-		return allowed;
-	}
 
 })(); // SCOPE END

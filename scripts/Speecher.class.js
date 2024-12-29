@@ -43,7 +43,6 @@
 //var TTS_GLOBAL_UTTERANCE_OLD;
 //var TTS_GLOBAL_UTTERANCE_ARRAY = [];
 
-
 {	// scope
 	const hasProperty = (target = {}, prop) => prop in target || Object.hasOwn(target, prop) || !!target[prop];
 	const OVC = 'onvoiceschanged';			// tired of typing and mistyping these
@@ -202,7 +201,7 @@
 		}
 
 		pause() {			//this.stopNow = true;
-			//this.isSpeaking = false;	// UNSURE
+			this.isSpeaking = false;	// UNSURE
 			this.#isPaused = true;
 			this.ss.pause();
 		}
@@ -210,7 +209,7 @@
 		resume() {			//this.stopNow = false;
 			this.ss.resume();
 			this.#isPaused = false;
-			this.#sayQueueProcess();
+			this.sayQueueProcess();
 		}
 			// cancels the current speaking voice - end event will trigger
 		cancel() {
@@ -252,7 +251,7 @@
 			}
 
 			SPEECHER_log("Speech Queue", this.speechQueueMap.size);
-			this.#sayQueueProcess(pack.immediate);
+			this.sayQueueProcess(pack.immediate);
 
 			return this.speechQueueID;
 		}
@@ -302,8 +301,9 @@
 
 			// immediate ignores speaking and paused and throws it into the queue
 
-		#sayQueueProcess(immediate = false) {
-			if ( !immediate && (this.ss.speaking || this.#isPaused || this.#isSpeaking) ) {
+		sayQueueProcess(immediate = false) {
+			if ( !immediate && (this.ss.speaking || this.#isPaused) ) { // || this.#isSpeaking) ) {
+				console.log("NO I SHALL NOT SPEAK");
 				return;
 			}
 
@@ -388,13 +388,13 @@
 				//console.log(m("UTTERANCE END EVENT") + ` for ${e.utterance.queueid} : ${e.utterance.text}`);
 				this.#isSpeaking = false;
 				this.currentSpeakingID = -1;
-				this.#sayQueueProcess()
+				this.sayQueueProcess()
 			});
 			this.utterance.addEventListener('error', e => {
 				SPEECHER_log("UTTERANCE ERROR ", e);
 				this.#isSpeaking = false;
 				this.currentSpeakingID = -1;
-				this.#sayQueueProcess();	// CRITICAL
+				this.sayQueueProcess();	// CRITICAL
 			});
 
 			this.#utterance_add_handlers(this.utterance, this.#utterance_handlers);
@@ -440,8 +440,8 @@
 			this.speechQueueMap.delete( id );
 
 			if ( this.currentSpeakingID === id ) {
-				this.ss.cancel();			// cancel calls end handler? it seems to
 				this.#isSpeaking = false;
+				this.ss.cancel();			// cancel calls end handler? it seems to
 				//this._sayQueueProcess();	// don't know if I need this, does cancel fire the end event?
 				this.emit("cancelledcurrent", {"id" : id,
 					"utterance" : this.utterance
