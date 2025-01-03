@@ -17,7 +17,7 @@ function gid(id, el = document) {
 	return el.getElementById(id);
 }
 
-    /* gidC is pointless being as how fast gid is anyway */
+    /* gidC is kinda pointless being as how fast gid is anyway */
 
 let gidCache = {}
 function gidC(id, el = document) {
