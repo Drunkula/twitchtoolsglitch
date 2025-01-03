@@ -13,6 +13,12 @@ function qs(query, el=document) {
     return el.querySelector(query);
 }
 
+function gid(id, el = document) {
+	return el.getElementById(id);
+}
+
+    /* gidC is pointless being as how fast gid is anyway */
+
 let gidCache = {}
 function gidC(id, el = document) {
     //if (gidCache.hasOwnProperty(el)) {
