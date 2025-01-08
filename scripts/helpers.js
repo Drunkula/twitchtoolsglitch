@@ -17,18 +17,18 @@ function gid(id, el = document) {
 	return el.getElementById(id);
 }
 
-    /* gidC is kinda pointless being as how fast gid is anyway */
+    /* gidC is awful, like 12 times slower than the original.  gid does 30+ million a second */
 
 let gidCache = {}
 function gidC(id, el = document) {
-    //if (gidCache.hasOwnProperty(el)) {
-    if ( gidCache[el]?.hasOwnProperty(id) ) {
+    if (gidCache[el]?.[id]) {
         return gidCache[el][id];
     }
 
     let o =  el.getElementById(id);
     if (o) {
-		if ( !gidCache.hasOwnProperty(el) )
+		//if ( !gidCache.hasOwnProperty(el) )
+		if ( !gidCache[el] )
 			gidCache[el] = {};
 
 		gidCache[el][id] = o;

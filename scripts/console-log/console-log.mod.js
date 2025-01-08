@@ -9,6 +9,7 @@ var ccols = {};    // console colours
 var actions = {
     consoleclear: d => console.clear(),
     consolelog: d => {clog( ccols[d.colour](d.message) );},
+    dump: d => console.log(d.data)
 }
 
 const SOCK_ADDR = "ws://localhost:8082";
