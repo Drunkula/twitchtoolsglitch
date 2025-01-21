@@ -190,5 +190,32 @@ cclient.on('roomstate', (chan, state) => {
 	}
 
 
+			// user allowed to do the command?  This doesn't need to be public if we do the filtering here and emit
+
+	function user_permitted(userstate) {
+		let allowed = false;
+
+		switch (true) {	// block first
+			case TT.config.perms.ignoredUsers.includes(userstate.username):
+				allowed = false;
+				break;
+			case TT.config.perms.allowEveryone:
+			case TT.config.perms.allowMods && userstate.mod:
+			case TT.config.perms.allowVips && userstate.badges && userstate.badges.vip === "1":
+			case TT.config.perms.allowSubs && userstate.subscriber:
+			case TT.config.perms.allowNamed.includes(userstate.username):
+			case userstate.badges && userstate.badges.broadcaster === "1":
+				allowed = true;
+				break;
+
+			default:
+				allowed = false;
+				break;
+		}
+
+		return allowed;
+	}
+
+	TT.user_permitted = user_permitted;
 
 })(); // SCOPE END
