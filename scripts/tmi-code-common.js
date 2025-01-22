@@ -190,7 +190,8 @@ cclient.on('roomstate', (chan, state) => {
 	}
 
 
-			// user allowed to do the command?  This doesn't need to be public if we do the filtering here and emit
+		// user allowed to do the command?  This doesn't need to be public if we do the filtering here and emit
+		// added here Jan 25 as it got deleted
 
 	function user_permitted(userstate) {
 		let allowed = false;
