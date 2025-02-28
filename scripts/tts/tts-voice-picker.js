@@ -7,7 +7,7 @@ const SPEECH_END_TIMEOUT_MS = 20000;     // seconds that speech has to end befor
 const TTS_TEST_TEXT = "I am the test.  Yay I am doing a test now. 1 2 3 4 5, 12345";
 
 langs = {};
-langsR = {};
+//langsR = {};
 
 let VOICE_PICK_EVENTS = [
         // want this it happen AFTER update_say_commands
@@ -33,7 +33,7 @@ window.addEventListener('load', async (event) => {
     sort_and_filter_voices(voices);
     //console.log("voices after", voices);
     console.log("langs", langs, Object.keys(langs).length);
-    console.log("langsR", langsR, Object.keys(langsR).length);
+    //console.log("langsR", langsR, Object.keys(langsR).length);
 
     create_speech_selects_options(voices);
     create_speech_filters_options();
@@ -71,24 +71,35 @@ function sort_and_filter_voices(voices) {
         // format en-NG
         let [lang, region] = v.lang.split('-');
 
-        // name MAY NOT have a dash but URL always seems to
-        let langW = v.voiceURI.split('-');
-
-            // format is like Microsoft Abeo Online (Natural) - English (Nigeria)
-        if (langW.length > 1) {
-            let c = langW[1].match(/(\w*)\s\((.*)\)/);
-            langs[lang] = c[1];
-            langsR[region] = c[2];
+        let langW = v.voiceURI.split('- '); // = 0: ...(Natural), 1: English (Nigeria)
+            // regex matches what's before the brackets and what's in them.  Now simplified
+        if (langW.length > 1) {            //let c = langW[1].match(/(\w*)\s\((.*)\)/);             //langs[lang] = c[1];
+            langs[lang] = langW[1].split(" (")[0]; // English (Nigeria) -> English or whole thing if no split
         }
-
 
         //console.log(v.lang);
         //console.log(c);
 
-        v.nicename = vnf2(voice_name_filter(v.name));
+        //v.nicename = vnf2(voice_name_filter(v.name));
+        v.nicename = cleanup_voice_name(v.name);
     }
 
     return voices.sort( (a, b) => a.nicename.localeCompare(b.nicename) );
+}
+
+function cleanup_voice_name(name) {
+    let replacer = /(Microsoft|Online \(Natural\)| Traditional|Google\s)\w*/g;
+    let replaceNMD = /Republic of North Macedonia/g;
+    let replaceMan = /\(.*Mandarin.*\)/;
+    let replaceMulti = /Multilingual/;
+    let replaceUAE = /United Arab Emirates/;
+
+    return name
+        .replace(replacer, "")
+        .replace(replaceNMD, "NMD")
+        .replace(replaceUAE, "UAE")
+        .replace(replaceMulti, " Multi")
+        .replace(replaceMan, "(Mandarin)")
 }
 
 
