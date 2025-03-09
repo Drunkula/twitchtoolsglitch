@@ -102,9 +102,9 @@ autoselect_player_check();
 
 function autoselect_player_check() {
     let q = new window.URLSearchParams( window.location.search );
-    let auto  = q.get("autoselect");
-    if (auto) {
-        auto = auto.toLowerCase();
+    let urlQStringAutoselect  = q.get("autoselect");
+    if (urlQStringAutoselect) {
+        urlQStringAutoselect = urlQStringAutoselect.toLowerCase();
         let origAction = YTO.actions.players;   // store old "players" action
         let sel = gid("playerselect");
         YTO.actions.players = d => {
@@ -112,7 +112,7 @@ function autoselect_player_check() {
             if (sel.selectedIndex > 0) return; // don't select if something's already selected
 
             for (let o of sel.options) {
-                if (o.innerText.toLowerCase() == auto) {
+                if (o.innerText.toLowerCase() == urlQStringAutoselect) {
                     o.selected = true;
                     sel.dispatchEvent(new Event("change"));
                     break;
@@ -238,11 +238,21 @@ function players_select_update(d) {
         o1.text = "All Players"; o1.value="players";
         opts.push(o1);
 
-        for (let p in d.players) {
+        // if (d.players)
+        //console.log("d.players", d.players);
+        // console.log("d", d);
+        let players = Object.values(d.players);
+        players.sort( (a,b) => a.name.localeCompare(b.name) );
+
+        // for (let p in d.players) {
+        for (let p of players) {
             let opt = dce("option");
-            opt.value = d.players[p].UID;
-            opt.text = d.players[p].name;
-            opt.dataset["socketid"] = p;
+            // opt.value = d.players[p].UID;
+            // opt.text = d.players[p].name;
+            // opt.dataset["socketid"] = p;
+            opt.value = p.UID;
+            opt.text =  p.name;
+            opt.dataset["socketid"] = p.socketid;
             if (opt.value === currSel) opt.selected = 'selected';
             opts.push(opt);
         }

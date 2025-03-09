@@ -303,7 +303,7 @@
 
 		sayQueueProcess(immediate = false) {
 			if ( !immediate && (this.ss.speaking || this.#isPaused) ) { // || this.#isSpeaking) ) {
-				console.log("NO I SHALL NOT SPEAK");
+				console.log("Not speaking as not immediate, am speaking or paused.");
 				return;
 			}
 

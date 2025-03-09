@@ -73,8 +73,14 @@ function sort_and_filter_voices(voices) {
 
         let langW = v.voiceURI.split('- '); // = 0: ...(Natural), 1: English (Nigeria)
             // regex matches what's before the brackets and what's in them.  Now simplified
-        if (langW.length > 1) {            //let c = langW[1].match(/(\w*)\s\((.*)\)/);             //langs[lang] = c[1];
-            langs[lang] = langW[1].split(" (")[0]; // English (Nigeria) -> English or whole thing if no split
+
+        try {
+            if (langW.length > 1) {            //let c = langW[1].match(/(\w*)\s\((.*)\)/);             //langs[lang] = c[1];
+                langs[lang] = langW[1].split(" (")[0]; // English (Nigeria) -> English or whole thing if no split
+            }
+        } catch (error) {
+            console.log("Voice filter error on voice: ", v);
+            console.log(error);
         }
 
         //console.log(v.lang);
